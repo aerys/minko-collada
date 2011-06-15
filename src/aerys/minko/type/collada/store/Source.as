@@ -1,13 +1,9 @@
-package aerys.minko.type.collada.intermediary
+package aerys.minko.type.collada.store
 {
-	import aerys.minko.data.parser.collada.ColladaParser;
 	import aerys.minko.type.math.Matrix4x4;
-	
-	import flash.geom.Matrix3D;
 
 	public final class Source
 	{
-//		private static const NS		: Namespace	= ColladaParser.NS;
 		private static const TYPES	: Object	= {
 			"float"		: Number,
 			"Name"		: String,
@@ -73,6 +69,7 @@ package aerys.minko.type.collada.intermediary
 					);
 				else
 					throw new Error('Unknown type found');
+				
 				source._data.push(currentDatum);
 			}
 			
@@ -89,16 +86,29 @@ package aerys.minko.type.collada.intermediary
 			return out;
 		}
 		
-		public function getComponentByParamIndex(index : uint, paramIndex : uint) : Object
+		public function getComponentByParamIndex(index		: uint, 
+												 paramIndex	: uint) : Object
 		{
 			return _data[index * _paramNames.length + paramIndex];
 		}
 		
-		public function getComponentByParamName(index : uint, paramName : String) : Object
+		public function getComponentByParamName(index		: uint, 
+												paramName	: String) : Object
 		{
 			return _data[index * _paramNames.length + _paramNames.indexOf(paramName)];
 		}
 		
-		
+		public function pushVertexComponent(vertexId	: uint, 
+											out			: Vector.<Number>) : void
+		{
+			var start	: uint = vertexId * _stride;
+			var end		: uint = start + _stride;
+			
+			for (var i : uint = start; i < end; ++i)
+			{
+				// if data[i] is not a float, an exception will be raised.
+				out.push(_data[i]);
+			}
+		}
 	}
 }

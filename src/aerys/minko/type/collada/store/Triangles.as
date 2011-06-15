@@ -1,17 +1,20 @@
-package aerys.minko.type.collada.ressource
+package aerys.minko.type.collada.store
 {
-	import aerys.minko.type.collada.intermediary.Source;
+	import aerys.minko.type.vertex.VertexIterator;
 
-	public class TriangleStore
+	public class Triangles
 	{
+		private const NOT_YET_IMPLEMENTED_FAIL : Function = 
+			function(xmlPrimitive : XML) : void { throw new Error(xmlPrimitive.localName() + ' primitives are not supported yet'); };
+		
 		private const NAME_TO_PARSER : Object = {
-			'lines'			: function(xmlPrimitive : XML) : void { throw new Error(xmlPrimitive.localName() + ' primitives are not supported yet'); },
-			'linestrips'	: function(xmlPrimitive : XML) : void { throw new Error(xmlPrimitive.localName() + ' primitives are not supported yet'); },
-			'polygons'		: function(xmlPrimitive : XML) : void { throw new Error(xmlPrimitive.localName() + ' primitives are not supported yet'); },
+			'lines'			: NOT_YET_IMPLEMENTED_FAIL,
+			'linestrips'	: NOT_YET_IMPLEMENTED_FAIL,
+			'polygons'		: NOT_YET_IMPLEMENTED_FAIL,
 			'polylist'		: fillVerticesFromPolylist,
 			'triangles'		: fillVerticesFromTriangles,
-			'trifans'		: function(xmlPrimitive : XML) : void { throw new Error(xmlPrimitive.localName() + ' primitives are not supported yet'); },
-			'tristrips'		: function(xmlPrimitive : XML) : void { throw new Error(xmlPrimitive.localName() + ' primitives are not supported yet'); }
+			'trifans'		: NOT_YET_IMPLEMENTED_FAIL,
+			'tristrips'		: NOT_YET_IMPLEMENTED_FAIL
 		};
 		
 		/**
@@ -53,19 +56,20 @@ package aerys.minko.type.collada.ressource
 			return _triangleVertices[storeVertexId * indicesPerVertex + _offsets['VERTEX']];
 		}
 		
-		public function writeVertexData(vertexId	: uint, 
-										semantics	: Vector.<String>,
-										offset		: uint,
-										out			: Vector.<Number>) : void
+		public function pushVertexComponents(storeVertexId	: uint, 
+											 semantics		: Vector.<String>,
+											 out			: Vector.<Number>) : void
 		{
 			var semanticsLength : uint = semantics.length;
+		
 			for (var semanticId : uint = 0; semanticId < semanticsLength; ++semanticId)
 			{
-				
+				var source : Source = _sources[semantics[semanticId]];
+				source.pushVertexComponent(storeVertexId, out);
 			}
 		}
 		
-		public function TriangleStore(xmlPrimitive	: XML = null, 
+		public function Triangles(xmlPrimitive	: XML = null, 
 									  xmlMesh		: XML = null)
 		{
 			if (xmlPrimitive && xmlMesh)
