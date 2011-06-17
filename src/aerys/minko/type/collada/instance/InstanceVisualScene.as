@@ -1,23 +1,43 @@
 package aerys.minko.type.collada.instance
 {
+	import aerys.minko.scene.node.IScene;
+	import aerys.minko.scene.node.group.Group;
 	import aerys.minko.type.collada.Document;
 	import aerys.minko.type.collada.ressource.IRessource;
+	import aerys.minko.type.collada.ressource.VisualScene;
 	
 	public class InstanceVisualScene implements IInstance
 	{
-		public static function createFromSourceId(document	: Document, 
-												  nodeId	: String) : InstanceVisualScene
+		private var _document	: Document;
+		
+		private var _sourceId	: String;
+		private var _name		: String;
+		private var _sid		: String;
+		
+		public function InstanceVisualScene(document	: Document, 
+											sourceId	: String,
+											name		: String = null,
+											sid			: String = null)
 		{
-			throw new Error('must be implemented');
+			_document	= document;
+			_sourceId	= sourceId;
+			_name		= name;
+			_sid		= sid;
 		}
 		
-		public function InstanceVisualScene(document : Document, sourceId : String)
+		public function toScene() : IScene
 		{
+			return toGroup();
 		}
 		
-		public function get ressource():IRessource
+		public function toGroup() : Group
 		{
-			return null;
+			return VisualScene(ressource).toGroup();
+		}
+		
+		public function get ressource() : IRessource
+		{
+			return _document.getVisualSceneById(_sourceId);
 		}
 	}
 }

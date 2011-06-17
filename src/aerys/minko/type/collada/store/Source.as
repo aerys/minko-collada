@@ -4,6 +4,8 @@ package aerys.minko.type.collada.store
 
 	public final class Source
 	{
+		private static const NS	: Namespace	= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
 		private static const TYPES	: Object	= {
 			"float"		: Number,
 			"Name"		: String,
@@ -27,26 +29,26 @@ package aerys.minko.type.collada.store
 		public static function createFromXML(xmlSource : XML) : Source
 		{
 			// fill the source object.
-			var source : Source	= new Source();
-			source._id			= String(xmlSource.@id);
+			var source : Source		= new Source();
+			source._id				= String(xmlSource.@id);
 			
-			var xmlAccessor : XML = xmlSource..accessor[0];
-			source._stride		= parseInt(String(xmlAccessor.@stride));
-			source._count		= parseInt(String(xmlAccessor.@count));
+			var xmlAccessor : XML	= xmlSource..NS::accessor[0];
+			source._stride			= parseInt(String(xmlAccessor.@stride));
+			source._count			= parseInt(String(xmlAccessor.@count));
 			
 			source._paramNames	= new Vector.<String>();
 			source._paramTypes	= new Vector.<Class>();
-			for each (var xmlParam : XML in xmlAccessor.param)
+			for each (var xmlParam : XML in xmlAccessor.NS::param)
 			{
 				source._paramNames.push(String(xmlParam.@name));
 				source._paramTypes.push(TYPES[String(xmlParam.@type)]);
 			}
 			
 			// read data
-			var xmlRawData		: XML		= source.(@id == String(xmlAccessor.@source).substr(1))[0];
-			var rawData 		: Array		= String(xmlRawData).split(" ");
-			var currentOffset	: uint		= 0;
-			var currentDatum	: *;
+			var xmlRawData			: XML		= xmlSource.(@id == String(xmlAccessor.@source).substr(1))[0];
+			var rawData 			: Array		= String(xmlRawData).split(" ");
+			var currentOffset		: uint		= 0;
+			var currentDatum		: *;
 			
 			source._data = new Array();
 			for (var index : uint = 0; index < source._count; ++index)

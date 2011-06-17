@@ -1,26 +1,35 @@
 package aerys.minko.type.collada
 {
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.scene.node.IScene;
 	import aerys.minko.type.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.collada.instance.IInstance;
-	import aerys.minko.type.collada.instance.InstanceController;
-	import aerys.minko.type.collada.instance.InstanceGeometry;
-	import aerys.minko.type.collada.instance.InstanceNode;
-	import aerys.minko.type.collada.instance.InstanceVisualScene;
 	import aerys.minko.type.collada.ressource.Controller;
 	import aerys.minko.type.collada.ressource.Geometry;
+	import aerys.minko.type.collada.ressource.IRessource;
 	import aerys.minko.type.collada.ressource.Node;
 	import aerys.minko.type.collada.ressource.VisualScene;
-	import aerys.minko.type.collada.store.Source;
 	
-	import flash.utils.flash_proxy;
+	import flash.utils.ByteArray;
 
 	use namespace minko_collada;
 	
 	public class Document
 	{
-		minko_collada static const NS		: Namespace	= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		private static const NS	: Namespace	= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
+		private static const NODENAME_TO_LIBRARY	: Object = {
+			'controller'	: '_controllers',
+			'geometry'		: '_geometries',
+			'node'			: '_nodes',
+			'visual_scene'	: '_visualScenes'
+		};
+		
+		private static const NODENAME_TO_CLASS		: Object = {
+			'controller'			: Controller,
+			'geometry'				: Geometry,
+			'node'					: Node,
+			'visual_scene'			: VisualScene
+		};
 		
 		private var _mainSceneId	: String;
 		
@@ -31,7 +40,6 @@ package aerys.minko.type.collada
 		
 		public function get mainScene()		: VisualScene	{ return _visualScenes[_mainSceneId]; }
 		public function get mainSceneId()	: String		{ return _mainSceneId; }
-		
 		public function get nodes()			: Object	 	{ return _nodes; }
 		public function get geometries()	: Object 		{ return _geometries; }
 		public function get controllers()	: Object 		{ return _controllers; }
@@ -40,9 +48,18 @@ package aerys.minko.type.collada
 		public function getGeometryById		(id : String) : Geometry	{ return _geometries[id];	}
 		public function getControllerById	(id : String) : Controller	{ return _controllers[id];	}
 		public function getNodeById			(id	: String) : Node		{ return _nodes[id];		}
-		public function getSceneById		(id	: String) : VisualScene	{ return _visualScenes[id];	}
+		public function getVisualSceneById	(id	: String) : VisualScene	{ return _visualScenes[id];	}
 		
-		public function Document(xmlDocument : XML)
+		public function Document()
+		{
+		}
+		
+		public function loadByteArray(data : ByteArray) : void
+		{
+			loadXml(new XML(data.readUTFBytes(data.length)));
+		}
+		
+		public function loadXml(xmlDocument : XML) : void
 		{
 			_mainSceneId	= String(xmlDocument.scene.instance_visual_scene.@url).substr(1);
 			
@@ -65,33 +82,14 @@ package aerys.minko.type.collada
 			if (!nodeId)
 				nodeId = xmlNode.@id = RandomStringGenerator.generateRandomString();
 			
-			if (nodeType == 'controller')
-			{
-				_controllers[nodeId] = new Controller(xmlNode, this);
-				return InstanceController.createFromSourceId(this, nodeId);
-			}
+			if (!NODENAME_TO_LIBRARY.hasOwnProperty(nodeType))
+				throw new Error('No such handled ressource type');
 			
-			if (nodeType == 'geometry')
-			{
-				_nodes[nodeId] = new Geometry(xmlNode, this);
-				return InstanceGeometry.createFromSourceId(this, nodeId);
-			}
+			var library			: Object		= NODENAME_TO_LIBRARY[nodeType];
+			var ressourceClass	: Class			= NODENAME_TO_CLASS[nodeType];
 			
-			if (nodeType == 'node')
-			{
-				_nodes[nodeId] = new Node(xmlNode, this);
-				return InstanceNode.createFromSourceId(this, nodeId);
-			}
-			
-			if (nodeType == 'scene')
-			{
-				_visualScenes[nodeId] = new VisualScene(xmlNode, this);
-				return InstanceVisualScene.createFromSourceId(this, nodeId);
-			}
-			
-			throw new Error('Unknown ressource type.');
+			var ressource		: IRessource	= new ressourceClass(xmlNode, this); 
+			return ressource.instance;
 		}
-		
-		
 	}
 }

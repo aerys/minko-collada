@@ -1,5 +1,6 @@
 package aerys.minko.type.collada.instance
 {
+	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.Model;
 	import aerys.minko.type.collada.Document;
 	import aerys.minko.type.collada.ressource.Geometry;
@@ -10,21 +11,29 @@ package aerys.minko.type.collada.instance
 		private var _document			: Document;
 		
 		private var _sourceId			: String;
-		private var _bindedMaterialId	: String;
+		private var _name				: String;
+		private var _sid				: String;
 		
 		public function InstanceGeometry(document			: Document,
-										 sourceId			: String = null,
-										 bindedMaterialId	: String = null)
+										 sourceId			: String,
+										 name				: String = null,
+										 sid				: String = null)
 		{
-			_document			= document;
-			_sourceId			= sourceId;
-			_bindedMaterialId	= bindedMaterialId;
+			_document	= document;
+			
+			_sourceId	= sourceId;
+			_name		= name;
+			_sid		= sid;
 		}
 		
-		public static function createFromXML(xml		: XML, 
-											 document	: Document) : InstanceGeometry
+		public static function createFromXML(document	: Document,
+											 xml		: XML) : InstanceGeometry
 		{
-			throw new Error('implement me');
+			var sourceId	: String = String(xml.@url).substr(1);
+			var name		: String = xml.@name;
+			var sid			: String = xml.@sid;
+			
+			return new InstanceGeometry(document, sourceId, name, sid);
 		}
 		
 		public static function createFromSourceId(document : Document,
@@ -33,15 +42,17 @@ package aerys.minko.type.collada.instance
 			return new InstanceGeometry(document, sourceId);
 		}
 		
+		public function toScene() : IScene
+		{
+			return toModel();
+		}
+		
 		public function toModel() : Model
 		{
-			var geometryRessource : Geometry = ressource as Geometry;
+			var geometryRessource	: Geometry	= ressource as Geometry;
+			var model				: Model		= new Model();
 			
-			var model : Model	= new Model();
 			model.mesh			= geometryRessource.toMesh();
-			
-			if (_bindedMaterialId)
-				throw new Error('implement me!');
 			
 			return model
 		}

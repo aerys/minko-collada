@@ -19,6 +19,9 @@ package aerys.minko.type.collada.ressource
 	
 	public class Geometry implements IRessource
 	{
+		private static const NS : Namespace = 
+			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
 		private static const POLYGON_NODES : Vector.<String> = Vector.<String>([
 			'lines', 'linestrips', 'polygons', 'polylist',
 			'triangles', 'trifans', 'tristrips', ]);
@@ -248,7 +251,7 @@ package aerys.minko.type.collada.ressource
 		}
 		
 		minko_collada function createMesh(indexData		: Vector.<uint>, 
-										  vertexData		: Vector.<Number>, 
+										  vertexData	: Vector.<Number>, 
 										  vertexFormat	: VertexFormat) : Mesh
 		{
 			var vertexStream		: VertexStream		= new VertexStream(vertexData, vertexFormat, true);

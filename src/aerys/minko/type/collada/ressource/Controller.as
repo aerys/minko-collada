@@ -16,8 +16,10 @@ package aerys.minko.type.collada.ressource
 	
 	public class Controller implements IRessource
 	{
-		private static const NS					: Namespace = Document.NS;
-		private static const BONE_COMPONENTS	: Vector.<VertexComponent> = 
+		private static const NS					: Namespace 				= 
+			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
+		private static const BONE_COMPONENTS	: Vector.<VertexComponent>	= 
 			Vector.<VertexComponent>([
 				VertexComponent.BONE0, VertexComponent.BONE1,
 				VertexComponent.BONE2, VertexComponent.BONE3,
@@ -31,10 +33,10 @@ package aerys.minko.type.collada.ressource
 		/* not yet implemented */
 		
 		// skin related data
-		private var _id							: String;
-		private var _name						: String;
-		private var _skinId						: String;
-		private var _bindShapeMatrix			: Matrix4x4;
+		private var _id					: String;
+		private var _name				: String;
+		private var _skinId				: String;
+		private var _bindShapeMatrix	: Matrix4x4;
 		
 		/**
 		 * if weightCountPerVertex == 2
@@ -43,9 +45,9 @@ package aerys.minko.type.collada.ressource
 		 * 		boneid1forvertex2, bonevalue1forvertex2, boneid2forvertex2, bonevalue2forvertex2
 		 * ]
 		 */
-		private var _boneIds					: Vector.<String>;
-		private var _boneData					: Vector.<Number>
-		private var _boneCountPerVertex			: uint;
+		private var _boneIds			: Vector.<String>;
+		private var _boneData			: Vector.<Number>
+		private var _boneCountPerVertex	: uint;
 		
 		public function get id()				: String	{ return _id; }
 		public function get name()				: String	{ return _name; }
@@ -59,8 +61,8 @@ package aerys.minko.type.collada.ressource
 												document	: Document, 
 												store		: Object) : void
 		{
-			var xmlControllerLibrary	: XML = xmlDocument..library_controllers[0];
-			var xmlControllers 			: XML = xmlControllerLibrary.controller;
+			var xmlControllerLibrary	: XML		= xmlDocument..NS::library_controllers[0];
+			var xmlControllers 			: XMLList	= xmlControllerLibrary.NS::controller;
 			
 			for each (var xmlController : XML in xmlControllers)
 			{
@@ -74,19 +76,32 @@ package aerys.minko.type.collada.ressource
 		{
 			_document				= document;
 			
+//			trace(xmlController);
+			
 			_id						= xmlController.@id;
 			_name					= xmlController.@name;
-			_skinId					= String(xmlController.skin[0].@source).substr(1);
-			_bindShapeMatrix		= parseBindShapeMatrix(xmlController.skin[0]);
+			
+//			trace(_id, _name);
+			
+			_skinId					= String(xmlController.NS::skin[0].@source).substr(1);
+			
+//			trace(_skinId);
+			
+			_bindShapeMatrix		= parseBindShapeMatrix(xmlController.NS::skin[0]);
+			
+//			trace(_bindShapeMatrix);
+			
 			_boneIds				= parseJoints(xmlController);
 			_boneData				= new Vector.<Number>();
 			_boneCountPerVertex		= parseBoneData(xmlController, _boneData);
+			
+//			trace(_boneIds, _boneCountPerVertex);
 		}
 		
 		private static function parseBindShapeMatrix(xmlSkin : XML) : Matrix4x4
 		{
 			return xmlSkin.bind_shape_matrix.length() != 0 ? 
-				NumberListParser.parseMatrix4x4(xmlSkin.bind_shape_matrix[0]) :
+				NumberListParser.parseMatrix4x4(xmlSkin.NS::bind_shape_matrix[0]) :
 				new Matrix4x4();
 		}
 		
@@ -102,8 +117,8 @@ package aerys.minko.type.collada.ressource
 			var vcount 			: Vector.<int> 			= NumberListParser.parseIntList(skin.NS::vertex_weights.NS::vcount[0]);
 			var v 				: Vector.<int> 			= NumberListParser.parseIntList(skin.NS::vertex_weights.NS::v[0]);
 			
-			var offsetJoint		: int 					= skin.NS::vertex_weights.NS::input.(@semantic == JOINT).@offset;
-			var offsetWeight 	: int 					= skin.NS::vertex_weights.NS::input.(@semantic == WEIGHT).@offset;
+			var offsetJoint		: int 					= skin.NS::vertex_weights.NS::input.(@semantic == 'JOINT').@offset;
+			var offsetWeight 	: int 					= skin.NS::vertex_weights.NS::input.(@semantic == 'WEIGHT').@offset;
 			
 			var numInputs 		: int 					= xmlController..NS::vertex_weights.NS::input.length();
 			
@@ -144,7 +159,7 @@ package aerys.minko.type.collada.ressource
 		
 		private static function parseInvBindMatrix(controller : XML) : Vector.<Matrix4x4>
 		{
-			var sourceId	: String	= controller..NS::joints.NS::input.(@semantic == INV_BIND_MATRIX).@source.substring(1);
+			var sourceId	: String	= controller..NS::joints.NS::input.(@semantic == 'INV_BIND_MATRIX').@source.substring(1);
 			var xmlSource	: XML		= controller..NS::source.(@id == sourceId)[0];			
 			
 			var source		: Source	= Source.createFromXML(xmlSource);
@@ -154,7 +169,7 @@ package aerys.minko.type.collada.ressource
 		
 		private static function parseJoints(controller : XML) : Vector.<String>
 		{
-			var sourceId	: String	= controller..NS::joints.NS::input.(@semantic == JOINT).@source.substring(1);
+			var sourceId	: String	= controller..NS::joints.NS::input.(@semantic == 'JOINT').@source.substring(1);
 			var xmlSource	: XML		= controller..NS::source.(@id == sourceId)[0];
 			
 			var source		: Source	= Source.createFromXML(xmlSource);
@@ -164,12 +179,17 @@ package aerys.minko.type.collada.ressource
 		
 		private static function parseWeights(controller : XML) : Vector.<Number>
 		{
-			var sourceId	: String	= controller..NS::vertex_weights.NS::input.(@semantic == WEIGHT).@source.substring(1);
+			var sourceId	: String	= controller..NS::vertex_weights.NS::input.(@semantic == 'WEIGHT').@source.substring(1);
 			var xmlSource	: XML		= controller..NS::source.(@id == sourceId)[0];
 			
 			var source		: Source	= Source.createFromXML(xmlSource);
+			var result		: Vector.<Number>	= Vector.<Number>(source.data);
 			
-			return Vector.<Number>(source.data);
+			trace(xmlSource);
+			trace(source.data);
+			trace(result);
+			
+			return result;
 		}
 		
 		public function toMesh() : IMesh

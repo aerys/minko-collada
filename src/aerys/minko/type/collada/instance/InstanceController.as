@@ -1,43 +1,60 @@
 package aerys.minko.type.collada.instance
 {
+	import aerys.minko.scene.node.IScene;
+	import aerys.minko.scene.node.mesh.IMesh;
+	import aerys.minko.scene.node.skeleton.Joint;
 	import aerys.minko.scene.node.skeleton.SkinnedMesh;
 	import aerys.minko.type.collada.Document;
+	import aerys.minko.type.collada.ressource.Controller;
 	import aerys.minko.type.collada.ressource.IRessource;
+	import aerys.minko.type.collada.ressource.Node;
 	
 	public class InstanceController implements IInstance
 	{
 		private var _document			: Document;
 		
 		private var _sourceId			: String;
-		private var _bindedMaterialId	: String;
+		private var _name				: String;
+		private var _sid				: String;
 		private var _bindedSkeletonId	: String;
 		
 		public function InstanceController(document			: Document,
 										   sourceId			: String,
-										   bindedMaterialId : String = null,
+										   name				: String = null,
+										   sid				: String = null,
 										   bindedSkeletonId	: String = null)
 		{
 			_document			= document;
 			_sourceId			= sourceId;
-			_bindedMaterialId	= bindedMaterialId;
+			_name				= name;
+			_sid				= sid;
 			_bindedSkeletonId	= bindedSkeletonId;
-		}
-		
-		public static function createFromSourceId(document : Document, 
-												  sourceId : String) : InstanceController
-		{
-			return new InstanceController(document, sourceId);
 		}
 		
 		public static function createFromXML(document	: Document, 
 											 xml		: XML) : InstanceController
 		{
-			throw new Error('Implement me');
+			var sourceId			: String = String(xml.@url).substr(1);
+			var name				: String = xml.@name;
+			var sid					: String = xml.@sid;
+			var bindedSkeletonId	: String = String(xml.skeleton[0]).substr(1);
+			
+			return new InstanceController(document, sourceId, name, sid, bindedSkeletonId);
 		}
 		
-		public function toSkinnedMesh() : SkinnedMesh 
+		public function toScene() : IScene
 		{
-			throw new Error('Implement me');
+			return toSkinnedMesh();
+		}
+		
+		public function toSkinnedMesh() : SkinnedMesh
+		{
+			var skeletonRoot	: Node	= _document.getNodeById(_bindedSkeletonId);
+			var skeleton		: Joint	= skeletonRoot.toJoint();
+			
+			var mesh			: IMesh	= Controller(ressource).toMesh();
+			
+			return new SkinnedMesh(skeleton, mesh.vertexStreamList, mesh.indexStream);
 		}
 		
 		public function get ressource() : IRessource

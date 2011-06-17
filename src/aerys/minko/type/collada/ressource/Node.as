@@ -1,16 +1,23 @@
 package aerys.minko.type.collada.ressource
 {
+	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.group.TransformGroup;
 	import aerys.minko.scene.node.skeleton.Joint;
 	import aerys.minko.type.collada.Document;
-	import aerys.minko.type.collada.enum.NodeType;
 	import aerys.minko.type.collada.helper.TransformParser;
 	import aerys.minko.type.collada.instance.IInstance;
+	import aerys.minko.type.collada.instance.InstanceController;
+	import aerys.minko.type.collada.instance.InstanceGeometry;
 	import aerys.minko.type.collada.instance.InstanceNode;
 	import aerys.minko.type.math.Matrix4x4;
 
+	use namespace minko_collada;
+	
 	public class Node implements IRessource
 	{
+		private static const NS	: Namespace = 
+			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
 		private var _document	: Document;
 		
 		private var _id			: String;
@@ -54,6 +61,32 @@ package aerys.minko.type.collada.ressource
 			
 			_transform	= TransformParser.parseTransform(xmlNode);
 			_type		= xmlNode.@type;
+			
+			for each (var child : XML in xmlNode.children())
+			{
+				var localName : String = child.localName();
+				if (localName == 'node')
+				{
+					_childs.push(document.delegateRessourceCreation(child));
+				}
+				else if (localName.substr('instance_'.length) == 'instance_')
+				{
+					if (localName == 'instance_camera')
+						0; // do nothing
+					
+					else if (localName == 'instance_controller')
+						_childs.push(InstanceController.createFromXML(document, child));
+					
+					else if (localName == 'instance_geometry')
+						_childs.push(InstanceGeometry.createFromXML(document, child));
+					
+					else if (localName == 'instance_light')
+						0; // do nothing
+					
+					else if (localName == 'instance_node')
+						_childs.push(InstanceNode.createFromXML(document, child));
+				}
+			}
 		}
 		
 		public function getChildAt(index : uint) : IInstance
