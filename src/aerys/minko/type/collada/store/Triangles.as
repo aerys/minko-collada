@@ -4,6 +4,9 @@ package aerys.minko.type.collada.store
 
 	public class Triangles
 	{
+		private static const NS : Namespace = 
+			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
 		private const NOT_YET_IMPLEMENTED_FAIL : Function = 
 			function(xmlPrimitive : XML) : void { throw new Error(xmlPrimitive.localName() + ' primitives are not supported yet'); };
 		
@@ -51,62 +54,57 @@ package aerys.minko.type.collada.store
 		public function get vertexCount()		: uint				{ return _triangleVertices.length / _indicesPerVertex; }
 		public function get triangleCount()		: uint				{ return vertexCount / 3; }
 		
-		public function getVertexId(storeVertexId : uint) : uint
-		{
-			return _triangleVertices[storeVertexId * indicesPerVertex + _offsets['VERTEX']];
-		}
-		
-		public function pushVertexComponents(storeVertexId	: uint, 
-											 semantics		: Vector.<String>,
-											 out			: Vector.<Number>) : void
-		{
-			var semanticsLength : uint = semantics.length;
-		
-			for (var semanticId : uint = 0; semanticId < semanticsLength; ++semanticId)
-			{
-				var source : Source = _sources[semantics[semanticId]];
-				source.pushVertexComponent(storeVertexId, out);
-			}
-		}
-		
 		public function Triangles(xmlPrimitive	: XML = null, 
-									  xmlMesh		: XML = null)
+								  xmlMesh		: XML = null)
 		{
 			if (xmlPrimitive && xmlMesh)
 				initializeFromXML(xmlPrimitive, xmlMesh);
 		}
 		
-		private function initializeFromXML(xmlPrimitive : XML, xmlMesh : XML) : void
+		/*
+		* Fixme
+		* There is maybe a misunderstanding reading the collada specifications, and it seams illogical
+		* droping this data for the vertex component.
+		* 
+		* Nevertheless, we already know everything about the vertices.
+		* According to the collada 1.5 specs, there is always and only 1 vertices nodes per mesh.
+		* cf : Collada, Specification – Core Elements Reference 5-89, so why do we need references to it?
+		*/
+		private function initializeFromXML(xmlPrimitive	: XML, 
+										   xmlMesh		: XML) : void
 		{
 			_semantics			= new Vector.<String>();
 			_offsets			= new Object();
 			_sources			= new Object();	
 			
-			_indicesPerVertex				= 0;
-			_triangleVertices				= new Vector.<uint>();
+			_indicesPerVertex	= 0;
+			_triangleVertices	= new Vector.<uint>();
 			
-			for each (var input : XML in xmlPrimitive.input)
+			var sources		: XMLList	= xmlMesh..NS::source;
+			for each (var input : XML in xmlPrimitive.NS::input)
 			{
 				var semantic 	: String	= String(input.@semantic);
 				var offset		: uint		= parseInt(String(input.@offset));
-				
 				var sourceId	: String	= String(input.@source).substr(1);
-				var source		: Source	= Source.createFromXML(xmlMesh..source.(@id == sourceId)[0]);
 				
 				if (offset + 1 > _indicesPerVertex)
 					_indicesPerVertex = offset + 1;
 				
+				_semantics.push(semantic);
 				_offsets[semantic] = offset;
-				_sources[semantic] = source;
+				
+				if (semantic != 'VERTEX')
+					_sources[semantic] = Source.createFromXML(sources.(@id == sourceId)[0]);
 			}
 			
 			// will triangulate the data in here and push ids to _triangleVertices
 			NAME_TO_PARSER[xmlPrimitive.localName()](xmlPrimitive);
 			
-			if (_offsets['VERTEX'] == undefined)
-				throw new Error(
-					'Invalid collada file. An input of VERTEX semantic is ' +
-					'mandatory in ' + xmlPrimitive.localName() + ' nodes');
+//			 cf comentary upside.
+//			if (_offsets['VERTEX'] == undefined)
+//				throw new Error(
+//					'Invalid collada file. An input of VERTEX semantic is ' +
+//					'mandatory in ' + xmlPrimitive.localName() + ' nodes');
 		}
 		
 		/**
@@ -115,7 +113,7 @@ package aerys.minko.type.collada.store
 		 */		
 		private function fillVerticesFromTriangles(xmlPrimitive : XML) : void
 		{
-			var indexList : Array = String(xmlPrimitive.p[0]).split(' ');
+			var indexList : Array = String(xmlPrimitive.NS::p[0]).split(' ');
 			for each (var index : String in indexList)
 				_triangleVertices.push(parseInt(index));
 		}
@@ -125,8 +123,8 @@ package aerys.minko.type.collada.store
 		 */		
 		private function fillVerticesFromPolylist(xmlPrimitive : XML) : void
 		{
-			var indexList 		: Array = String(xmlPrimitive.p[0]).split(' ');
-			var polyCountList	: Array = String(xmlPrimitive.vcount[0]).split(' ');
+			var indexList 		: Array = String(xmlPrimitive.NS::p[0]).split(' ');
+			var polyCountList	: Array = String(xmlPrimitive.NS::vcount[0]).split(' ');
 			
 			var currentIndex	: uint = 0;
 			for each (var polyCount : String in polyCount)
@@ -144,10 +142,34 @@ package aerys.minko.type.collada.store
 					
 					throw new Error('fix me, the last polygon is going to fail when recreating the triangle fan because a modulo is missing');
 					for (k = 0; k < _indicesPerVertex; ++k)
-						_triangleVertices.push(indexList[(currentIndex + j + _indicesPerVertex + k /* it missing around here */)]);
+						_triangleVertices.push(indexList[(currentIndex + j + _indicesPerVertex + k /* it's missing around here */)]);
 				}
 				
 				currentIndex += numVertices;
+			}
+		}
+		
+		
+		
+		public function getVertexId(storeVertexId : uint) : uint
+		{
+			return _triangleVertices[storeVertexId * indicesPerVertex + _offsets['VERTEX']];
+		}
+		
+		public function pushVertexComponents(storeVertexId	: uint, 
+											 semantics		: Vector.<String>,
+											 out			: Vector.<Number>) : void
+		{
+			var semanticsLength : uint = semantics.length;
+			
+			for (var semanticId : uint = 0; semanticId < semanticsLength; ++semanticId)
+			{
+				var semantic 		: String	= semantics[semanticId];
+				
+				var source			: Source	= _sources[semantic];
+				var sourceVertexId	: uint		= _triangleVertices[_indicesPerVertex * storeVertexId + _offsets[semantic]];
+				
+				source.pushVertexComponent(sourceVertexId, out);
 			}
 		}
 		

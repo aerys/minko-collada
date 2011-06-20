@@ -11,6 +11,9 @@ package aerys.minko.type.collada.instance
 	
 	public class InstanceController implements IInstance
 	{
+		private static const NS : Namespace = 
+			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
 		private var _document			: Document;
 		
 		private var _sourceId			: String;
@@ -37,7 +40,7 @@ package aerys.minko.type.collada.instance
 			var sourceId			: String = String(xml.@url).substr(1);
 			var name				: String = xml.@name;
 			var sid					: String = xml.@sid;
-			var bindedSkeletonId	: String = String(xml.skeleton[0]).substr(1);
+			var bindedSkeletonId	: String = String(xml.NS::skeleton[0]).substr(1);
 			
 			return new InstanceController(document, sourceId, name, sid, bindedSkeletonId);
 		}

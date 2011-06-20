@@ -1,6 +1,7 @@
 package aerys.minko.type.collada.ressource
 {
 	import aerys.minko.ns.minko_collada;
+	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.TransformGroup;
 	import aerys.minko.scene.node.skeleton.Joint;
 	import aerys.minko.type.collada.Document;
@@ -35,18 +36,19 @@ package aerys.minko.type.collada.ressource
 		public function get type()		: String				{ return _type; }
 		public function get childs()	: Vector.<IInstance>	{ return _childs; }
 		
-		public function get instance()	: IInstance				{ return new InstanceNode(_document, _id); }
-		
 		public static function fillStoreFromXML(xmlDocument	: XML,
 												document	: Document, 
 												store		: Object) : void
 		{
-			var xmlNodeLibrary	: XML = xmlDocument..library_nodes[0];
-			var xmlNodes		: XML = xmlNodeLibrary.node;
+			var xmlNodeLibrary	: XML		= xmlDocument..NS::library_nodes[0];
+			if (xmlNodeLibrary == null)
+				return;
+			
+			var xmlNodes		: XMLList	= xmlNodeLibrary.NS::node;
 			
 			for each (var xmlNode : XML in xmlNodes)
 			{
-				var node : Node = new Node(xmlNodes, document);
+				var node : Node = new Node(xmlNode, document);
 				store[node.id] = node;
 			}
 		}
@@ -58,34 +60,32 @@ package aerys.minko.type.collada.ressource
 			_id			= xmlNode.@id;
 			_sid		= xmlNode.@sid;
 			_name		= xmlNode.@name;
-			
 			_transform	= TransformParser.parseTransform(xmlNode);
 			_type		= xmlNode.@type;
+			_childs		= new Vector.<IInstance>();
 			
 			for each (var child : XML in xmlNode.children())
 			{
+				
 				var localName : String = child.localName();
+				
 				if (localName == 'node')
-				{
 					_childs.push(document.delegateRessourceCreation(child));
-				}
-				else if (localName.substr('instance_'.length) == 'instance_')
-				{
-					if (localName == 'instance_camera')
+					
+				else if (localName == 'instance_camera')
 						0; // do nothing
 					
-					else if (localName == 'instance_controller')
-						_childs.push(InstanceController.createFromXML(document, child));
-					
-					else if (localName == 'instance_geometry')
-						_childs.push(InstanceGeometry.createFromXML(document, child));
-					
-					else if (localName == 'instance_light')
-						0; // do nothing
-					
-					else if (localName == 'instance_node')
-						_childs.push(InstanceNode.createFromXML(document, child));
-				}
+				else if (localName == 'instance_controller')
+					_childs.push(InstanceController.createFromXML(document, child));
+				
+				else if (localName == 'instance_geometry')
+					_childs.push(InstanceGeometry.createFromXML(document, child));
+				
+				else if (localName == 'instance_light')
+					0; // do nothing
+				
+				else if (localName == 'instance_node')
+					_childs.push(InstanceNode.createFromXML(document, child));
 			}
 		}
 		
@@ -93,15 +93,43 @@ package aerys.minko.type.collada.ressource
 		{
 			return _childs[index];
 		}
-
+		
+		public function createInstance() : IInstance				
+		{
+			return new InstanceNode(_document, _id); 
+		}
+		
+		/**
+		 * to be fixed
+		 * child.toScene will instanciate every time a new minko object
+		 * 
+		 * what happens for a scene with many times the same mesh?
+		 * 
+		 * @return 
+		 */		
 		public function toTransformGroup() : TransformGroup
 		{
-			throw new Error('implement me');
+			var tf : TransformGroup = new TransformGroup();
+			for each (var child : IInstance in _childs)
+				tf.addChild(child.toScene());
+			return tf;
 		}
 		
 		public function toJoint() : Joint
 		{
-			throw new Error('implement me');
+			var joint : Joint = new Joint();
+			for each (var child : IInstance in _childs)
+			{
+				var minkoChild : IScene;
+				
+				if (child is InstanceNode)
+					minkoChild = Node(child.ressource).toJoint();
+				else
+					minkoChild = child.toScene();
+				
+				joint.addChild(minkoChild);
+			}
+			return joint;
 		}
 	}
 }

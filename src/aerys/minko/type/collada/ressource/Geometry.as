@@ -24,17 +24,17 @@ package aerys.minko.type.collada.ressource
 		
 		private static const POLYGON_NODES : Vector.<String> = Vector.<String>([
 			'lines', 'linestrips', 'polygons', 'polylist',
-			'triangles', 'trifans', 'tristrips', ]);
+			'triangles', 'trifans', 'tristrips' ]);
 		
 		private var _document				: Document;
 		
 		private var _id						: String;
+		private var _name					: String;
 		private var _verticesDataSemantics	: Vector.<String>;
-		private var _verticesDataSources	: Object
+		private var _verticesDataSources	: Object;
 		private var _triangleStores			: Vector.<Triangles>;
 		
 		public function get id()		: String	{ return _id; }
-		public function get instance()	: IInstance	{ return new InstanceGeometry(_document, _id); }
 		
 		minko_collada function get verticesDataSemantics() : Vector.<String>
 		{
@@ -55,8 +55,11 @@ package aerys.minko.type.collada.ressource
 												document	: Document, 
 												store		: Object) : void
 		{
-			var xmlGeometryLibrary	: XML = xmlDocument..library_geometries[0];
-			var xmlGeometries		: XML = xmlGeometryLibrary.geometry;
+			var xmlGeometryLibrary	: XML		= xmlDocument..NS::library_geometries[0];
+			if (xmlGeometryLibrary == null)
+				return;
+			
+			var xmlGeometries		: XMLList	= xmlGeometryLibrary.NS::geometry;
 			
 			for each (var xmlGeometry : XML in xmlGeometries)
 			{
@@ -67,24 +70,54 @@ package aerys.minko.type.collada.ressource
 		
 		public function Geometry(xmlGeometry : XML, document : Document) 
 		{
-			_document = document;
+			_document				= document;
+			_id						= xmlGeometry.@id;
+			_name					= xmlGeometry.@name;
 			
-			var xmlMesh		: XML = xmlGeometry.mesh[0];
-			var xmlVertices	: XML = xmlMesh.vertices[0];
+			_verticesDataSemantics	= new Vector.<String>();
+			_verticesDataSources	= new Object();
+			_triangleStores			= new Vector.<Triangles>();
 			
-			for each (var input : XML in xmlVertices.input)
+			var xmlMesh		: XML = xmlGeometry.NS::mesh[0];
+			var xmlVertices	: XML = xmlMesh.NS::vertices[0];
+			
+			for each (var input : XML in xmlVertices.NS::input)
 			{
-				var semantic	: String = String(input.@semantic);
-				var sourceId	: String = String(input.@source).substr(1);
-				var source		: Source = Source.createFromXML(xmlMesh..source.(@id == sourceId)[0]);
+				var semantic	: String	= String(input.@semantic);
+				var sourceId	: String	= String(input.@source).substr(1);
+				var xmlSource	: XML		= xmlMesh..NS::source.(@id == sourceId)[0];
+				var source		: Source	= Source.createFromXML(xmlSource);
 				
 				_verticesDataSemantics.push(semantic);
 				_verticesDataSources[semantic] = source;
 			}
 			
-			for each (var polygonNode : String in POLYGON_NODES)
-				for each (var polygons : XML in xmlMesh.(polygonNode))
-					_triangleStores.push(new Triangles(polygons, xmlMesh));
+			var polygons : XML;
+			for each (polygons in xmlMesh.NS::lines)
+				_triangleStores.push(new Triangles(polygons, xmlMesh));
+				
+			for each (polygons in xmlMesh.NS::linestrips)
+				_triangleStores.push(new Triangles(polygons, xmlMesh));
+				
+			for each (polygons in xmlMesh.NS::polygons)
+				_triangleStores.push(new Triangles(polygons, xmlMesh));
+				
+			for each (polygons in xmlMesh.NS::polylist)
+				_triangleStores.push(new Triangles(polygons, xmlMesh));
+				
+			for each (polygons in xmlMesh.NS::triangles)
+				_triangleStores.push(new Triangles(polygons, xmlMesh));
+				
+			for each (polygons in xmlMesh.NS::trifans)
+				_triangleStores.push(new Triangles(polygons, xmlMesh));
+				
+			for each (polygons in xmlMesh.NS::tristrips)
+				_triangleStores.push(new Triangles(polygons, xmlMesh));
+		}
+		
+		public function createInstance() : IInstance
+		{
+			return new InstanceGeometry(_document, _id); 
 		}
 		
 		public function toMesh() : IMesh
@@ -131,6 +164,8 @@ package aerys.minko.type.collada.ressource
 										   triangleStore		: Triangles,
 										   resultVertex			: Vector.<Number> = null) : Vector.<Number>
 		{
+			resultVertex.length = 0;
+			
 			var vertexSemanticsLength	: uint = vertexSemantics.length;
 			var triangleSemanticsLength	: uint = triangleSemantics.length;
 			
@@ -148,6 +183,13 @@ package aerys.minko.type.collada.ressource
 			{
 				triangleStore.pushVertexComponents(storeVertexId, triangleSemantics, resultVertex);
 			}
+			
+			for each (var kk : * in resultVertex)
+				if (isNaN(kk))
+				{
+					0;
+					trace('coucou');
+				}	
 			
 			return resultVertex;
 		}
@@ -212,22 +254,44 @@ package aerys.minko.type.collada.ressource
 			var semantic			: String;
 			var vertexComponent		: VertexComponent;
 			
-			for each (semantic in vertexSemantics)
+			var semanticId			: uint;
+			var semanticLength		: uint;
+			for (semanticId = 0, semanticLength = vertexSemantics.length; 
+				 semanticId < semanticLength; 
+				 ++semanticId)
 			{
+				semantic = vertexSemantics[semanticId];
 				vertexComponent = createComponentFromSemantic(semantic);
+				
 				if (vertexComponent)
+				{
 					vertexFormat.addComponent(vertexComponent);
+				}
 				else
+				{	
 					trace('Dropping unknown vertex semantic:', semantic);
+					vertexSemantics.splice(semanticId, 1);
+					--semanticId;
+					--semanticLength;
+				}
 			}
 			
-			for each (semantic in triangleSemantics)
+			for (semanticId = 0, semanticLength = triangleSemantics.length; 
+				 semanticId < semanticLength; 
+				 ++semanticId)
 			{
+				semantic = triangleSemantics[semanticId];
+				
 				vertexComponent = createComponentFromSemantic(semantic);
 				if (vertexComponent)
 					vertexFormat.addComponent(vertexComponent);
 				else
+				{
 					trace('Dropping unknown triangle semantic:', semantic);
+					triangleSemantics.splice(semanticId, 1);
+					--semanticId;
+					--semanticLength;
+				}
 			}
 			
 			return vertexFormat;

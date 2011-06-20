@@ -2,6 +2,13 @@ package aerys.minko.type.collada.store
 {
 	import aerys.minko.type.math.Matrix4x4;
 
+	/**
+	 * This represent a <source> node in a collada document, and provides
+	 * methods to easily access the contained data.
+	 * 
+	 * @author Romain Gilliotte <romain.gilliotte@aerys.in>
+	 * 
+	 */	
 	public final class Source
 	{
 		private static const NS	: Namespace	= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
@@ -26,6 +33,16 @@ package aerys.minko.type.collada.store
 		public function get paramTypes()	: Vector.<Class>	{ return _paramTypes; }
 		public function get data()			: Array				{ return _data; }
 		
+		/*
+		 * For an obscure reason, there is no way to get the raw data using the
+		 * .(@attrName == value) syntax, so we loop over all children to find the node we are
+		 * searching for.
+		 * 
+		 * This should be the following.
+		 * 		var xmlRawData			: XML		= xmlSource.(@id == sourceId)[0];
+		 *
+		 * If someone do understand what is wrong here, please fix it.
+		 */
 		public static function createFromXML(xmlSource : XML) : Source
 		{
 			// fill the source object.
@@ -45,8 +62,25 @@ package aerys.minko.type.collada.store
 			}
 			
 			// read data
-			var xmlRawData			: XML		= xmlSource.(@id == String(xmlAccessor.@source).substr(1))[0];
+			var sourceId			: String	= String(xmlAccessor.@source).substr(1);
+			
+			/*
+			 * Kludge here.
+			 */
+			var xmlRawData			: XML		= null;
+			for each (var node : XML in xmlSource.children())
+				if (sourceId == node.attribute('id'))
+					xmlRawData = node;
+			
+			if (xmlRawData == null)
+				throw new Error('Source data could not be found');
+			
+			/*
+			 * End of kludge.
+			 */
+			
 			var rawData 			: Array		= String(xmlRawData).split(" ");
+			
 			var currentOffset		: uint		= 0;
 			var currentDatum		: *;
 			

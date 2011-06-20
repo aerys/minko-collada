@@ -4,6 +4,7 @@ package aerys.minko.type.collada.ressource
 
 	public interface IRessource
 	{
-		function get instance() : IInstance;
+		function get id()			: String;
+		function createInstance()	: IInstance;
 	}
 }

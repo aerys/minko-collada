@@ -4,8 +4,9 @@ package aerys.minko.type.collada.ressource
 	import aerys.minko.scene.node.group.Group;
 	import aerys.minko.type.collada.Document;
 	import aerys.minko.type.collada.instance.IInstance;
+	import aerys.minko.type.collada.instance.InstanceNode;
 	import aerys.minko.type.collada.instance.InstanceVisualScene;
-
+	
 	use namespace minko_collada;
 	
 	public class VisualScene implements IRessource
@@ -20,13 +21,22 @@ package aerys.minko.type.collada.ressource
 		
 		public function get id()		: String				{ return _id; }
 		public function get childs()	: Vector.<IInstance>	{ return _childs; }
-		public function get instance()	: IInstance				{ return new InstanceVisualScene(_document, _id); }
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
 												document	: Document,
 												store		: Object) : void
 		{
-			var xmlSceneLibrary	: XML = xmlDocument..library_scenes[0];
+			var xmlSceneLibrary	: XML		= xmlDocument..NS::library_visual_scenes[0];
+			if (xmlSceneLibrary == null)
+				return;
+			
+			var xmlScenes		: XMLList	= xmlSceneLibrary.NS::visual_scene;
+			for each (var xmlScene : XML in xmlScenes)
+			{
+				var scene : VisualScene = new VisualScene(xmlScene, document);
+				store[scene.id] = scene;
+			}
+			
 		}
 		
 		public function VisualScene(xmlScene : XML,
@@ -35,9 +45,15 @@ package aerys.minko.type.collada.ressource
 			_document	= document;
 			_id			= xmlScene.@id;
 			_name		= xmlScene.@name;
+			_childs		= new Vector.<IInstance>();
 			
-			for each (var xmlNode : XML in xmlScene.node)
+			for each (var xmlNode : XML in xmlScene.NS::node)
 				_childs.push(document.delegateRessourceCreation(xmlNode));
+		}
+		
+		public function createInstance() : IInstance
+		{
+			return new InstanceVisualScene(_document, _id); 
 		}
 		
 		public function toGroup() : Group
@@ -46,7 +62,10 @@ package aerys.minko.type.collada.ressource
 			group.name = _name;
 			
 			for each (var child : IInstance in _childs)
-				group.addChild(child.toScene());
+			{
+				if (!(child is InstanceNode) || Node(child.ressource).type != 'JOINT')
+					group.addChild(child.toScene());
+			}
 			
 			return group;
 		}

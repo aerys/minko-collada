@@ -55,8 +55,6 @@ package aerys.minko.type.collada.ressource
 		public function get skin()				: Geometry	{ return _document.getGeometryById(_skinId); }
 		public function get skinId()			: String	{ return _skinId; }
 		
-		public function get instance()			: IInstance	{ return new InstanceController(_document, _id); }
-		
 		public static function fillStoreFromXML(xmlDocument	: XML,
 												document	: Document, 
 												store		: Object) : void
@@ -185,29 +183,30 @@ package aerys.minko.type.collada.ressource
 			var source		: Source	= Source.createFromXML(xmlSource);
 			var result		: Vector.<Number>	= Vector.<Number>(source.data);
 			
-			trace(xmlSource);
-			trace(source.data);
-			trace(result);
-			
 			return result;
+		}
+		
+		public function createInstance() : IInstance
+		{ 
+			return new InstanceController(_document, _id); 
 		}
 		
 		public function toMesh() : IMesh
 		{
 			// get geometry, as most tasks are going to be delegated to it
-			var geometry				: Geometry			= _document.getGeometryById(_skinId);
+			var geometry			: Geometry			= _document.getGeometryById(_skinId);
 			
 			// create semantic list for vertices and triangles
-			var vertexSemantics			: Vector.<String>	= geometry.verticesDataSemantics;
-			var triangleSemantics		: Vector.<String>	= geometry.createTriangleStoreSemanticList();
+			var vertexSemantics		: Vector.<String>	= geometry.verticesDataSemantics;
+			var triangleSemantics	: Vector.<String>	= geometry.createTriangleStoreSemanticList();
 			
 			// create vertexformat with semantics
-			var vertexFormat			: VertexFormat		= 
+			var vertexFormat		: VertexFormat		= 
 				createVertexFormat(geometry, vertexSemantics, triangleSemantics);
 			
 			// fill buffers with semantics
-			var indexData				: Vector.<uint>		= new Vector.<uint>();
-			var vertexData				: Vector.<Number>	= new Vector.<Number>();
+			var indexData			: Vector.<uint>		= new Vector.<uint>();
+			var vertexData			: Vector.<Number>	= new Vector.<Number>();
 			fillBuffers(geometry, vertexSemantics, triangleSemantics, indexData, vertexData);
 			
 			// merge it all
@@ -254,16 +253,26 @@ package aerys.minko.type.collada.ressource
 									 triangleStore		: Triangles,
 									 resultVertex		: Vector.<Number> = null) : Vector.<Number>
 		{
+			resultVertex.length = 0;
+			
 			var vertexId : uint = triangleStore.getVertexId(storeVertexId);
 			
 			// let the geometry build its vertex
 			geometry.buildVertex(storeVertexId, vertexSemantics, triangleSemantics, triangleStore, resultVertex);
 			
+			for each (var kk : * in resultVertex)
+				if (isNaN(kk))
+				{
+					0;
+					trace('coucou');
+				}	
+				
 			// add bone components
 			for (var i : uint = 2 * _boneCountPerVertex * vertexId;
 				i < 2 * _boneCountPerVertex * (vertexId + 1);
 				++i)
 				resultVertex.push(_boneData[i]);
+			
 			
 			return resultVertex;
 		}

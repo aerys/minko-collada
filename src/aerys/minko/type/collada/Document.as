@@ -61,7 +61,7 @@ package aerys.minko.type.collada
 		
 		public function loadXml(xmlDocument : XML) : void
 		{
-			_mainSceneId	= String(xmlDocument.scene.instance_visual_scene.@url).substr(1);
+			_mainSceneId	= String(xmlDocument.NS::scene[0].NS::instance_visual_scene[0].@url).substr(1);
 			
 			_controllers	= new Object();
 			_geometries		= new Object();
@@ -85,11 +85,13 @@ package aerys.minko.type.collada
 			if (!NODENAME_TO_LIBRARY.hasOwnProperty(nodeType))
 				throw new Error('No such handled ressource type');
 			
-			var library			: Object		= NODENAME_TO_LIBRARY[nodeType];
+			var library			: Object		= this[NODENAME_TO_LIBRARY[nodeType]];
 			var ressourceClass	: Class			= NODENAME_TO_CLASS[nodeType];
 			
 			var ressource		: IRessource	= new ressourceClass(xmlNode, this); 
-			return ressource.instance;
+			library[ressource.id] = ressource;
+			
+			return ressource.createInstance();
 		}
 	}
 }
