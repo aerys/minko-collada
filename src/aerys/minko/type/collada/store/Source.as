@@ -16,7 +16,8 @@ package aerys.minko.type.collada.store
 		private static const TYPES	: Object	= {
 			"float"		: Number,
 			"Name"		: String,
-			"float4x4"	: Matrix4x4
+			"float4x4"	: Matrix4x4,
+			"name"		: String
 		};
 		
 		protected var _id			: String;
@@ -81,33 +82,56 @@ package aerys.minko.type.collada.store
 			
 			var rawData 			: Array		= String(xmlRawData).split(" ");
 			
+			
+			/* the kludge is back */
+			var size : uint = 0;
+			for each (var paramType : Class in source._paramTypes)
+				size += paramType == Matrix4x4 ? 16 : 1;
+			source._count = rawData.length / size;
+			/* end of second kludge */
+			
 			var currentOffset		: uint		= 0;
 			var currentDatum		: *;
 			
 			source._data = new Array();
 			for (var index : uint = 0; index < source._count; ++index)
 				for each (var paramType : Class in source._paramTypes)
-			{
-				if (paramType == String)
-					currentDatum = rawData[currentOffset++];
-				else if (paramType == Number)
-					currentDatum = parseFloat(rawData[int(currentOffset++)]);
-				else if (paramType == Matrix4x4)
-					currentDatum = new Matrix4x4(
-						parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-						parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-						parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-						parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-						parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-						parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-						parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-						parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)])
-					);
-				else
-					throw new Error('Unknown type found');
-				
-				source._data.push(currentDatum);
-			}
+				{
+					if (paramType == String)
+					{
+						currentDatum = rawData[currentOffset++];
+					}
+					else if (paramType == Number)
+					{
+						currentDatum = parseFloat(rawData[int(currentOffset++)]);
+					}
+					else if (paramType == Matrix4x4)
+					{
+						currentDatum = new Matrix4x4(
+							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
+							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
+							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
+							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
+							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
+							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
+							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
+							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)])
+						).transpose();
+						
+						if (isNaN(Matrix4x4(currentDatum).getRawData()[0]))
+						{
+							trace(currentDatum);
+							var a : uint = 09;
+						}
+					}
+					else
+					{
+						throw new Error('Unknown type found');
+					}
+					
+					
+					source._data.push(currentDatum);
+				}
 			
 			return source;
 		}

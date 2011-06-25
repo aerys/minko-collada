@@ -184,13 +184,6 @@ package aerys.minko.type.collada.ressource
 				triangleStore.pushVertexComponents(storeVertexId, triangleSemantics, resultVertex);
 			}
 			
-			for each (var kk : * in resultVertex)
-				if (isNaN(kk))
-				{
-					0;
-					trace('coucou');
-				}	
-			
 			return resultVertex;
 		}
 		
@@ -268,8 +261,8 @@ package aerys.minko.type.collada.ressource
 					vertexFormat.addComponent(vertexComponent);
 				}
 				else
-				{	
-					trace('Dropping unknown vertex semantic:', semantic);
+				{
+//					trace('Dropping unknown vertex semantic:', semantic);
 					vertexSemantics.splice(semanticId, 1);
 					--semanticId;
 					--semanticLength;
@@ -287,7 +280,7 @@ package aerys.minko.type.collada.ressource
 					vertexFormat.addComponent(vertexComponent);
 				else
 				{
-					trace('Dropping unknown triangle semantic:', semantic);
+//					trace('Dropping unknown triangle semantic:', semantic);
 					triangleSemantics.splice(semanticId, 1);
 					--semanticId;
 					--semanticLength;

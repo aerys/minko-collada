@@ -3,6 +3,7 @@ package aerys.minko.type.collada
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.type.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.collada.instance.IInstance;
+	import aerys.minko.type.collada.ressource.Animation;
 	import aerys.minko.type.collada.ressource.Controller;
 	import aerys.minko.type.collada.ressource.Geometry;
 	import aerys.minko.type.collada.ressource.IRessource;
@@ -33,6 +34,7 @@ package aerys.minko.type.collada
 		
 		private var _mainSceneId	: String;
 		
+		private var _animations		: Object;
 		private var _controllers	: Object;
 		private var _geometries		: Object;
 		private var _nodes			: Object;
@@ -63,15 +65,18 @@ package aerys.minko.type.collada
 		{
 			_mainSceneId	= String(xmlDocument.NS::scene[0].NS::instance_visual_scene[0].@url).substr(1);
 			
+			_animations		= new Object();
 			_controllers	= new Object();
 			_geometries		= new Object();
 			_nodes			= new Object();
 			_visualScenes	= new Object();
 			
+			Animation	.fillStoreFromXML(xmlDocument, this, _animations);
 			Controller	.fillStoreFromXML(xmlDocument, this, _controllers);
 			Geometry	.fillStoreFromXML(xmlDocument, this, _geometries);
 			Node		.fillStoreFromXML(xmlDocument, this, _nodes);
 			VisualScene	.fillStoreFromXML(xmlDocument, this, _visualScenes);
+			
 		}
 		
 		minko_collada function delegateRessourceCreation(xmlNode : XML) : IInstance

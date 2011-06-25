@@ -2,6 +2,7 @@ package aerys.minko.type.collada.ressource
 {
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.mesh.IMesh;
+	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.type.collada.Document;
 	import aerys.minko.type.collada.helper.NumberListParser;
 	import aerys.minko.type.collada.instance.IInstance;
@@ -18,14 +19,6 @@ package aerys.minko.type.collada.ressource
 	{
 		private static const NS					: Namespace 				= 
 			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
-		
-		private static const BONE_COMPONENTS	: Vector.<VertexComponent>	= 
-			Vector.<VertexComponent>([
-				VertexComponent.BONE0, VertexComponent.BONE1,
-				VertexComponent.BONE2, VertexComponent.BONE3,
-				VertexComponent.BONE4, VertexComponent.BONE5,
-				VertexComponent.BONE6, VertexComponent.BONE7
-			]);
 		
 		private var _document			: Document;
 		
@@ -45,15 +38,18 @@ package aerys.minko.type.collada.ressource
 		 * 		boneid1forvertex2, bonevalue1forvertex2, boneid2forvertex2, bonevalue2forvertex2
 		 * ]
 		 */
-		private var _boneIds			: Vector.<String>;
-		private var _boneData			: Vector.<Number>
+		private var _jointNames			: Vector.<String>;
+		private var _invBindMatrices	: Vector.<Matrix4x4>;
+		private var _boneWeights		: Vector.<Number>
 		private var _boneCountPerVertex	: uint;
 		
-		public function get id()				: String	{ return _id; }
-		public function get name()				: String	{ return _name; }
-		public function get bindShapeMatrix()	: Matrix4x4	{ return _bindShapeMatrix; }
-		public function get skin()				: Geometry	{ return _document.getGeometryById(_skinId); }
-		public function get skinId()			: String	{ return _skinId; }
+		public function get id()				: String				{ return _id; }
+		public function get name()				: String				{ return _name; }
+		public function get jointNames()		: Vector.<String>		{ return _jointNames; }
+		public function get bindShapeMatrix()	: Matrix4x4				{ return _bindShapeMatrix; }
+		public function get invBindMatrices()	: Vector.<Matrix4x4>	{ return _invBindMatrices; }
+		public function get skin()				: Geometry				{ return _document.getGeometryById(_skinId); }
+		public function get skinId()			: String				{ return _skinId; }
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
 												document	: Document, 
@@ -74,26 +70,17 @@ package aerys.minko.type.collada.ressource
 		{
 			_document				= document;
 			
-//			trace(xmlController);
-			
 			_id						= xmlController.@id;
 			_name					= xmlController.@name;
-			
-//			trace(_id, _name);
-			
 			_skinId					= String(xmlController.NS::skin[0].@source).substr(1);
-			
-//			trace(_skinId);
 			
 			_bindShapeMatrix		= parseBindShapeMatrix(xmlController.NS::skin[0]);
 			
-//			trace(_bindShapeMatrix);
-			
-			_boneIds				= parseJoints(xmlController);
-			_boneData				= new Vector.<Number>();
-			_boneCountPerVertex		= parseBoneData(xmlController, _boneData);
-			
-//			trace(_boneIds, _boneCountPerVertex);
+			_boneWeights			= new Vector.<Number>();
+			_jointNames				= parseJoints(xmlController);
+			_invBindMatrices		= parseInvBindMatrix(xmlController);
+
+			_boneCountPerVertex		= parseBoneData(xmlController, _boneWeights);
 		}
 		
 		private static function parseBindShapeMatrix(xmlSkin : XML) : Matrix4x4
@@ -108,8 +95,6 @@ package aerys.minko.type.collada.ressource
 		{
 			var skin 			: XML 					= xmlController.NS::skin[0];
 			
-			var jointsNames 	: Vector.<String> 		= parseJoints(xmlController);
-			var invBindMatrices : Vector.<Matrix4x4> 	= parseInvBindMatrix(xmlController);
 			var weights			: Vector.<Number> 		= parseWeights(xmlController);
 			
 			var vcount 			: Vector.<int> 			= NumberListParser.parseIntList(skin.NS::vertex_weights.NS::vcount[0]);
@@ -191,7 +176,7 @@ package aerys.minko.type.collada.ressource
 			return new InstanceController(_document, _id); 
 		}
 		
-		public function toMesh() : IMesh
+		public function toMesh() : Mesh
 		{
 			// get geometry, as most tasks are going to be delegated to it
 			var geometry			: Geometry			= _document.getGeometryById(_skinId);
@@ -220,7 +205,7 @@ package aerys.minko.type.collada.ressource
 			var vertexFormat : VertexFormat = geometry.createVertexFormat(vertexSemantics, triangleSemantics);
 			
 			for (var k : uint = 0; k < _boneCountPerVertex; ++k)
-				vertexFormat.addComponent(BONE_COMPONENTS[k]);
+				vertexFormat.addComponent(VertexComponent.BONES[k]);
 			
 			return vertexFormat;
 		}
@@ -259,19 +244,12 @@ package aerys.minko.type.collada.ressource
 			
 			// let the geometry build its vertex
 			geometry.buildVertex(storeVertexId, vertexSemantics, triangleSemantics, triangleStore, resultVertex);
-			
-			for each (var kk : * in resultVertex)
-				if (isNaN(kk))
-				{
-					0;
-					trace('coucou');
-				}	
 				
 			// add bone components
 			for (var i : uint = 2 * _boneCountPerVertex * vertexId;
 				i < 2 * _boneCountPerVertex * (vertexId + 1);
 				++i)
-				resultVertex.push(_boneData[i]);
+				resultVertex.push(_boneWeights[i]);
 			
 			
 			return resultVertex;

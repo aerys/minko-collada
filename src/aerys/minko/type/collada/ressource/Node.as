@@ -110,14 +110,20 @@ package aerys.minko.type.collada.ressource
 		public function toTransformGroup() : TransformGroup
 		{
 			var tf : TransformGroup = new TransformGroup();
+			Matrix4x4.copy(_transform, tf.transform);
+			
 			for each (var child : IInstance in _childs)
 				tf.addChild(child.toScene());
+			
 			return tf;
 		}
 		
 		public function toJoint() : Joint
 		{
 			var joint : Joint = new Joint();
+			joint.name = _sid;
+			Matrix4x4.copy(_transform, joint.transform);
+			
 			for each (var child : IInstance in _childs)
 			{
 				var minkoChild : IScene;
