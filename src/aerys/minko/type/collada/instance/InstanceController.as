@@ -48,6 +48,7 @@ package aerys.minko.type.collada.instance
 		
 		public function toScene() : IScene
 		{
+			return Controller(ressource).skin.toMesh();
 			return toSkinnedMesh();
 		}
 		

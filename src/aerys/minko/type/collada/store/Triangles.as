@@ -1,5 +1,6 @@
 package aerys.minko.type.collada.store
 {
+	import aerys.minko.type.collada.helper.NumberListParser;
 	import aerys.minko.type.vertex.VertexIterator;
 
 	public class Triangles
@@ -78,7 +79,6 @@ package aerys.minko.type.collada.store
 			_sources			= new Object();	
 			
 			_indicesPerVertex	= 0;
-			_triangleVertices	= new Vector.<uint>();
 			
 			var sources		: XMLList	= xmlMesh..NS::source;
 			for each (var input : XML in xmlPrimitive.NS::input)
@@ -113,9 +113,7 @@ package aerys.minko.type.collada.store
 		 */		
 		private function fillVerticesFromTriangles(xmlPrimitive : XML) : void
 		{
-			var indexList : Array = String(xmlPrimitive.NS::p[0]).split(' ');
-			for each (var index : String in indexList)
-				_triangleVertices.push(parseInt(index));
+			_triangleVertices = NumberListParser.parseUintList(xmlPrimitive.NS::p[0]);
 		}
 		
 		/**
@@ -123,33 +121,36 @@ package aerys.minko.type.collada.store
 		 */		
 		private function fillVerticesFromPolylist(xmlPrimitive : XML) : void
 		{
-			var indexList 		: Array = String(xmlPrimitive.NS::p[0]).split(' ');
-			var polyCountList	: Array = String(xmlPrimitive.NS::vcount[0]).split(' ');
+			_triangleVertices	= new Vector.<uint>();
 			
-			var currentIndex	: uint = 0;
-			for each (var polyCount : String in polyCount)
+			var indexList 			: Vector.<uint> = NumberListParser.parseUintList(xmlPrimitive.NS::p[0]);
+			var polyCountList		: Vector.<uint> = NumberListParser.parseUintList(xmlPrimitive.NS::vcount[0]);
+			var polyCountListLength	: uint			= polyCountList.length;
+			var currentIndex		: uint			= 0;
+			
+			for (var polygonId : uint = 0; polygonId < polyCountListLength; ++polygonId)
 			{
-				var numVertices : uint = parseInt(polyCount);
+				var numVertices : uint = polyCountList[polygonId];
 				
 				for (var j : uint = 1; j < numVertices - 1; ++j)
 				{
 					var k : uint;
+					// triangle 0
 					for (k = 0; k < _indicesPerVertex; ++k)
-						_triangleVertices.push(indexList[currentIndex + k]);
+						_triangleVertices.push(indexList[currentIndex * _indicesPerVertex + k]);
 					
+					// triangle j 
 					for (k = 0; k < _indicesPerVertex; ++k)
-						_triangleVertices.push(indexList[currentIndex + j + k]);
+						_triangleVertices.push(indexList[(currentIndex + j) * _indicesPerVertex + k]);
 					
-					throw new Error('fix me, the last polygon is going to fail when recreating the triangle fan because a modulo is missing');
+					// triangle j + 1
 					for (k = 0; k < _indicesPerVertex; ++k)
-						_triangleVertices.push(indexList[(currentIndex + j + _indicesPerVertex + k /* it's missing around here */)]);
+						_triangleVertices.push(indexList[(currentIndex + j + 1) * _indicesPerVertex + k]);
 				}
 				
 				currentIndex += numVertices;
 			}
 		}
-		
-		
 		
 		public function getVertexId(storeVertexId : uint) : uint
 		{

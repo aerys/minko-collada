@@ -129,7 +129,6 @@ package aerys.minko.type.collada.helper
 					parseFloat(data[i + 12]),	parseFloat(data[i + 13]),	parseFloat(data[i + 14]),	parseFloat(data[i + 15])
 				).transpose();
 				
-				trace('NumberlistParser', matrix);
 				result.push(matrix);
 			}
 			
@@ -197,8 +196,6 @@ package aerys.minko.type.collada.helper
 				parseFloat(data[8]),	parseFloat(data[9]),	parseFloat(data[10]),	parseFloat(data[11]),
 				parseFloat(data[12]),	parseFloat(data[13]),	parseFloat(data[14]),	parseFloat(data[15])
 			).transpose();
-			
-			trace('NumberlistParser', matrix);
 			
 			return matrix;
 		}

@@ -85,8 +85,8 @@ package aerys.minko.type.collada.store
 			
 			/* the kludge is back */
 			var size : uint = 0;
-			for each (var paramType : Class in source._paramTypes)
-				size += paramType == Matrix4x4 ? 16 : 1;
+			for each (var paramType2 : Class in source._paramTypes)
+				size += paramType2 == Matrix4x4 ? 16 : 1;
 			source._count = rawData.length / size;
 			/* end of second kludge */
 			
@@ -117,12 +117,6 @@ package aerys.minko.type.collada.store
 							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
 							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)])
 						).transpose();
-						
-						if (isNaN(Matrix4x4(currentDatum).getRawData()[0]))
-						{
-							trace(currentDatum);
-							var a : uint = 09;
-						}
 					}
 					else
 					{
@@ -159,7 +153,8 @@ package aerys.minko.type.collada.store
 		}
 		
 		public function pushVertexComponent(vertexId	: uint, 
-											out			: Vector.<Number>) : void
+											out			: Vector.<Number>,
+											uv			: Boolean = false) : void
 		{
 			var start	: uint = vertexId * _stride;
 			var end		: uint = start + _stride;

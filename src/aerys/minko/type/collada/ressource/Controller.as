@@ -56,6 +56,9 @@ package aerys.minko.type.collada.ressource
 												store		: Object) : void
 		{
 			var xmlControllerLibrary	: XML		= xmlDocument..NS::library_controllers[0];
+			if (!xmlControllerLibrary)
+				return;
+			
 			var xmlControllers 			: XMLList	= xmlControllerLibrary.NS::controller;
 			
 			for each (var xmlController : XML in xmlControllers)

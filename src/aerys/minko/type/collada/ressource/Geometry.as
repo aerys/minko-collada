@@ -171,18 +171,19 @@ package aerys.minko.type.collada.ressource
 			
 			var vertexId				: uint = triangleStore.getVertexId(storeVertexId);
 			
+			var semanticId				: uint;
+			var semanticName			: String;
 			// push components from vertices definition
-			for (var vertexSemanticId : uint = 0; vertexSemanticId < vertexSemanticsLength; ++vertexSemanticId)
+			for (semanticId = 0; semanticId < vertexSemanticsLength; ++semanticId)
 			{
-				var source : Source = _verticesDataSources[vertexSemantics[vertexSemanticId]];
+				semanticName = vertexSemantics[semanticId];
+				
+				var source : Source = _verticesDataSources[semanticName];
 				source.pushVertexComponent(vertexId, resultVertex);
 			}
 			
 			// push components from triangle definition
-			for (var triangleSemanticId : uint = 0; triangleSemanticId < triangleSemanticsLength; ++triangleSemanticId)
-			{
-				triangleStore.pushVertexComponents(storeVertexId, triangleSemantics, resultVertex);
-			}
+			triangleStore.pushVertexComponents(storeVertexId, triangleSemantics, resultVertex);
 			
 			return resultVertex;
 		}
@@ -262,7 +263,7 @@ package aerys.minko.type.collada.ressource
 				}
 				else
 				{
-//					trace('Dropping unknown vertex semantic:', semantic);
+					//	trace('Dropping unknown vertex semantic:', semantic);
 					vertexSemantics.splice(semanticId, 1);
 					--semanticId;
 					--semanticLength;
@@ -280,7 +281,7 @@ package aerys.minko.type.collada.ressource
 					vertexFormat.addComponent(vertexComponent);
 				else
 				{
-//					trace('Dropping unknown triangle semantic:', semantic);
+					//	trace('Dropping unknown triangle semantic:', semantic);
 					triangleSemantics.splice(semanticId, 1);
 					--semanticId;
 					--semanticLength;
@@ -295,11 +296,11 @@ package aerys.minko.type.collada.ressource
 			if (semantic == InputType.POSITION)
 				return VertexComponent.XYZ;
 			
-			if (semantic == InputType.COLOR)
-				return VertexComponent.RGB;
+//			if (semantic == InputType.COLOR)
+//				return VertexComponent.RGB;
 			
-			if (semantic == InputType.TEXCOORD)
-				return VertexComponent.UV;
+//			if (semantic == InputType.TEXCOORD)
+//				return VertexComponent.UV;
 			
 			if (semantic == InputType.NORMAL)
 				return VertexComponent.NORMAL;
