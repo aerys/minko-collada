@@ -126,7 +126,8 @@ package aerys.minko.type.collada.helper
 					parseFloat(data[i]),		parseFloat(data[i + 1]),	parseFloat(data[i + 2]),	parseFloat(data[i + 3]),
 					parseFloat(data[i + 4]),	parseFloat(data[i + 5]),	parseFloat(data[i + 6]),	parseFloat(data[i + 7]),
 					parseFloat(data[i + 8]),	parseFloat(data[i + 9]),	parseFloat(data[i + 10]),	parseFloat(data[i + 11]),
-					parseFloat(data[i + 12]),	parseFloat(data[i + 13]),	parseFloat(data[i + 14]),	parseFloat(data[i + 15])
+//					parseFloat(data[i + 12]),	parseFloat(data[i + 13]),	parseFloat(data[i + 14]), parseFloat(data[i + 15])
+					0, 0, 0, 1
 				).transpose();
 				
 				result.push(matrix);
@@ -194,7 +195,8 @@ package aerys.minko.type.collada.helper
 				parseFloat(data[0]),	parseFloat(data[1]),	parseFloat(data[2]),	parseFloat(data[3]),
 				parseFloat(data[4]),	parseFloat(data[5]),	parseFloat(data[6]),	parseFloat(data[7]),
 				parseFloat(data[8]),	parseFloat(data[9]),	parseFloat(data[10]),	parseFloat(data[11]),
-				parseFloat(data[12]),	parseFloat(data[13]),	parseFloat(data[14]),	parseFloat(data[15])
+//				parseFloat(data[12]),	parseFloat(data[13]),	parseFloat(data[14]),	parseFloat(data[15])
+				0, 0, 0, 1
 			).transpose();
 			
 			return matrix;

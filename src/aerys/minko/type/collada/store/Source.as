@@ -130,12 +130,12 @@ package aerys.minko.type.collada.store
 			return source;
 		}
 		
-		public function getItem(index : uint) : Object
+		public function getItem(index : uint, out : Object = null) : Object
 		{
-			var out : Object = new Object();
+			out ||= new Object();
 			
 			for each (var paramName : String in _paramNames)
-			out[paramName] = getComponentByParamName(index, paramName);
+				out[paramName] = getComponentByParamName(index, paramName);
 			
 			return out;
 		}

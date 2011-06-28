@@ -1,6 +1,7 @@
 package aerys.minko.type.collada
 {
 	import aerys.minko.ns.minko_collada;
+	import aerys.minko.type.animation.Animation;
 	import aerys.minko.type.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.collada.instance.IInstance;
 	import aerys.minko.type.collada.ressource.Animation;
@@ -71,14 +72,18 @@ package aerys.minko.type.collada
 			_nodes			= new Object();
 			_visualScenes	= new Object();
 			
-			Animation	.fillStoreFromXML(xmlDocument, this, _animations);
+			aerys.minko.type.collada.ressource.Animation	.fillStoreFromXML(xmlDocument, this, _animations);
 			Controller	.fillStoreFromXML(xmlDocument, this, _controllers);
 			Geometry	.fillStoreFromXML(xmlDocument, this, _geometries);
 			Node		.fillStoreFromXML(xmlDocument, this, _nodes);
 			VisualScene	.fillStoreFromXML(xmlDocument, this, _visualScenes);
 			
+			var colladaMergedAnim	: aerys.minko.type.collada.ressource.Animation	= new aerys.minko.type.collada.ressource.Animation(xmlDocument.NS::library_animations[0], this)
+			minkoAnim			= colladaMergedAnim.toMinkoAnimation();
+			
+			
 		}
-		
+		public var minkoAnim			: aerys.minko.type.animation.Animation
 		minko_collada function delegateRessourceCreation(xmlNode : XML) : IInstance
 		{
 			var nodeType	: String = xmlNode.localName();
