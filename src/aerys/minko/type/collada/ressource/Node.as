@@ -5,6 +5,7 @@ package aerys.minko.type.collada.ressource
 	import aerys.minko.scene.node.group.TransformGroup;
 	import aerys.minko.scene.node.skeleton.Joint;
 	import aerys.minko.type.collada.Document;
+	import aerys.minko.type.collada.enum.NodeType;
 	import aerys.minko.type.collada.helper.TransformParser;
 	import aerys.minko.type.collada.instance.IInstance;
 	import aerys.minko.type.collada.instance.InstanceController;
@@ -113,7 +114,8 @@ package aerys.minko.type.collada.ressource
 			Matrix4x4.copy(_transform, tf.transform);
 			
 			for each (var child : IInstance in _childs)
-				tf.addChild(child.toScene());
+				if (!(child is InstanceNode && Node(InstanceNode(child).ressource)._type == NodeType.JOINT))
+					tf.addChild(child.toScene());
 			
 			return tf;
 		}
