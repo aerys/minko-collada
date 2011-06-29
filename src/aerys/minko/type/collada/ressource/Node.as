@@ -123,7 +123,8 @@ package aerys.minko.type.collada.ressource
 		public function toJoint() : Joint
 		{
 			var joint : Joint = new Joint();
-			joint.name = _sid;
+			joint.name = _id;
+			joint.boneName = _sid;
 			Matrix4x4.copy(_transform, joint.transform);
 			
 			for each (var child : IInstance in _childs)
