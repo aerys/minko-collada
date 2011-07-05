@@ -14,6 +14,8 @@ package aerys.minko.type.collada.instance
 		private var _name				: String;
 		private var _sid				: String;
 		
+		private var _minkoModel			: Model;
+		
 		public function InstanceGeometry(document			: Document,
 										 sourceId			: String,
 										 name				: String = null,
@@ -49,12 +51,15 @@ package aerys.minko.type.collada.instance
 		
 		public function toModel() : Model
 		{
-			var geometryRessource	: Geometry	= ressource as Geometry;
-			var model				: Model		= new Model();
+			if (!_minkoModel)
+			{
+				var geometryRessource	: Geometry	= ressource as Geometry;
+				
+				_minkoModel = new Model();
+				_minkoModel.mesh = geometryRessource.toMesh();
+			}
 			
-			model.mesh			= geometryRessource.toMesh();
-			
-			return model
+			return _minkoModel;
 		}
 		
 		public function get ressource() : IRessource

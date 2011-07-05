@@ -17,8 +17,7 @@ package aerys.minko.type.collada.ressource
 	
 	public class Controller implements IRessource
 	{
-		private static const NS					: Namespace 				= 
-			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
 		private var _document			: Document;
 		
@@ -247,13 +246,12 @@ package aerys.minko.type.collada.ressource
 			
 			// let the geometry build its vertex
 			geometry.buildVertex(storeVertexId, vertexSemantics, triangleSemantics, triangleStore, resultVertex);
-				
+			
 			// add bone components
 			for (var i : uint = 2 * _boneCountPerVertex * vertexId;
 				i < 2 * _boneCountPerVertex * (vertexId + 1);
 				++i)
 				resultVertex.push(_boneWeights[i]);
-			
 			
 			return resultVertex;
 		}

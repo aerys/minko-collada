@@ -1,12 +1,15 @@
-package aerys.minko.type.collada.ressource
+package aerys.minko.type.collada.ressource.animation
 {
 	import aerys.minko.type.animation.Animation;
 	import aerys.minko.type.animation.timeline.ITimeline;
-	import aerys.minko.type.animation.timeline.LinearTimeline;
+	import aerys.minko.type.animation.timeline.MatrixLinearTimeline;
+	import aerys.minko.type.animation.timeline.MatrixSegmentTimeline;
 	import aerys.minko.type.collada.Document;
 	import aerys.minko.type.collada.instance.IInstance;
-	import aerys.minko.type.collada.ressource.animation.Channel;
 	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Transform3D;
+	import aerys.minko.type.math.Vector4;
+	import aerys.minko.type.collada.ressource.IRessource;
 	
 	public class Animation implements IRessource
 	{
@@ -30,6 +33,9 @@ package aerys.minko.type.collada.ressource
 				return;
 			
 			var xmlAnimations 		: XMLList	= xmlAnimationLibrary.NS::animation;
+			
+			store['mergedAnimations'] = new Animation(xmlAnimationLibrary, document);
+			
 			for each (var xmlAnimation : XML in xmlAnimations)
 			{
 				var animation : Animation = new Animation(xmlAnimation, document);
@@ -68,10 +74,10 @@ package aerys.minko.type.collada.ressource
 			{
 				times = timesCollection[targetId];
 				
-				var timesLength		: uint					= times.length;
+				var timesLength			: uint					= times.length;
 				
-				var minkoTimes		: Vector.<uint>			= new Vector.<uint>();
-				var minkoMatrices	: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
+				var minkoTimes			: Vector.<uint>			= new Vector.<uint>();
+				var minkoMatrices		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
 				
 				for (var i : uint = 0; i < timesLength; ++i)
 				{
@@ -81,14 +87,21 @@ package aerys.minko.type.collada.ressource
 					vector[1]	= vector[2]	 = vector[3]  = 0;
 					vector[4]	= vector[6]  = vector[7]  = 0;
 					vector[8]	= vector[9]  = vector[11] = 0;
-					vector[12]	= vector[13] = vector[13] = 0;
+					vector[12]	= vector[13] = vector[14] = 0;
 					
 					setMatrixData(time, vector, targetId);
 					
+					// why do we have to do this? animation data from the collada file is plain wrong.
+					vector[3] = vector[7] = vector[11] = 0
+					vector[15] = 1;
+					var matrix : Transform3D = new Transform3D();
+					matrix.setRawData(vector, 0, false);
+					
 					minkoTimes.push((time * 1000) << 0);
-					minkoMatrices.push(Matrix4x4.fromRawData(vector, 0, true));
+					minkoMatrices.push(matrix);
 				}
-				timelines.push(new LinearTimeline(_id, targetId, minkoTimes, minkoMatrices));
+				
+				timelines.push(new MatrixSegmentTimeline(_id, targetId, minkoTimes, minkoMatrices));
 			}
 			
 			return new aerys.minko.type.animation.Animation(_id, timelines);

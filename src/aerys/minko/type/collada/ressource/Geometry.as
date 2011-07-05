@@ -86,6 +86,7 @@ package aerys.minko.type.collada.ressource
 				var semantic	: String	= String(input.@semantic);
 				var sourceId	: String	= String(input.@source).substr(1);
 				var xmlSource	: XML		= xmlMesh..NS::source.(@id == sourceId)[0];
+				
 				var source		: Source	= Source.createFromXML(xmlSource);
 				
 				_verticesDataSemantics.push(semantic);
@@ -296,8 +297,8 @@ package aerys.minko.type.collada.ressource
 			if (semantic == InputType.POSITION)
 				return VertexComponent.XYZ;
 			
-//			if (semantic == InputType.COLOR)
-//				return VertexComponent.RGB;
+			if (semantic == InputType.COLOR)
+				return VertexComponent.RGB;
 			
 //			if (semantic == InputType.TEXCOORD)
 //				return VertexComponent.UV;

@@ -93,10 +93,16 @@ package aerys.minko.type.collada.store
 			var currentOffset		: uint		= 0;
 			var currentDatum		: *;
 			
+			
+			var paramCount : uint = source._paramNames.length;
 			source._data = new Array();
 			for (var index : uint = 0; index < source._count; ++index)
-				for each (var paramType : Class in source._paramTypes)
+			{
+				for (var paramId : uint = 0; paramId < paramCount; ++paramId)
 				{
+					var paramType : Class	= source._paramTypes[paramId];
+					var paramName : String	= source._paramNames[paramId];
+					
 					if (paramType == String)
 					{
 						currentDatum = rawData[currentOffset++];
@@ -123,9 +129,9 @@ package aerys.minko.type.collada.store
 						throw new Error('Unknown type found');
 					}
 					
-					
 					source._data.push(currentDatum);
 				}
+			}
 			
 			return source;
 		}

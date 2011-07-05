@@ -1,6 +1,7 @@
 package aerys.minko.type.collada.instance
 {
 	import aerys.minko.scene.node.IScene;
+	import aerys.minko.scene.node.group.IGroup;
 	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.scene.node.skeleton.Joint;
 	import aerys.minko.scene.node.skeleton.SkinnedMesh;
@@ -21,6 +22,8 @@ package aerys.minko.type.collada.instance
 		private var _name				: String;
 		private var _sid				: String;
 		private var _bindedSkeletonId	: String;
+		
+		private var _minkoSkinnedMesh	: SkinnedMesh;
 		
 		public function InstanceController(document			: Document,
 										   sourceId			: String,
@@ -48,21 +51,27 @@ package aerys.minko.type.collada.instance
 		
 		public function toScene() : IScene
 		{
-//			return Controller(ressource).skin.toMesh();
 			return toSkinnedMesh();
 		}
 		
 		public function toSkinnedMesh() : SkinnedMesh
 		{
-			var controller		: Controller			= Controller(ressource);
+			if (!_minkoSkinnedMesh)
+			{
+				var controller			: Controller			= Controller(ressource);
+				
+				var skeletonReference	: IGroup				= null;
+				var skeletonRootName	: String				= _bindedSkeletonId;
+				
+				var mesh				: Mesh					= controller.toMesh();
+				var bindShapeMatrix		: Matrix4x4				= controller.bindShapeMatrix;
+				var jointNames			: Vector.<String>		= controller.jointNames;
+				var invBindMatrices		: Vector.<Matrix4x4>	= controller.invBindMatrices;
+				
+				_minkoSkinnedMesh = new SkinnedMesh(mesh, skeletonReference, skeletonRootName, bindShapeMatrix, jointNames, invBindMatrices);
+			}
 			
-			var skeleton		: Joint					= _document.getNodeById(_bindedSkeletonId).toJoint();
-			var mesh			: Mesh					= controller.toMesh();
-			var bindShapeMatrix	: Matrix4x4				= controller.bindShapeMatrix;
-			var jointNames		: Vector.<String>		= controller.jointNames;
-			var invBindMatrices	: Vector.<Matrix4x4>	= controller.invBindMatrices;
-			
-			return new SkinnedMesh(mesh, skeleton, bindShapeMatrix, jointNames, invBindMatrices);
+			return _minkoSkinnedMesh;
 		}
 		
 		public function get ressource() : IRessource

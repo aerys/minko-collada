@@ -3,6 +3,7 @@ package aerys.minko.type.collada.ressource.animation
 	import aerys.minko.type.collada.enum.TransformType;
 	import aerys.minko.type.collada.store.Source;
 	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Vector4;
 
 	public class Channel
 	{
@@ -136,25 +137,71 @@ package aerys.minko.type.collada.ressource.animation
 		
 		public function setMatrixData(t : Number, data : Vector.<Number>) : void
 		{
-			
 			switch (_transformType)
 			{
-				case TransformType.TRANSFORM_0_0: data[0] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_0_1: data[1] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_0_2: data[2] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_0_3: data[3] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_1_0: data[4] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_1_1: data[5] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_1_2: data[6] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_1_3: data[7] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_2_0: data[8] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_2_1: data[9] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_2_2: data[10] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_2_3: data[11] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_3_0: data[12] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_3_1: data[13] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_3_2: data[14] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_3_3: data[15] = getSimpleValueAt(t); break;
+				case TransformType.TRANSFORM_0_0:
+					data[0] = getSimpleValueAt(t); 
+					break;
+				
+				case TransformType.TRANSFORM_0_1: 
+					data[1] = getSimpleValueAt(t); 
+					break;
+				
+				case TransformType.TRANSFORM_0_2:
+					data[2] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_0_3:
+					data[3] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_1_0:
+					data[4] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_1_1:
+					data[5] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_1_2:
+					data[6] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_1_3:
+					data[7] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_2_0:
+					data[8] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_2_1:
+					data[9] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_2_2:
+					data[10] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_2_3:
+					data[11] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_3_0:
+					data[12] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_3_1:
+					data[13] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_3_2:
+					data[14] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_3_3:
+					data[15] = getSimpleValueAt(t);
+					break;
 					
 				case TransformType.ROTATE_X:
 				case TransformType.ROTATE_Y:

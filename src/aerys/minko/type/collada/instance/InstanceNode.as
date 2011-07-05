@@ -4,6 +4,7 @@ package aerys.minko.type.collada.instance
 	import aerys.minko.scene.node.group.TransformGroup;
 	import aerys.minko.scene.node.skeleton.Joint;
 	import aerys.minko.type.collada.Document;
+	import aerys.minko.type.collada.enum.NodeType;
 	import aerys.minko.type.collada.ressource.IRessource;
 	import aerys.minko.type.collada.ressource.Node;
 	
@@ -14,6 +15,8 @@ package aerys.minko.type.collada.instance
 		private var _id			: String;
 		private var _name		: String;
 		private var _scopedId	: String;
+		
+		private var _minkoScene	: IScene;
 		
 		public function InstanceNode(document	: Document,
 									 sourceId	: String,
@@ -44,17 +47,23 @@ package aerys.minko.type.collada.instance
 		
 		public function toScene() : IScene
 		{
-			return toTransformGroup();
+			return Node(ressource).type == NodeType.NODE ? toTransformGroup() : toJoint();
 		}
 		
 		public function toTransformGroup() : TransformGroup
 		{
-			return Node(ressource).toTransformGroup();
+			if (!_minkoScene)
+				_minkoScene = Node(ressource).toTransformGroup();
+			
+			return TransformGroup(_minkoScene);
 		}
 		
 		public function toJoint() : Joint
 		{
-			return Node(ressource).toJoint();
+			if (!_minkoScene)
+				_minkoScene = Node(ressource).toJoint();
+			
+			return Joint(_minkoScene);
 		}
 		
 		public function get ressource() : IRessource
