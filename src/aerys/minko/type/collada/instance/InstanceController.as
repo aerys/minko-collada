@@ -41,10 +41,12 @@ package aerys.minko.type.collada.instance
 		public static function createFromXML(document	: Document, 
 											 xml		: XML) : InstanceController
 		{
-			var sourceId			: String = String(xml.@url).substr(1);
-			var name				: String = xml.@name;
-			var sid					: String = xml.@sid;
-			var bindedSkeletonId	: String = String(xml.NS::skeleton[0]).substr(1);
+			var sourceId			: String	= String(xml.@url).substr(1);
+			var name				: String	= xml.@name;
+			var sid					: String	= xml.@sid;
+			
+			var xmlSkeletonId		: XML		= xml.NS::skeleton[0];
+			var bindedSkeletonId	: String	= xmlSkeletonId != null ? String(xmlSkeletonId).substr(1) : null;
 			
 			return new InstanceController(document, sourceId, name, sid, bindedSkeletonId);
 		}
@@ -68,7 +70,8 @@ package aerys.minko.type.collada.instance
 				var jointNames			: Vector.<String>		= controller.jointNames;
 				var invBindMatrices		: Vector.<Matrix4x4>	= controller.invBindMatrices;
 				
-				_minkoSkinnedMesh = new SkinnedMesh(mesh, skeletonReference, skeletonRootName, bindShapeMatrix, jointNames, invBindMatrices);
+				_minkoSkinnedMesh		= new SkinnedMesh(mesh, skeletonReference, skeletonRootName, bindShapeMatrix, jointNames, invBindMatrices);
+				_minkoSkinnedMesh.name	= _sourceId;
 			}
 			
 			return _minkoSkinnedMesh;

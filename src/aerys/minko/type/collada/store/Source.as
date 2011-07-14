@@ -1,5 +1,6 @@
 package aerys.minko.type.collada.store
 {
+	import aerys.minko.type.collada.enum.InputType;
 	import aerys.minko.type.math.Matrix4x4;
 
 	/**
@@ -17,7 +18,8 @@ package aerys.minko.type.collada.store
 			"float"		: Number,
 			"Name"		: String,
 			"float4x4"	: Matrix4x4,
-			"name"		: String
+			"name"		: String,
+			"IDREF"		: String
 		};
 		
 		protected var _id			: String;
@@ -27,12 +29,18 @@ package aerys.minko.type.collada.store
 		protected var _paramTypes	: Vector.<Class>;
 		protected var _data			: Array;
 		
-		public function get id()			: String			{ return _id; }
-		public function get stride()		: uint				{ return _stride; }
-		public function get count()			: uint				{ return _count; }
-		public function get paramNames()	: Vector.<String>	{ return _paramNames; }
-		public function get paramTypes()	: Vector.<Class>	{ return _paramTypes; }
-		public function get data()			: Array				{ return _data; }
+		protected var _semantic		: String;
+		
+		public function get id()			: String			{ return _id;			}
+		public function get stride()		: uint				{ return _stride;		}
+		public function get count()			: uint				{ return _count;		}
+		public function get paramNames()	: Vector.<String>	{ return _paramNames;	}
+		public function get paramTypes()	: Vector.<Class>	{ return _paramTypes;	}
+		public function get data()			: Array				{ return _data;			}
+		public function get semantic()		: String			{ return _semantic;		}
+		
+		public function set semantic(v : String) : void { _semantic = v; }
+		
 		
 		/*
 		 * For an obscure reason, there is no way to get the raw data using the
@@ -80,7 +88,7 @@ package aerys.minko.type.collada.store
 			 * End of kludge.
 			 */
 			
-			var rawData 			: Array		= String(xmlRawData).split(" ");
+			var rawData : Array = String(xmlRawData).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			
 			
 			/* the kludge is back */
@@ -165,11 +173,13 @@ package aerys.minko.type.collada.store
 			var start	: uint = vertexId * _stride;
 			var end		: uint = start + _stride;
 			
+			// if this is a texture coord, we drop the w coordinate.
+			if (_semantic == InputType.TEXCOORD && _stride == 3)
+				--end;
+			
+			// if data[i] is no float, an exception will be raised because of the implicit cast.
 			for (var i : uint = start; i < end; ++i)
-			{
-				// if data[i] is not a float, an exception will be raised.
 				out.push(_data[i]);
-			}
 		}
 	}
 }

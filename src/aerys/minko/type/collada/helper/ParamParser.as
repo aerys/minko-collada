@@ -3,39 +3,39 @@ package aerys.minko.type.collada.helper
 	public class ParamParser
 	{
 		private static const _PARSERS : Object = {
-			bool			: notYetImplemented,
-			bool2			: notYetImplemented,
-			bool3			: notYetImplemented,
-			bool4			: notYetImplemented,
+			'bool'				: notYetImplemented,
+			'bool2'				: notYetImplemented,
+			'bool3'				: notYetImplemented,
+			'bool4'				: notYetImplemented,
 			
-			int				: notYetImplemented,
-			int2			: notYetImplemented,
-			int3			: notYetImplemented,
-			int4			: notYetImplemented,
+			'int'				: notYetImplemented,
+			'int2'				: notYetImplemented,
+			'int3'				: notYetImplemented,
+			'int4'				: notYetImplemented,
 			
-			float			: notYetImplemented,
-			float2			: notYetImplemented,
-			float3			: notYetImplemented,
-			float4			: notYetImplemented,
+			'float'				: notYetImplemented,
+			'float2'			: notYetImplemented,
+			'float3'			: notYetImplemented,
+			'float4'			: notYetImplemented,
 			
-			float2x1		: notYetImplemented,
-			float2x2		: notYetImplemented,
-			float2x3		: notYetImplemented,
-			float2x4		: notYetImplemented,
+			'float2x1'			: notYetImplemented,
+			'float2x2'			: notYetImplemented,
+			'float2x3'			: notYetImplemented,
+			'float2x4'			: notYetImplemented,
 			
-			float3x1		: notYetImplemented,
-			float3x2		: notYetImplemented,
-			float3x3		: notYetImplemented,
-			float3x4		: notYetImplemented,
+			'float3x1'			: notYetImplemented,
+			'float3x2'			: notYetImplemented,
+			'float3x3'			: notYetImplemented,
+			'float3x4'			: notYetImplemented,
 			
-			float4x1		: notYetImplemented,
-			float4x2		: notYetImplemented,
-			float4x3		: notYetImplemented,
-			float4x4		: notYetImplemented,
+			'float4x1'			: notYetImplemented,
+			'float4x2'			: notYetImplemented,
+			'float4x3'			: notYetImplemented,
+			'float4x4'			: notYetImplemented,
 			
-			enum			: notYetImplemented,
-			sampler_image	: notYetImplemented,
-			sampler_states	: notYetImplemented
+			'enum'				: notYetImplemented,
+			'sampler_image'		: notYetImplemented,
+			'sampler_states'	: notYetImplemented
 		};
 		
 		public static function parseParam(xml : XML) : *

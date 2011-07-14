@@ -7,7 +7,7 @@ package aerys.minko.type.collada.helper
 	{
 		public static function parseIntList(xml : XML) : Vector.<int>
 		{
-			var data		: Array			= String(xml).split(' ');
+			var data		: Array			= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint			= data.length;
 			var result		: Vector.<int>	= new Vector.<int>();
 			
@@ -19,7 +19,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseUintList(xml : XML) : Vector.<uint>
 		{
-			var data		: Array			= String(xml).split(' ');
+			var data		: Array			= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint			= data.length;
 			var result		: Vector.<uint>	= new Vector.<uint>();
 			
@@ -31,7 +31,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseNumberList(xml : XML) : Vector.<Number>
 		{
-			var data		: Array				= String(xml).split(' ');
+			var data		: Array				= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint				= data.length;
 			var result		: Vector.<Number>	= new Vector.<Number>();
 			
@@ -43,7 +43,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseVector3List(xml : XML) : Vector.<Vector4>
 		{
-			var data		: Array				= String(xml).split(' ');
+			var data		: Array				= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint				= data.length;
 			var result		: Vector.<Vector4>	= new Vector.<Vector4>();
 			
@@ -66,7 +66,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseVector4List(xml : XML) : Vector.<Vector4>
 		{
-			var data		: Array				= String(xml).split(' ');
+			var data		: Array				= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint				= data.length;
 			var result		: Vector.<Vector4>	= new Vector.<Vector4>();
 			
@@ -90,7 +90,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseMatrix3x3List(xml : XML) : Vector.<Matrix4x4>
 		{
-			var data		: Array					= String(xml).split(' ');
+			var data		: Array					= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint					= data.length;
 			var result		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
 			
@@ -114,7 +114,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseMatrix4x4List(xml : XML) : Vector.<Matrix4x4>
 		{
-			var data		: Array					= String(xml).split(' ');
+			var data		: Array					= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint					= data.length;
 			var result		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
 			
@@ -138,7 +138,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseVector3(xml : XML) : Vector4
 		{
-			var data		: Array		= String(xml).split(' ');
+			var data		: Array		= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint		= data.length;
 			
 			var float1		: Number	= parseFloat(data[0]);
@@ -153,7 +153,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseVector4(xml : XML) : Vector4
 		{
-			var data		: Array		= String(xml).split(' ');
+			var data		: Array		= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint		= data.length;
 			
 			var float1		: Number	= parseFloat(data[0]);
@@ -169,7 +169,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseMatrix3x3(xml : XML) : Matrix4x4
 		{
-			var data		: Array	= String(xml).split(' ');
+			var data		: Array	= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint	= data.length;
 			
 			if (dataLength != 9)
@@ -185,7 +185,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseMatrix4x4(xml : XML) : Matrix4x4
 		{
-			var data		: Array	= String(xml).split(' ');
+			var data		: Array	= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint	= data.length;
 			
 			if (dataLength != 16)
@@ -200,5 +200,6 @@ package aerys.minko.type.collada.helper
 			
 			return matrix;
 		}
+		
 	}
 }

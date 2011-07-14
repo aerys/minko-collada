@@ -13,15 +13,15 @@ package aerys.minko.type.collada.ressource.effect
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
 		private var _document	: Document;
-		
 		private var _id			: String;
 		private var _name		: String;
 		private var _params		: Object;
 		private var _profiles	: Vector.<IProfile>;
 		
-		
-		public function get id()	: String { return _id;		}
-		public function get name()	: String { return _name;	}
+		public function get id()		: String 			{ return _id;		}
+		public function get name()		: String 			{ return _name;	}
+		public function get params()	: Object 			{ return _params;	}
+		public function get profiles()	: Vector.<IProfile>	{ return _profiles; }
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
 												document	: Document, 
@@ -43,38 +43,34 @@ package aerys.minko.type.collada.ressource.effect
 		public static function createFromXML(xml		: XML, 
 											 document	: Document) : Effect
 		{
-			var xmlProfile	: XML;
-			var effect		: Effect = new Effect();
+			var effect : Effect = new Effect();
 			
 			effect._document	= document;
 			effect._id			= xml.@id;
 			effect._name		= xml.@name;
 			
 			effect._profiles	= new Vector.<IProfile>();
-			for each (xmlProfile in xml.NS::profile_BRIDGE)
-				effect._profiles.push(ProfileFactory.createProfile(xmlProfile));
-			
-			for each (xmlProfile in xml.NS::profile_CG)
-				effect._profiles.push(ProfileFactory.createProfile(xmlProfile));
-			
-			for each (xmlProfile in xml.NS::profile_COMMON)
-				effect._profiles.push(ProfileFactory.createProfile(xmlProfile));
-			
-			for each (xmlProfile in xml.NS::profile_GLES)
-				effect._profiles.push(ProfileFactory.createProfile(xmlProfile));
-			
-			for each (xmlProfile in xml.NS::profile_GLES2)
-				effect._profiles.push(ProfileFactory.createProfile(xmlProfile));
-			
-			for each (xmlProfile in xml.NS::profile_GLSL)
-				effect._profiles.push(ProfileFactory.createProfile(xmlProfile));
-			
 			effect._params		= new Object();
-			for each (var newparam : XML in xml.NS::newparam)
+			
+			for each (var child : XML in xml.children())
 			{
-				var paramName	: String	= newparam.@sid;
-				var paramValue	: *			= ParamParser.parseParam(newparam);
-				effect._params[paramName]	= paramValue;
+				switch (child.localName())
+				{
+					case 'profile_BRIDGE':
+					case 'profile_CG':
+					case 'profile_COMMON':
+					case 'profile_GLES':
+					case 'profile_GLES2':
+					case 'profile_GLSL':
+						effect._profiles.push(ProfileFactory.createProfile(child));
+						break;
+						
+					case 'newparam':
+						var paramName	: String	= child.@sid;
+						var paramValue	: *			= ParamParser.parseParam(child);
+						effect._params[paramName]	= paramValue;
+						break;
+				}
 			}
 			
 			return effect;

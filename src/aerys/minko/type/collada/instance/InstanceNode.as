@@ -47,7 +47,12 @@ package aerys.minko.type.collada.instance
 		
 		public function toScene() : IScene
 		{
-			return Node(ressource).type == NodeType.NODE ? toTransformGroup() : toJoint();
+			switch (Node(ressource).type)
+			{
+				case NodeType.NODE:		return toTransformGroup();
+				case NodeType.JOINT:	return toJoint();
+				default: throw new Error('Unknown node type ' + Node(ressource).type);
+			}
 		}
 		
 		public function toTransformGroup() : TransformGroup

@@ -3,6 +3,7 @@ package aerys.minko.type.collada
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.Group;
+	import aerys.minko.scene.node.mesh.IMesh;
 	import aerys.minko.scene.node.skeleton.Joint;
 	import aerys.minko.scene.node.skeleton.SkinnedMesh;
 	import aerys.minko.type.collada.helper.RandomStringGenerator;
@@ -17,27 +18,41 @@ package aerys.minko.type.collada
 	import aerys.minko.type.collada.ressource.effect.Effect;
 	import aerys.minko.type.collada.ressource.image.Image;
 	
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
+	import flash.net.URLLoader;
+	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 
 	use namespace minko_collada;
 	
-	public class Document
+	public class Document extends EventDispatcher
 	{
 		private static const NS	: Namespace	= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
 		private static const NODENAME_TO_LIBRARY	: Object = {
+			'animation'		: '_animations',
 			'controller'	: '_controllers',
+			'effect'		: '_effects',
 			'geometry'		: '_geometries',
+			'image'			: '_images',
+			'material'		: '_materials',
 			'node'			: '_nodes',
 			'visual_scene'	: '_visualScenes'
 		};
 		
 		private static const NODENAME_TO_CLASS		: Object = {
+			'animation'				: Animation,
 			'controller'			: Controller,
+			'effect'				: Effect,
 			'geometry'				: Geometry,
+			'image'					: Image,
+			'material'				: Material,
 			'node'					: Node,
 			'visual_scene'			: VisualScene
 		};
+		
+		private var _url			: String;
 		
 		private var _mainSceneId	: String;
 		
@@ -74,14 +89,45 @@ package aerys.minko.type.collada
 		{
 		}
 		
-		public function loadByteArray(data : ByteArray) : void
+		public function loadURL(url : String) : void
 		{
-			loadXml(new XML(data.readUTFBytes(data.length)));
+			var r : URLRequest = new URLRequest();
+			r.url = url;
+			
+			var l : URLLoader = new URLLoader();
+			l.addEventListener(Event.COMPLETE, onColladaLoadComplete);
+			l.load(r);
 		}
 		
-		public function loadXml(xmlDocument : XML) : void
+		private function onColladaLoadComplete(e : Event) : void
 		{
-			_mainSceneId		= String(xmlDocument.NS::scene[0].NS::instance_visual_scene[0].@url).substr(1);
+			var data : XML = XML(URLLoader(e.currentTarget).data);
+			loadXML(data);
+			
+			for each (var image : Image in _images)
+			{
+				image.imageData.addEventListener(Event.COMPLETE, onImageLoadComplete);
+				image.imageData.load();
+			}
+		}
+		
+		private function onImageLoadComplete(e : Event) : void
+		{
+			for each (var image : Image in _images)
+				if (!image.imageData.isLoaded)
+					return;
+			
+			dispatchEvent(new Event(Event.COMPLETE));
+		}
+		
+		public function loadByteArray(data : ByteArray) : void
+		{
+			loadXML(new XML(data.readUTFBytes(data.length)));
+		}
+		
+		public function loadXML(xmlDocument : XML) : void
+		{
+			_mainSceneId	= String(xmlDocument.NS::scene[0].NS::instance_visual_scene[0].@url).substr(1);
 			
 			_animations		= new Object();
 			_controllers	= new Object();
@@ -96,20 +142,23 @@ package aerys.minko.type.collada
 			Controller	.fillStoreFromXML(xmlDocument, this, _controllers);
 			Effect		.fillStoreFromXML(xmlDocument, this, _effects);
 			Geometry	.fillStoreFromXML(xmlDocument, this, _geometries);
-//			Image		.fillStoreFromXML(xmlDocument, this, _images);
+			Image		.fillStoreFromXML(xmlDocument, this, _images);
 			Material 	.fillStoreFromXML(xmlDocument, this, _materials);
 			Node		.fillStoreFromXML(xmlDocument, this, _nodes);
 			VisualScene	.fillStoreFromXML(xmlDocument, this, _visualScenes);
 		}
 		
-		public function toGroup(removeEmptyGroups : Boolean = true) : Group
+		public function toGroup(dropEmptyGroups : Boolean = true, dropSkinning : Boolean = false) : Group
 		{
 			var visualScene	: VisualScene	= _visualScenes[_mainSceneId];
 			var sceneGraph	: Group			= visualScene.toGroup();
 			setSkeletonReferenceNodes(sceneGraph, sceneGraph);
 			
-			if (removeEmptyGroups)
-				this.removeEmptyGroups(sceneGraph, null);
+			if (dropEmptyGroups)
+				removeEmptyGroups(sceneGraph, null);
+			
+			if (dropSkinning)
+				removeSkinning(sceneGraph);
 			
 			return sceneGraph;
 		}
@@ -126,17 +175,44 @@ package aerys.minko.type.collada
 			}
 		}
 		
-		private function removeEmptyGroups(currentGroup : Group, parentGroup : Group) : void
+		private function removeEmptyGroups(currentGroup : Group, parentGroup : Group) : Boolean
 		{
+			var childCount : uint = currentGroup.numChildren;
+			for (var childIndex : uint = 0; childIndex < childCount; ++childIndex)
+			{
+				var el : Group = currentGroup.getChildAt(childIndex) as Group;
+				if (el != null && removeEmptyGroups(Group(el), currentGroup))
+				{
+					--childIndex;
+					--childCount;
+				}
+			}
+			
 			if (!(currentGroup is Joint) && currentGroup.numChildren == 0 && parentGroup != null)
 			{
 				parentGroup.removeChild(currentGroup);
+				return true;
 			}
-			else
+			
+			return false;
+		}
+		
+		private function removeSkinning(currentGroup : Group) : void
+		{
+			var childCount : uint = currentGroup.numChildren;
+			for (var childIndex : uint = 0; childIndex < childCount; ++childIndex)
 			{
-				for each (var el : IScene in currentGroup)
-					if (el is Group)
-						removeEmptyGroups(Group(el), currentGroup);
+				var el : IScene = currentGroup.getChildAt(childIndex);
+				if (el is Group)
+				{
+					removeSkinning(el as Group);
+				}
+				else if (el is SkinnedMesh)
+				{
+					var mesh : IMesh = SkinnedMesh(el).mesh;
+					currentGroup.removeChildAt(childIndex);
+					currentGroup.addChildAt(mesh, childIndex);
+				}
 			}
 		}
 		

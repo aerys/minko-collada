@@ -19,7 +19,7 @@ package aerys.minko.type.collada.instance
 		{
 			var instanceEffect : InstanceEffect = new InstanceEffect();
 			instanceEffect._document	= document;
-			instanceEffect._sourceId	= xml.@url;
+			instanceEffect._sourceId	= String(xml.@url).substr(1);
 			instanceEffect._params		= new Object();
 			
 			for each (var setparam : XML in xml.NS::setparam)

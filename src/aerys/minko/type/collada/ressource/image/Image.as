@@ -5,6 +5,7 @@ package aerys.minko.type.collada.ressource.image
 	import aerys.minko.type.collada.instance.InstanceImage;
 	import aerys.minko.type.collada.ressource.IRessource;
 	import aerys.minko.type.collada.ressource.image.data.IImageData;
+	import aerys.minko.type.collada.ressource.image.data.ImageDataFactory;
 	
 	public class Image implements IRessource
 	{
@@ -44,7 +45,12 @@ package aerys.minko.type.collada.ressource.image
 			var image : Image = new Image();
 			image._document = document;
 			
-			throw new Error('not yet implemented');
+			image._id			= xmlImage.@id;
+			image._sid			= xmlImage.@sid;
+			image._name			= xmlImage.@name;
+			image._imageData	= ImageDataFactory.createImageData(xmlImage.children()[0]);
+			
+			return image;
 		}
 		
 		public function createInstance():IInstance

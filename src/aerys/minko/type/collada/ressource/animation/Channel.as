@@ -2,12 +2,16 @@ package aerys.minko.type.collada.ressource.animation
 {
 	import aerys.minko.type.collada.enum.TransformType;
 	import aerys.minko.type.collada.store.Source;
+	import aerys.minko.type.math.ConstVector4;
 	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Transform3D;
 	import aerys.minko.type.math.Vector4;
 
 	public class Channel
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
+		private static const TMP_MATRIX		: Transform3D = new Transform3D();
 		
 		private var _targetId				: String;
 		private var _transformType			: String;
@@ -204,19 +208,41 @@ package aerys.minko.type.collada.ressource.animation
 					break;
 					
 				case TransformType.ROTATE_X:
+					TMP_MATRIX.setRawData(data);
+					TMP_MATRIX.rotation.x = getSimpleValueAt(t) / 180 * Math.PI;
+					TMP_MATRIX.appendScale(1);
+//					TMP_MATRIX.prependRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.X_AXIS);
+					TMP_MATRIX.getRawData(data);
+					break;
+				
 				case TransformType.ROTATE_Y:
+					TMP_MATRIX.setRawData(data);
+					TMP_MATRIX.rotation.y = getSimpleValueAt(t) / 180 * Math.PI;
+					TMP_MATRIX.appendScale(1);
+//					TMP_MATRIX.prependRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.Y_AXIS);
+					TMP_MATRIX.getRawData(data);
+					break;
+				
 				case TransformType.ROTATE_Z:
-					throw new Error('here we should multiply the matrix by a rotation matrix');
+					TMP_MATRIX.setRawData(data);
+					TMP_MATRIX.rotation.z = getSimpleValueAt(t) / 180 * Math.PI;
+					TMP_MATRIX.appendScale(1);
+//					TMP_MATRIX.prependRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.Z_AXIS);
+					TMP_MATRIX.getRawData(data);
 					break;
 				
 				case TransformType.TRANSLATE:
 					var value : Object = getCompoundValueAt(t);
-					data[12] = value.X;
-					data[13] = value.Y;
-					data[14] = value.Z;
-					break
+					TMP_MATRIX.setRawData(data);
+					TMP_MATRIX.position.set(value.X, value.Y, value.Z);
+					TMP_MATRIX.appendScale(1);
+//					TMP_MATRIX.prependTranslation(value.X, value.Y, value.Z);
+					TMP_MATRIX.getRawData(data);
+					break;
 				
-				default: trace('Unknown animation type', _transformType);
+				default: 
+					trace('Unknown animation type', _transformType);
+					break;
 			}
 		}
 	}

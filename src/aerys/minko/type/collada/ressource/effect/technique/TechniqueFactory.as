@@ -11,8 +11,9 @@ package aerys.minko.type.collada.ressource.effect.technique
 		
 		public static function createTechnique(xml : XML) : ITechnique
 		{
-			var firstSonName : String = xml.children()[0].localName();
-			return NAME_TO_TECHNIQUE[firstSonName].createFromXML(xml);
+			var node		: XML		= xml.children()[0];
+			var nodeName	: String	= node.localName();
+			return NAME_TO_TECHNIQUE[nodeName].createFromXML(node);
 		}
 	}
 }

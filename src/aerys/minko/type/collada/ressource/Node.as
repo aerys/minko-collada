@@ -63,9 +63,12 @@ package aerys.minko.type.collada.ressource
 			_sid		= xmlNode.@sid;
 			_name		= xmlNode.@name;
 			_transform	= TransformParser.parseTransform(xmlNode);
-			_type		= xmlNode.@type;
-			_childs		= new Vector.<IInstance>();
 			
+			_type		= String(xmlNode.@type).toUpperCase();
+			if (_type.length == 0)
+				_type = NodeType.NODE;
+			
+			_childs		= new Vector.<IInstance>();
 			for each (var child : XML in xmlNode.children())
 			{
 				
@@ -75,7 +78,7 @@ package aerys.minko.type.collada.ressource
 					_childs.push(document.delegateRessourceCreation(child));
 					
 				else if (localName == 'instance_camera')
-						0; // do nothing
+					0; // do nothing
 					
 				else if (localName == 'instance_controller')
 					_childs.push(InstanceController.createFromXML(document, child));
@@ -121,7 +124,11 @@ package aerys.minko.type.collada.ressource
 			tf.transform.appendScale(1);				// used to invalidate the matrix
 			
 			for each (var child : IInstance in _childs)
-				tf.addChild(child.toScene());
+			{
+				var minkoChild : IScene = child.toScene();
+				if (minkoChild != null)
+					tf.addChild(minkoChild);
+			}
 			
 			return tf;
 		}
@@ -139,7 +146,11 @@ package aerys.minko.type.collada.ressource
 			joint.transform.appendScale(1);				// used to invalidate the matrix
 			
 			for each (var child : IInstance in _childs)
-				joint.addChild(child.toScene());
+			{
+				var minkoChild : IScene = child.toScene();
+				if (minkoChild != null)
+					joint.addChild(minkoChild);
+			}
 			
 			return joint;
 		}

@@ -16,6 +16,10 @@ package aerys.minko.type.collada.ressource.effect.profile
 		private var _params		: Object;
 		private var _technique	: ITechnique;
 		
+		public function get id()		: String		{ return _id; }
+		public function get params()	: Object		{ return _params; }
+		public function get technique()	: ITechnique	{ return _technique; }
+		
 		public static function createFromXML(xml : XML) : ProfileCommon
 		{
 			var profileCommon : ProfileCommon = new ProfileCommon();
@@ -32,6 +36,5 @@ package aerys.minko.type.collada.ressource.effect.profile
 			
 			return profileCommon;
 		}
-		
 	}
 }

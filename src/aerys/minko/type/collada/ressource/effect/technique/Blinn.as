@@ -2,8 +2,10 @@ package aerys.minko.type.collada.ressource.effect.technique
 {
 	import aerys.minko.type.collada.store.CommonColorOrTexture;
 
-	public class Blinn implements ITechnique
+	public class Blinn implements ILightedTechnique
 	{
+		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
 		private var _emission			: CommonColorOrTexture;
 		private var _ambient			: CommonColorOrTexture;
 		private var _diffuse			: CommonColorOrTexture;
@@ -28,7 +30,18 @@ package aerys.minko.type.collada.ressource.effect.technique
 		
 		public static function createFromXML(xml : XML) : Blinn
 		{
-			return null;
+			var blinn : Blinn = new Blinn();
+			blinn._emission				= CommonColorOrTexture.createFromXML(xml.NS::emission[0]);
+			blinn._ambient				= CommonColorOrTexture.createFromXML(xml.NS::ambient[0]);
+			blinn._diffuse				= CommonColorOrTexture.createFromXML(xml.NS::diffuse[0]);
+			blinn._specular				= CommonColorOrTexture.createFromXML(xml.NS::specular[0]);
+			blinn._shininess			= parseFloat(xml.NS::shininess[0].NS::float[0]);
+			blinn._reflective			= CommonColorOrTexture.createFromXML(xml.NS::reflective[0]);
+			blinn._reflectivity			= parseFloat(xml.NS::reflectivity[0].NS::float[0]);
+			blinn._transparent			= CommonColorOrTexture.createFromXML(xml.NS::transparent[0]);
+			blinn._transparency			= parseFloat(xml.NS::transparency[0].NS::float[0]);
+			blinn._indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);
+			return blinn;
 		}
 	}
 }

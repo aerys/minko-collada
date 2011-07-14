@@ -28,8 +28,7 @@ package aerys.minko.type.collada.ressource.animation
 												store		: Object) : void
 		{
 			var xmlAnimationLibrary	: XML		= xmlDocument..NS::library_animations[0];
-			
-			if (!xmlAnimationLibrary)
+			if (!xmlAnimationLibrary || xmlAnimationLibrary.children().length() == 0)
 				return;
 			
 			var xmlAnimations 		: XMLList	= xmlAnimationLibrary.NS::animation;
