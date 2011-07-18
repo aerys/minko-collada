@@ -1,4 +1,4 @@
-package aerys.minko.type.parser.collada.ressource
+package aerys.minko.type.parser.collada.ressource.geometry
 {
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.group.Group;
@@ -9,13 +9,13 @@ package aerys.minko.type.parser.collada.ressource
 	import aerys.minko.type.parser.collada.enum.InputType;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceGeometry;
-	import aerys.minko.type.parser.collada.store.Source;
-	import aerys.minko.type.parser.collada.store.Triangles;
+	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.stream.IndexStream;
 	import aerys.minko.type.stream.VertexStream;
 	import aerys.minko.type.stream.VertexStreamList;
 	import aerys.minko.type.vertex.format.VertexComponent;
 	import aerys.minko.type.vertex.format.VertexFormat;
+	import aerys.minko.type.parser.collada.ressource.IRessource;
 	
 	use namespace minko_collada;
 	
@@ -60,8 +60,14 @@ package aerys.minko.type.parser.collada.ressource
 			
 			for each (var xmlGeometry : XML in xmlGeometries)
 			{
-				var geometry : Geometry = Geometry.createFromXML(xmlGeometry, document);
-				store[geometry.id] = geometry;
+				try {
+					var geometry : Geometry = Geometry.createFromXML(xmlGeometry, document);
+					store[geometry.id] = geometry;
+				}
+				catch (e : Error)
+				{
+					trace('Failed to parse Mesh: ' + e.message);
+				}
 			}
 		}
 		
@@ -272,7 +278,7 @@ package aerys.minko.type.parser.collada.ressource
 				}
 				else
 				{
-						trace('Dropping unknown vertex semantic:', semantic);
+					trace('Dropping unknown vertex semantic:', semantic);
 					vertexSemantics.splice(semanticId, 1);
 					--semanticId;
 					--semanticLength;

@@ -1,6 +1,7 @@
-package aerys.minko.type.parser.collada.store
+package aerys.minko.type.parser.collada.ressource.geometry
 {
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
+	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.vertex.VertexIterator;
 
 	public class Triangles
@@ -13,7 +14,7 @@ package aerys.minko.type.parser.collada.store
 		private const NAME_TO_PARSER : Object = {
 			'lines'			: NOT_YET_IMPLEMENTED_FAIL,
 			'linestrips'	: NOT_YET_IMPLEMENTED_FAIL,
-			'polygons'		: NOT_YET_IMPLEMENTED_FAIL,
+			'polygons'		: fillVerticesFromPolygons,
 			'polylist'		: fillVerticesFromPolylist,
 			'triangles'		: fillVerticesFromTriangles,
 			'trifans'		: NOT_YET_IMPLEMENTED_FAIL,
@@ -155,6 +156,34 @@ package aerys.minko.type.parser.collada.store
 				}
 				
 				currentIndex += numVertices;
+			}
+		}
+		
+		private function fillVerticesFromPolygons(xmlPrimitive : XML) : void
+		{
+			_triangleVertices	= new Vector.<uint>();
+			
+			
+			for each (var xmlP : XML in xmlPrimitive.NS::p)
+			{
+				var indexList		: Vector.<uint> = NumberListParser.parseUintList(xmlP);
+				var numVertices 	: uint			= indexList.length / _indicesPerVertex;
+				
+				for (var j : uint = 1; j < numVertices - 1; ++j)
+				{
+					var k : uint;
+					// triangle 0
+					for (k = 0; k < _indicesPerVertex; ++k)
+						_triangleVertices.push(indexList[k]);
+					
+					// triangle j 
+					for (k = 0; k < _indicesPerVertex; ++k)
+						_triangleVertices.push(indexList[j * _indicesPerVertex + k]);
+					
+					// triangle j + 1
+					for (k = 0; k < _indicesPerVertex; ++k)
+						_triangleVertices.push(indexList[(j + 1) * _indicesPerVertex + k]);
+				}
 			}
 		}
 		

@@ -140,7 +140,7 @@ package aerys.minko.type.parser.collada.ressource
 			
 			var joint : Joint = new Joint();
 			joint.name = _id;
-			joint.boneName = _sid;
+			joint.boneName = _sid && _sid.length != 0 ? _sid : _id;
 			
 			Matrix4x4.copy(_transform, joint.transform);
 			joint.transform.appendScale(1);				// used to invalidate the matrix

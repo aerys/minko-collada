@@ -9,9 +9,9 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.scene.node.texture.ITexture;
 	import aerys.minko.type.parser.collada.Document;
-	import aerys.minko.type.parser.collada.ressource.Geometry;
+	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
-	import aerys.minko.type.parser.collada.store.Triangles;
+	import aerys.minko.type.parser.collada.ressource.geometry.Triangles;
 	
 	use namespace minko_collada;
 	
@@ -73,6 +73,10 @@ package aerys.minko.type.parser.collada.instance
 			if (!_minkoModel)
 			{
 				var geometryRessource	: Geometry	= ressource as Geometry;
+				
+				if (geometryRessource == null)
+					return null;
+				
 				var mesh				: IMesh		= geometryRessource.toMesh();
 				var texture				: ITexture	= null;
 				

@@ -1,4 +1,4 @@
-package aerys.minko.type.parser.collada.store
+package aerys.minko.type.parser.collada.ressource.effect
 {
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
 	import aerys.minko.type.math.Vector4;

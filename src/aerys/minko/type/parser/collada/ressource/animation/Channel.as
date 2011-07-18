@@ -1,11 +1,11 @@
 package aerys.minko.type.parser.collada.ressource.animation
 {
-	import aerys.minko.type.parser.collada.enum.TransformType;
-	import aerys.minko.type.parser.collada.store.Source;
 	import aerys.minko.type.math.ConstVector4;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.math.Transform3D;
 	import aerys.minko.type.math.Vector4;
+	import aerys.minko.type.parser.collada.enum.TransformType;
+	import aerys.minko.type.parser.collada.helper.Source;
 
 	public class Channel
 	{
@@ -111,7 +111,7 @@ package aerys.minko.type.parser.collada.ressource.animation
 			// later here we should implement bezier stuff & co, but i'm way too lazy right now.
 			
 			var timeIndex		: uint		= getTimeIndexAt(t);
-			var times			: Array	= _sources['INPUT'].data;
+			var times			: Array		= _sources['INPUT'].data;
 			var timesLength		: uint		= times.length;
 			var outputSource	: Source	= _sources['OUTPUT'];
 			
@@ -139,10 +139,51 @@ package aerys.minko.type.parser.collada.ressource.animation
 			return out;
 		}
 		
+		private function getMatrixValueAt(t : Number, out : Matrix4x4 = null) : Matrix4x4
+		{
+			out ||= new Matrix4x4();
+			
+			// interpolate the output source the get the wanted value.
+			// later here we should implement bezier stuff & co, but i'm way too lazy right now.
+			
+			var timeIndex		: uint		= getTimeIndexAt(t);
+			var times			: Array		= _sources['INPUT'].data;
+			var timesLength		: uint		= times.length;
+			var outputSource	: Source	= _sources['OUTPUT'];
+			
+			if (timeIndex == 0)
+			{
+				out = outputSource.getComponentByParamIndex(0, 0) as Matrix4x4;
+			}
+			else if (timeIndex == timesLength)
+			{
+				out = outputSource.getComponentByParamIndex(timesLength - 1, 0) as Matrix4x4;
+			}
+			else
+			{
+				var previousTime		: Number	= times[timeIndex - 1];
+				var nextTime			: Number	= times[timeIndex];
+				var interpolationRatio	: Number	= (t - previousTime) / (nextTime - previousTime);
+				
+				var previousValue		: Matrix4x4	= outputSource.getComponentByParamIndex(timeIndex - 1, 0) as Matrix4x4;
+				var nextValue			: Matrix4x4	= outputSource.getComponentByParamIndex(timeIndex, 0) as Matrix4x4;
+				
+				Matrix4x4.copy(previousValue, out);
+				out.interpolateTo(nextValue, 1 - interpolationRatio);
+			}
+			
+			return out;
+		}
+		
 		public function setMatrixData(t : Number, data : Vector.<Number>) : void
 		{
 			switch (_transformType)
 			{
+				case TransformType.MATRIX:
+					var matrix : Matrix4x4 = getMatrixValueAt(t);
+					matrix.getRawData(data, 0, false);
+					break;
+				
 				case TransformType.TRANSFORM_0_0:
 					data[0] = getSimpleValueAt(t); 
 					break;

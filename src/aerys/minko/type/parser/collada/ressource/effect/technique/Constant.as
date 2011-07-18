@@ -1,7 +1,7 @@
 package aerys.minko.type.parser.collada.ressource.effect.technique
 {
 	import aerys.minko.render.shader.node.leaf.Constant;
-	import aerys.minko.type.parser.collada.store.CommonColorOrTexture;
+	import aerys.minko.type.parser.collada.ressource.effect.CommonColorOrTexture;
 
 	public class Constant implements ITechnique
 	{

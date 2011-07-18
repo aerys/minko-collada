@@ -1,7 +1,7 @@
 package aerys.minko.type.parser.collada.ressource.effect.technique
 {
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
-	import aerys.minko.type.parser.collada.store.CommonColorOrTexture;
+	import aerys.minko.type.parser.collada.ressource.effect.CommonColorOrTexture;
 
 	public class Phong implements ILightedTechnique
 	{
@@ -32,16 +32,53 @@ package aerys.minko.type.parser.collada.ressource.effect.technique
 		public static function createFromXML(xml : XML) : Phong
 		{
 			var phong : Phong = new Phong();
-			phong._emission				= CommonColorOrTexture.createFromXML(xml.NS::emission[0]);
-			phong._ambient				= CommonColorOrTexture.createFromXML(xml.NS::ambient[0]);
-			phong._diffuse				= CommonColorOrTexture.createFromXML(xml.NS::diffuse[0]);
-			phong._specular				= CommonColorOrTexture.createFromXML(xml.NS::specular[0]);
-			phong._shininess			= parseFloat(xml.NS::shininess[0].NS::float[0]);
-			phong._reflective			= CommonColorOrTexture.createFromXML(xml.NS::reflective[0]);
-			phong._reflectivity			= parseFloat(xml.NS::reflectivity[0].NS::float[0]);
-			phong._transparent			= CommonColorOrTexture.createFromXML(xml.NS::transparent[0]);
-			phong._transparency			= parseFloat(xml.NS::transparency[0].NS::float[0]);
-			phong._indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);
+			
+			for each (var child : XML in xml.children())
+			{
+				var localName : String = child.localName();
+				switch (child.localName())
+				{
+					case 'emission':
+						phong._emission		= CommonColorOrTexture.createFromXML(xml.NS::emission[0]);
+						break;
+					
+					case 'ambient':
+						phong._ambient		= CommonColorOrTexture.createFromXML(xml.NS::ambient[0]);
+						break;
+					
+					case 'diffuse':
+						phong._diffuse		= CommonColorOrTexture.createFromXML(xml.NS::diffuse[0]);
+						break;
+					
+					case 'specular':
+						phong._specular		= CommonColorOrTexture.createFromXML(xml.NS::specular[0]);
+						break;
+					
+					case 'shininess':
+						phong._shininess	= parseFloat(xml.NS::shininess[0].NS::float[0]);
+						break;
+					
+					case 'reflective':
+						phong._reflective	= CommonColorOrTexture.createFromXML(xml.NS::reflective[0]);
+						break;
+					
+					case 'reflectivity':
+						phong._reflectivity	= parseFloat(xml.NS::reflectivity[0].NS::float[0]);
+						break;
+					
+					case 'transparent':
+						phong._transparent	= CommonColorOrTexture.createFromXML(xml.NS::transparent[0]);
+						break;
+					
+					case 'transparency':
+						phong._transparency	= parseFloat(xml.NS::transparency[0].NS::float[0]);
+						break;
+					
+					case 'index_of_refraction':
+						phong._indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);
+						break;
+				}
+			}
 			
 			return phong;
 		}

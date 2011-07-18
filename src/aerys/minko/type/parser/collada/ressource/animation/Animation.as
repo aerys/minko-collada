@@ -4,11 +4,11 @@ package aerys.minko.type.parser.collada.ressource.animation
 	import aerys.minko.type.animation.timeline.ITimeline;
 	import aerys.minko.type.animation.timeline.MatrixLinearTimeline;
 	import aerys.minko.type.animation.timeline.MatrixSegmentTimeline;
-	import aerys.minko.type.parser.collada.Document;
-	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.math.Transform3D;
 	import aerys.minko.type.math.Vector4;
+	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
 	
 	public class Animation implements IRessource
@@ -22,6 +22,7 @@ package aerys.minko.type.parser.collada.ressource.animation
 		private var _channels	: Vector.<Channel>;
 		
 		public function get id() : String { return _id; }
+		public function set id(v : String) : void { _id = v; }
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
 												document	: Document, 
@@ -33,7 +34,9 @@ package aerys.minko.type.parser.collada.ressource.animation
 			
 			var xmlAnimations 		: XMLList	= xmlAnimationLibrary.NS::animation;
 			
-			store['mergedAnimations'] = new Animation(xmlAnimationLibrary, document);
+			var mergedAnimation : Animation = new Animation(xmlAnimationLibrary, document);
+			mergedAnimation.id = 'mergedAnimations';
+			store[mergedAnimation.id] = mergedAnimation;
 			
 			for each (var xmlAnimation : XML in xmlAnimations)
 			{
@@ -73,6 +76,9 @@ package aerys.minko.type.parser.collada.ressource.animation
 			{
 				times = timesCollection[targetId];
 				
+				if (times.length == 1 && isNaN(times[0]))
+					continue;
+				
 				var timesLength			: uint					= times.length;
 				
 				var minkoTimes			: Vector.<uint>			= new Vector.<uint>();
@@ -100,7 +106,8 @@ package aerys.minko.type.parser.collada.ressource.animation
 					minkoMatrices.push(matrix);
 				}
 				
-				timelines.push(new MatrixSegmentTimeline(_id, targetId, minkoTimes, minkoMatrices));
+				
+				timelines.push(new MatrixLinearTimeline(_id, targetId, minkoTimes, minkoMatrices));
 			}
 			
 			return new aerys.minko.type.animation.Animation(_id, timelines);

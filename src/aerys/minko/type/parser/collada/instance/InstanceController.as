@@ -70,6 +70,9 @@ package aerys.minko.type.parser.collada.instance
 				var jointNames			: Vector.<String>		= controller.jointNames;
 				var invBindMatrices		: Vector.<Matrix4x4>	= controller.invBindMatrices;
 				
+				if (mesh == null)
+					return null;
+				
 				_minkoSkinnedMesh		= new SkinnedMesh(mesh, skeletonReference, skeletonRootName, bindShapeMatrix, jointNames, invBindMatrices);
 				_minkoSkinnedMesh.name	= _sourceId;
 			}

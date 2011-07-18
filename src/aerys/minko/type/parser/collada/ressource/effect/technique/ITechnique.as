@@ -1,6 +1,6 @@
 package aerys.minko.type.parser.collada.ressource.effect.technique
 {
-	import aerys.minko.type.parser.collada.store.CommonColorOrTexture;
+	import aerys.minko.type.parser.collada.ressource.effect.CommonColorOrTexture;
 
 	public interface ITechnique
 	{

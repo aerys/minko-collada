@@ -9,7 +9,7 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.ressource.Controller;
-	import aerys.minko.type.parser.collada.ressource.Geometry;
+	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
 	import aerys.minko.type.parser.collada.ressource.Material;
 	import aerys.minko.type.parser.collada.ressource.Node;

@@ -13,7 +13,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.type.parser.collada.ressource.effect.technique.ITechnique;
 	import aerys.minko.type.parser.collada.ressource.effect.technique.Lambert;
 	import aerys.minko.type.parser.collada.ressource.effect.technique.Phong;
-	import aerys.minko.type.parser.collada.store.CommonColorOrTexture;
+	import aerys.minko.type.parser.collada.ressource.effect.CommonColorOrTexture;
 	
 	public class InstanceMaterial implements IInstance
 	{

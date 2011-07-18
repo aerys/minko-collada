@@ -7,11 +7,12 @@ package aerys.minko.type.parser.collada.ressource
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceController;
-	import aerys.minko.type.parser.collada.store.Source;
-	import aerys.minko.type.parser.collada.store.Triangles;
+	import aerys.minko.type.parser.collada.helper.Source;
+	import aerys.minko.type.parser.collada.ressource.geometry.Triangles;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.vertex.format.VertexComponent;
 	import aerys.minko.type.vertex.format.VertexFormat;
+	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
 	
 	use namespace minko_collada;
 	
@@ -259,6 +260,9 @@ package aerys.minko.type.parser.collada.ressource
 		{
 			// get geometry, as most tasks are going to be delegated to it
 			var geometry			: Geometry			= _document.getGeometryById(_skinId);
+			if (geometry == null)
+				return null;
+			
 			
 			// create semantic list for vertices and triangles
 			var vertexSemantics		: Vector.<String>	= geometry.verticesDataSemantics;
