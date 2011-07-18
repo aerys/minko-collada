@@ -17,8 +17,7 @@ package aerys.minko.type.collada.ressource
 	
 	public class Controller implements IRessource
 	{
-		private static const NS					: Namespace 				= 
-			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
 		private var _document			: Document;
 		
@@ -77,26 +76,91 @@ package aerys.minko.type.collada.ressource
 			_name					= xmlController.@name;
 			_skinId					= String(xmlController.NS::skin[0].@source).substr(1);
 			
-			_bindShapeMatrix		= parseBindShapeMatrix(xmlController.NS::skin[0]);
+			_bindShapeMatrix		= parseBindShapeMatrix(xmlController);
 			
 			_boneWeights			= new Vector.<Number>();
 			_jointNames				= parseJoints(xmlController);
+			
 			_invBindMatrices		= parseInvBindMatrix(xmlController);
 
 			_boneCountPerVertex		= parseBoneData(xmlController, _boneWeights);
+			optimizeBones();
 		}
 		
-		private static function parseBindShapeMatrix(xmlSkin : XML) : Matrix4x4
+		private function optimizeBones() : void
 		{
-			return xmlSkin.bind_shape_matrix.length() != 0 ? 
-				NumberListParser.parseMatrix4x4(xmlSkin.NS::bind_shape_matrix[0]) :
-				new Matrix4x4();
+			var boneWeights				: Vector.<Number>	= _boneWeights;
+			var boneCountPerVertex		: uint				= _boneCountPerVertex;
+			var vertexCount				: uint				= _boneWeights.length / boneCountPerVertex / 2;
+			
+			var newBoneWeights			: Vector.<Number>	= new Vector.<Number>();
+			var newBoneCountPerVertex	: uint				= 0;
+			
+			var vertexIndex 	: uint,		boneIndex			: uint;		// iterators
+			var boneIdIndex 	: uint,		boneInfluenceIndex	: uint;		// indexes in boneWeights vector
+			var boneId			: Number,	boneInfluence		: Number;	// values
+			var localBoneCount	: uint;
+			
+			// start counting how must bones we need in each vertex.
+			for (vertexIndex = 0; vertexIndex < vertexCount; ++vertexIndex)
+			{
+				localBoneCount = 0;
+				for (boneIndex = 0; boneIndex < boneCountPerVertex; ++boneIndex)
+				{
+					boneInfluenceIndex	= 2 * (vertexIndex * boneCountPerVertex + boneIndex) + 1;
+					boneInfluence		= boneWeights[boneInfluenceIndex];
+					
+					if (boneInfluence > 0)
+						++localBoneCount;
+				}
+				
+				if (localBoneCount > newBoneCountPerVertex)
+					newBoneCountPerVertex = localBoneCount;
+			}
+			
+			if (boneCountPerVertex != newBoneCountPerVertex)
+			{
+				// rewrite a new boneWeights vector
+				for (vertexIndex = 0; vertexIndex < vertexCount; ++vertexIndex)
+				{
+					localBoneCount = 0;
+					for (boneIndex = 0; boneIndex < boneCountPerVertex; ++boneIndex)
+					{
+						boneIdIndex			= 2 * (vertexIndex * boneCountPerVertex + boneIndex)
+						boneInfluenceIndex	= boneIdIndex + 1;
+						
+						boneId				= boneWeights[boneIdIndex];
+						boneInfluence		= boneWeights[boneInfluenceIndex];
+						
+						if (boneInfluence > 0)
+						{
+							newBoneWeights.push(boneId, boneInfluence);
+							++localBoneCount;
+						}
+					}
+					
+					for (; localBoneCount < newBoneCountPerVertex; ++localBoneCount)
+						newBoneWeights.push(0, 0);
+				}
+				
+				_boneWeights		= newBoneWeights;
+				_boneCountPerVertex	= newBoneCountPerVertex;
+			}
 		}
 		
-		private static function parseBoneData(xmlController	: XML, 
-											  bonesData		: Vector.<Number>) : uint
+		private function parseBindShapeMatrix(xmlController : XML) : Matrix4x4
+		{
+			var xmlSkin				: XML = xmlController.NS::skin[0];
+			var xmlBindShapeMatrix	: XML = xmlSkin.NS::bind_shape_matrix[0];
+			
+			return xmlBindShapeMatrix != null ? NumberListParser.parseMatrix4x4(xmlBindShapeMatrix) : new Matrix4x4();
+		}
+		
+		private function parseBoneData(xmlController	: XML, 
+									   bonesData		: Vector.<Number>) : uint
 		{
 			var skin 			: XML 					= xmlController.NS::skin[0];
+			var boneCount		: uint					= _jointNames.length;
 			
 			var weights			: Vector.<Number> 		= parseWeights(xmlController);
 			
@@ -120,16 +184,29 @@ package aerys.minko.type.collada.ressource
 					maxVcount = vc;
 			}
 			
-			for (i = 0; i < vcount.length; i++)
+			var vCountLength : uint = vcount.length;
+			for (i = 0; i < vCountLength; i++)
 			{
 				vc = vcount[i];
 				
 				for (var j : int = 0; j < vc; j++)
 				{
-					bonesData.push(
-						v[int(k + offsetJoint)],			// bone id
-						weights[v[int(k + offsetWeight)]]	// weight
-					);
+					// in collada, the bone numbered -1 does reference the bind shape matrix
+					
+					if (v[int(k + offsetJoint)] != -1)
+					{
+						bonesData.push(
+							v[int(k + offsetJoint)],			// bone id
+							weights[v[int(k + offsetWeight)]]	// weight
+						);
+					}
+					else
+					{
+						bonesData.push(
+							boneCount,							// bone id
+							0//weights[v[int(k + offsetWeight)]]	// weight
+						);
+					}
 					
 					k += numInputs;
 				}
@@ -165,13 +242,12 @@ package aerys.minko.type.collada.ressource
 		
 		private static function parseWeights(controller : XML) : Vector.<Number>
 		{
-			var sourceId	: String	= controller..NS::vertex_weights.NS::input.(@semantic == 'WEIGHT').@source.substring(1);
-			var xmlSource	: XML		= controller..NS::source.(@id == sourceId)[0];
+			var sourceId	: String			= controller..NS::vertex_weights.NS::input.(@semantic == 'WEIGHT').@source.substring(1);
+			var xmlSource	: XML				= controller..NS::source.(@id == sourceId)[0];
 			
-			var source		: Source	= Source.createFromXML(xmlSource);
-			var result		: Vector.<Number>	= Vector.<Number>(source.data);
+			var source		: Source			= Source.createFromXML(xmlSource);
 			
-			return result;
+			return Vector.<Number>(source.data);
 		}
 		
 		public function createInstance() : IInstance
@@ -247,13 +323,10 @@ package aerys.minko.type.collada.ressource
 			
 			// let the geometry build its vertex
 			geometry.buildVertex(storeVertexId, vertexSemantics, triangleSemantics, triangleStore, resultVertex);
-				
-			// add bone components
-			for (var i : uint = 2 * _boneCountPerVertex * vertexId;
-				i < 2 * _boneCountPerVertex * (vertexId + 1);
-				++i)
-				resultVertex.push(_boneWeights[i]);
 			
+			// add bone components
+			for (var i : uint = 2 * _boneCountPerVertex * vertexId; i < 2 * _boneCountPerVertex * (vertexId + 1); ++i)
+				resultVertex.push(_boneWeights[i]);
 			
 			return resultVertex;
 		}

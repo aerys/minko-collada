@@ -2,11 +2,16 @@ package aerys.minko.type.collada.ressource.animation
 {
 	import aerys.minko.type.collada.enum.TransformType;
 	import aerys.minko.type.collada.store.Source;
+	import aerys.minko.type.math.ConstVector4;
 	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Transform3D;
+	import aerys.minko.type.math.Vector4;
 
 	public class Channel
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
+		private static const TMP_MATRIX		: Transform3D = new Transform3D();
 		
 		private var _targetId				: String;
 		private var _transformType			: String;
@@ -136,40 +141,108 @@ package aerys.minko.type.collada.ressource.animation
 		
 		public function setMatrixData(t : Number, data : Vector.<Number>) : void
 		{
-			
 			switch (_transformType)
 			{
-				case TransformType.TRANSFORM_0_0: data[0] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_0_1: data[1] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_0_2: data[2] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_0_3: data[3] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_1_0: data[4] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_1_1: data[5] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_1_2: data[6] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_1_3: data[7] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_2_0: data[8] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_2_1: data[9] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_2_2: data[10] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_2_3: data[11] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_3_0: data[12] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_3_1: data[13] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_3_2: data[14] = getSimpleValueAt(t); break;
-				case TransformType.TRANSFORM_3_3: data[15] = getSimpleValueAt(t); break;
+				case TransformType.TRANSFORM_0_0:
+					data[0] = getSimpleValueAt(t); 
+					break;
+				
+				case TransformType.TRANSFORM_0_1: 
+					data[1] = getSimpleValueAt(t); 
+					break;
+				
+				case TransformType.TRANSFORM_0_2:
+					data[2] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_0_3:
+					data[3] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_1_0:
+					data[4] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_1_1:
+					data[5] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_1_2:
+					data[6] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_1_3:
+					data[7] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_2_0:
+					data[8] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_2_1:
+					data[9] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_2_2:
+					data[10] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_2_3:
+					data[11] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_3_0:
+					data[12] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_3_1:
+					data[13] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_3_2:
+					data[14] = getSimpleValueAt(t);
+					break;
+				
+				case TransformType.TRANSFORM_3_3:
+					data[15] = getSimpleValueAt(t);
+					break;
 					
 				case TransformType.ROTATE_X:
+					TMP_MATRIX.setRawData(data);
+					TMP_MATRIX.rotation.x = getSimpleValueAt(t) / 180 * Math.PI;
+					TMP_MATRIX.appendScale(1);
+//					TMP_MATRIX.prependRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.X_AXIS);
+					TMP_MATRIX.getRawData(data);
+					break;
+				
 				case TransformType.ROTATE_Y:
+					TMP_MATRIX.setRawData(data);
+					TMP_MATRIX.rotation.y = getSimpleValueAt(t) / 180 * Math.PI;
+					TMP_MATRIX.appendScale(1);
+//					TMP_MATRIX.prependRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.Y_AXIS);
+					TMP_MATRIX.getRawData(data);
+					break;
+				
 				case TransformType.ROTATE_Z:
-					throw new Error('here we should multiply the matrix by a rotation matrix');
+					TMP_MATRIX.setRawData(data);
+					TMP_MATRIX.rotation.z = getSimpleValueAt(t) / 180 * Math.PI;
+					TMP_MATRIX.appendScale(1);
+//					TMP_MATRIX.prependRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.Z_AXIS);
+					TMP_MATRIX.getRawData(data);
 					break;
 				
 				case TransformType.TRANSLATE:
 					var value : Object = getCompoundValueAt(t);
-					data[12] = value.X;
-					data[13] = value.Y;
-					data[14] = value.Z;
-					break
+					TMP_MATRIX.setRawData(data);
+					TMP_MATRIX.position.set(value.X, value.Y, value.Z);
+					TMP_MATRIX.appendScale(1);
+//					TMP_MATRIX.prependTranslation(value.X, value.Y, value.Z);
+					TMP_MATRIX.getRawData(data);
+					break;
 				
-				default: trace('Unknown animation type', _transformType);
+				default: 
+					trace('Unknown animation type', _transformType);
+					break;
 			}
 		}
 	}

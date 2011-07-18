@@ -62,10 +62,7 @@ package aerys.minko.type.collada.ressource
 			group.name = _name;
 			
 			for each (var child : IInstance in _childs)
-			{
-				if (!(child is InstanceNode) || Node(child.ressource).type != 'JOINT')
-					group.addChild(child.toScene());
-			}
+				group.addChild(child.toScene());
 			
 			return group;
 		}

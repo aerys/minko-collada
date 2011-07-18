@@ -7,7 +7,7 @@ package aerys.minko.type.collada.helper
 	{
 		public static function parseIntList(xml : XML) : Vector.<int>
 		{
-			var data		: Array			= String(xml).split(' ');
+			var data		: Array			= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint			= data.length;
 			var result		: Vector.<int>	= new Vector.<int>();
 			
@@ -19,7 +19,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseUintList(xml : XML) : Vector.<uint>
 		{
-			var data		: Array			= String(xml).split(' ');
+			var data		: Array			= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint			= data.length;
 			var result		: Vector.<uint>	= new Vector.<uint>();
 			
@@ -31,7 +31,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseNumberList(xml : XML) : Vector.<Number>
 		{
-			var data		: Array				= String(xml).split(' ');
+			var data		: Array				= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint				= data.length;
 			var result		: Vector.<Number>	= new Vector.<Number>();
 			
@@ -43,7 +43,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseVector3List(xml : XML) : Vector.<Vector4>
 		{
-			var data		: Array				= String(xml).split(' ');
+			var data		: Array				= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint				= data.length;
 			var result		: Vector.<Vector4>	= new Vector.<Vector4>();
 			
@@ -66,7 +66,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseVector4List(xml : XML) : Vector.<Vector4>
 		{
-			var data		: Array				= String(xml).split(' ');
+			var data		: Array				= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint				= data.length;
 			var result		: Vector.<Vector4>	= new Vector.<Vector4>();
 			
@@ -90,7 +90,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseMatrix3x3List(xml : XML) : Vector.<Matrix4x4>
 		{
-			var data		: Array					= String(xml).split(' ');
+			var data		: Array					= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint					= data.length;
 			var result		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
 			
@@ -105,6 +105,7 @@ package aerys.minko.type.collada.helper
 					parseFloat(data[i + 6]),	parseFloat(data[i + 7]),	parseFloat(data[i + 8]),	0,
 					0,							0,							0,							1
 				).transpose();
+				
 				result.push(matrix);
 			}
 			
@@ -113,7 +114,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseMatrix4x4List(xml : XML) : Vector.<Matrix4x4>
 		{
-			var data		: Array					= String(xml).split(' ');
+			var data		: Array					= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint					= data.length;
 			var result		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
 			
@@ -126,8 +127,7 @@ package aerys.minko.type.collada.helper
 					parseFloat(data[i]),		parseFloat(data[i + 1]),	parseFloat(data[i + 2]),	parseFloat(data[i + 3]),
 					parseFloat(data[i + 4]),	parseFloat(data[i + 5]),	parseFloat(data[i + 6]),	parseFloat(data[i + 7]),
 					parseFloat(data[i + 8]),	parseFloat(data[i + 9]),	parseFloat(data[i + 10]),	parseFloat(data[i + 11]),
-//					parseFloat(data[i + 12]),	parseFloat(data[i + 13]),	parseFloat(data[i + 14]), parseFloat(data[i + 15])
-					0, 0, 0, 1
+					parseFloat(data[i + 12]),	parseFloat(data[i + 13]),	parseFloat(data[i + 14]), parseFloat(data[i + 15])
 				).transpose();
 				
 				result.push(matrix);
@@ -138,7 +138,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseVector3(xml : XML) : Vector4
 		{
-			var data		: Array		= String(xml).split(' ');
+			var data		: Array		= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint		= data.length;
 			
 			var float1		: Number	= parseFloat(data[0]);
@@ -153,7 +153,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseVector4(xml : XML) : Vector4
 		{
-			var data		: Array		= String(xml).split(' ');
+			var data		: Array		= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint		= data.length;
 			
 			var float1		: Number	= parseFloat(data[0]);
@@ -169,7 +169,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseMatrix3x3(xml : XML) : Matrix4x4
 		{
-			var data		: Array	= String(xml).split(' ');
+			var data		: Array	= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint	= data.length;
 			
 			if (dataLength != 9)
@@ -185,7 +185,7 @@ package aerys.minko.type.collada.helper
 		
 		public static function parseMatrix4x4(xml : XML) : Matrix4x4
 		{
-			var data		: Array	= String(xml).split(' ');
+			var data		: Array	= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint	= data.length;
 			
 			if (dataLength != 16)
@@ -195,11 +195,11 @@ package aerys.minko.type.collada.helper
 				parseFloat(data[0]),	parseFloat(data[1]),	parseFloat(data[2]),	parseFloat(data[3]),
 				parseFloat(data[4]),	parseFloat(data[5]),	parseFloat(data[6]),	parseFloat(data[7]),
 				parseFloat(data[8]),	parseFloat(data[9]),	parseFloat(data[10]),	parseFloat(data[11]),
-//				parseFloat(data[12]),	parseFloat(data[13]),	parseFloat(data[14]),	parseFloat(data[15])
-				0, 0, 0, 1
+				parseFloat(data[12]),	parseFloat(data[13]),	parseFloat(data[14]),	parseFloat(data[15])
 			).transpose();
 			
 			return matrix;
 		}
+		
 	}
 }

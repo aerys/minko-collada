@@ -14,6 +14,8 @@ package aerys.minko.type.collada.instance
 		private var _name		: String;
 		private var _sid		: String;
 		
+		private var _minkoGroup	: Group;
+		
 		public function InstanceVisualScene(document	: Document, 
 											sourceId	: String,
 											name		: String = null,
@@ -32,7 +34,10 @@ package aerys.minko.type.collada.instance
 		
 		public function toGroup() : Group
 		{
-			return VisualScene(ressource).toGroup();
+			if (!_minkoGroup)
+				_minkoGroup = VisualScene(ressource).toGroup();
+			
+			return _minkoGroup;
 		}
 		
 		public function get ressource() : IRessource

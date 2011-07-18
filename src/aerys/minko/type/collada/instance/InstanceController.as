@@ -1,6 +1,7 @@
 package aerys.minko.type.collada.instance
 {
 	import aerys.minko.scene.node.IScene;
+	import aerys.minko.scene.node.group.IGroup;
 	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.scene.node.skeleton.Joint;
 	import aerys.minko.scene.node.skeleton.SkinnedMesh;
@@ -22,6 +23,8 @@ package aerys.minko.type.collada.instance
 		private var _sid				: String;
 		private var _bindedSkeletonId	: String;
 		
+		private var _minkoSkinnedMesh	: SkinnedMesh;
+		
 		public function InstanceController(document			: Document,
 										   sourceId			: String,
 										   name				: String = null,
@@ -38,31 +41,40 @@ package aerys.minko.type.collada.instance
 		public static function createFromXML(document	: Document, 
 											 xml		: XML) : InstanceController
 		{
-			var sourceId			: String = String(xml.@url).substr(1);
-			var name				: String = xml.@name;
-			var sid					: String = xml.@sid;
-			var bindedSkeletonId	: String = String(xml.NS::skeleton[0]).substr(1);
+			var sourceId			: String	= String(xml.@url).substr(1);
+			var name				: String	= xml.@name;
+			var sid					: String	= xml.@sid;
+			
+			var xmlSkeletonId		: XML		= xml.NS::skeleton[0];
+			var bindedSkeletonId	: String	= xmlSkeletonId != null ? String(xmlSkeletonId).substr(1) : null;
 			
 			return new InstanceController(document, sourceId, name, sid, bindedSkeletonId);
 		}
 		
 		public function toScene() : IScene
 		{
-//			return Controller(ressource).skin.toMesh();
 			return toSkinnedMesh();
 		}
 		
 		public function toSkinnedMesh() : SkinnedMesh
 		{
-			var controller		: Controller			= Controller(ressource);
+			if (!_minkoSkinnedMesh)
+			{
+				var controller			: Controller			= Controller(ressource);
+				
+				var skeletonReference	: IGroup				= null;
+				var skeletonRootName	: String				= _bindedSkeletonId;
+				
+				var mesh				: Mesh					= controller.toMesh();
+				var bindShapeMatrix		: Matrix4x4				= controller.bindShapeMatrix;
+				var jointNames			: Vector.<String>		= controller.jointNames;
+				var invBindMatrices		: Vector.<Matrix4x4>	= controller.invBindMatrices;
+				
+				_minkoSkinnedMesh		= new SkinnedMesh(mesh, skeletonReference, skeletonRootName, bindShapeMatrix, jointNames, invBindMatrices);
+				_minkoSkinnedMesh.name	= _sourceId;
+			}
 			
-			var skeleton		: Joint					= _document.getNodeById(_bindedSkeletonId).toJoint();
-			var mesh			: Mesh					= controller.toMesh();
-			var bindShapeMatrix	: Matrix4x4				= controller.bindShapeMatrix;
-			var jointNames		: Vector.<String>		= controller.jointNames;
-			var invBindMatrices	: Vector.<Matrix4x4>	= controller.invBindMatrices;
-			
-			return new SkinnedMesh(mesh, skeleton, bindShapeMatrix, jointNames, invBindMatrices);
+			return _minkoSkinnedMesh;
 		}
 		
 		public function get ressource() : IRessource

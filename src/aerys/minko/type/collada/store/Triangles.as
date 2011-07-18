@@ -5,8 +5,7 @@ package aerys.minko.type.collada.store
 
 	public class Triangles
 	{
-		private static const NS : Namespace = 
-			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
 		private const NOT_YET_IMPLEMENTED_FAIL : Function = 
 			function(xmlPrimitive : XML) : void { throw new Error(xmlPrimitive.localName() + ' primitives are not supported yet'); };
@@ -20,6 +19,8 @@ package aerys.minko.type.collada.store
 			'trifans'		: NOT_YET_IMPLEMENTED_FAIL,
 			'tristrips'		: NOT_YET_IMPLEMENTED_FAIL
 		};
+		
+		private var _material			: String;
 		
 		/**
 		 * Contains a list of all semantics here 
@@ -49,7 +50,7 @@ package aerys.minko.type.collada.store
 		 */		
 		private var _triangleVertices	: Vector.<uint>;
 		
-		
+		public function get material()			: String			{ return _material; }
 		public function get semantics()			: Vector.<String>	{ return _semantics; }
 		public function get indicesPerVertex()	: uint				{ return _indicesPerVertex; }
 		public function get vertexCount()		: uint				{ return _triangleVertices.length / _indicesPerVertex; }
@@ -75,6 +76,7 @@ package aerys.minko.type.collada.store
 										   xmlMesh		: XML) : void
 		{
 			_semantics			= new Vector.<String>();
+			_material			= xmlPrimitive.@material;
 			_offsets			= new Object();
 			_sources			= new Object();	
 			
@@ -94,7 +96,11 @@ package aerys.minko.type.collada.store
 				_offsets[semantic] = offset;
 				
 				if (semantic != 'VERTEX')
-					_sources[semantic] = Source.createFromXML(sources.(@id == sourceId)[0]);
+				{
+					var source : Source = Source.createFromXML(sources.(@id == sourceId)[0]);
+					source.semantic = semantic;
+					_sources[semantic] = source;
+				}
 			}
 			
 			// will triangulate the data in here and push ids to _triangleVertices

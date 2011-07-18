@@ -12,6 +12,7 @@ package aerys.minko.type.collada.ressource
 	import aerys.minko.type.collada.instance.InstanceGeometry;
 	import aerys.minko.type.collada.instance.InstanceNode;
 	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Vector4;
 
 	use namespace minko_collada;
 	
@@ -62,9 +63,12 @@ package aerys.minko.type.collada.ressource
 			_sid		= xmlNode.@sid;
 			_name		= xmlNode.@name;
 			_transform	= TransformParser.parseTransform(xmlNode);
-			_type		= xmlNode.@type;
-			_childs		= new Vector.<IInstance>();
 			
+			_type		= String(xmlNode.@type).toUpperCase();
+			if (_type.length == 0)
+				_type = NodeType.NODE;
+			
+			_childs		= new Vector.<IInstance>();
 			for each (var child : XML in xmlNode.children())
 			{
 				
@@ -74,7 +78,7 @@ package aerys.minko.type.collada.ressource
 					_childs.push(document.delegateRessourceCreation(child));
 					
 				else if (localName == 'instance_camera')
-						0; // do nothing
+					0; // do nothing
 					
 				else if (localName == 'instance_controller')
 					_childs.push(InstanceController.createFromXML(document, child));
@@ -110,34 +114,44 @@ package aerys.minko.type.collada.ressource
 		 */		
 		public function toTransformGroup() : TransformGroup
 		{
+			if (_type != NodeType.NODE)
+				throw new Error('Cannot convert joint node to TransformGroup');
+			
 			var tf : TransformGroup = new TransformGroup();
+			tf.name = _id;
+			
 			Matrix4x4.copy(_transform, tf.transform);
+			tf.transform.appendScale(1);				// used to invalidate the matrix
 			
 			for each (var child : IInstance in _childs)
-				if (!(child is InstanceNode && Node(InstanceNode(child).ressource)._type == NodeType.JOINT))
-					tf.addChild(child.toScene());
+			{
+				var minkoChild : IScene = child.toScene();
+				if (minkoChild != null)
+					tf.addChild(minkoChild);
+			}
 			
 			return tf;
 		}
 		
 		public function toJoint() : Joint
 		{
+			if (_type != NodeType.JOINT)
+				throw new Error('Cannot convert standart node to joint');
+			
 			var joint : Joint = new Joint();
 			joint.name = _id;
 			joint.boneName = _sid;
+			
 			Matrix4x4.copy(_transform, joint.transform);
+			joint.transform.appendScale(1);				// used to invalidate the matrix
 			
 			for each (var child : IInstance in _childs)
 			{
-				var minkoChild : IScene;
-				
-				if (child is InstanceNode)
-					minkoChild = Node(child.ressource).toJoint();
-				else
-					minkoChild = child.toScene();
-				
-				joint.addChild(minkoChild);
+				var minkoChild : IScene = child.toScene();
+				if (minkoChild != null)
+					joint.addChild(minkoChild);
 			}
+			
 			return joint;
 		}
 	}
