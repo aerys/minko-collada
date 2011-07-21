@@ -174,12 +174,18 @@ package aerys.minko.type.parser.collada.helper
 			var end		: uint = start + _stride;
 			
 			// if this is a texture coord, we drop the w coordinate.
-			if (_semantic == InputType.TEXCOORD && _stride == 3)
-				--end;
+			if (_semantic == InputType.TEXCOORD)
+			{
+				out.push(_data[start]);
+				out.push(1 - _data[start + 1]);
+			}
+			else
+			{
+				// if data[i] is no float, an exception will be raised because of the implicit cast.
+				for (var i : uint = start; i < end; ++i)
+					out.push(_data[i]);
+			}
 			
-			// if data[i] is no float, an exception will be raised because of the implicit cast.
-			for (var i : uint = start; i < end; ++i)
-				out.push(_data[i]);
 		}
 	}
 }

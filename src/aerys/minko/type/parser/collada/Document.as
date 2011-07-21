@@ -3,21 +3,22 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.Group;
+	import aerys.minko.scene.node.group.Joint;
 	import aerys.minko.scene.node.mesh.IMesh;
-	import aerys.minko.scene.node.skeleton.Joint;
-	import aerys.minko.scene.node.skeleton.SkinnedMesh;
+	import aerys.minko.scene.node.mesh.SkinnedMesh;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.ressource.Controller;
-	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
 	import aerys.minko.type.parser.collada.ressource.Material;
 	import aerys.minko.type.parser.collada.ressource.Node;
 	import aerys.minko.type.parser.collada.ressource.VisualScene;
 	import aerys.minko.type.parser.collada.ressource.animation.Animation;
 	import aerys.minko.type.parser.collada.ressource.effect.Effect;
+	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
 	import aerys.minko.type.parser.collada.ressource.image.Image;
 	
+	import flash.display.BitmapData;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.net.URLLoader;
@@ -53,6 +54,7 @@ package aerys.minko.type.parser.collada
 		};
 		
 		private var _url			: String;
+		private var _textureFeed	: Object;
 		
 		private var _mainSceneId	: String;
 		
@@ -87,6 +89,17 @@ package aerys.minko.type.parser.collada
 		
 		public function Document()
 		{
+			_textureFeed = new Object();
+		}
+		
+		public function feedTexture(filename : String, bitmapData : BitmapData) : void
+		{
+			_textureFeed[filename.toLocaleLowerCase()] = bitmapData;
+		}
+		
+		public function getTextureFromFeed(filename : String) : BitmapData
+		{
+			return _textureFeed[filename.toLocaleLowerCase()];
 		}
 		
 		public function loadURL(url : String) : void

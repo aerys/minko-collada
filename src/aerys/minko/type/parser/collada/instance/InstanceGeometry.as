@@ -5,12 +5,14 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.Model;
 	import aerys.minko.scene.node.group.Group;
 	import aerys.minko.scene.node.group.IGroup;
+	import aerys.minko.scene.node.group.StyleGroup;
 	import aerys.minko.scene.node.mesh.IMesh;
 	import aerys.minko.scene.node.mesh.Mesh;
+	import aerys.minko.scene.node.texture.BitmapTexture;
 	import aerys.minko.scene.node.texture.ITexture;
 	import aerys.minko.type.parser.collada.Document;
-	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
+	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
 	import aerys.minko.type.parser.collada.ressource.geometry.Triangles;
 	
 	use namespace minko_collada;
@@ -65,7 +67,8 @@ package aerys.minko.type.parser.collada.instance
 		
 		public function toScene() : IScene
 		{
-			return toUntexturedModel();
+			return toTexturedModelGroup()
+//			return toUntexturedModel();
 		}
 		
 		public function toUntexturedModel() : Model
@@ -104,7 +107,6 @@ package aerys.minko.type.parser.collada.instance
 				var texture				: ITexture			= instanceMaterial.toScene() as ITexture;
 				
 				group.addChild(new Model(subMesh, texture));
-				
 			}
 			
 			return group;

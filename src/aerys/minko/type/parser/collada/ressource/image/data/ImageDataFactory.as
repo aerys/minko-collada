@@ -1,5 +1,7 @@
 package aerys.minko.type.parser.collada.ressource.image.data
 {
+	import aerys.minko.type.parser.collada.Document;
+
 	public class ImageDataFactory
 	{
 		private static const NAME_TO_IMGDATA : Object = {
@@ -9,10 +11,10 @@ package aerys.minko.type.parser.collada.ressource.image.data
 			'create_cube'	: CreateCube
 		};
 		
-		public static function createImageData(xml : XML) : IImageData
+		public static function createImageData(xml : XML, document : Document) : IImageData
 		{
 			var firstSonName : String = xml.localName();
-			return NAME_TO_IMGDATA[firstSonName].createFromXML(xml);
+			return NAME_TO_IMGDATA[firstSonName].createFromXML(xml, document);
 		}
 	}
 }

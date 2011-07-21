@@ -1,9 +1,12 @@
 package aerys.minko.type.parser.collada.instance
 {
 	import aerys.minko.scene.node.IScene;
+	import aerys.minko.scene.node.texture.BitmapTexture;
+	import aerys.minko.scene.node.texture.ColorTexture;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
 	import aerys.minko.type.parser.collada.ressource.Material;
+	import aerys.minko.type.parser.collada.ressource.effect.CommonColorOrTexture;
 	import aerys.minko.type.parser.collada.ressource.effect.Effect;
 	import aerys.minko.type.parser.collada.ressource.effect.profile.IProfile;
 	import aerys.minko.type.parser.collada.ressource.effect.profile.ProfileCommon;
@@ -13,7 +16,10 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.type.parser.collada.ressource.effect.technique.ITechnique;
 	import aerys.minko.type.parser.collada.ressource.effect.technique.Lambert;
 	import aerys.minko.type.parser.collada.ressource.effect.technique.Phong;
-	import aerys.minko.type.parser.collada.ressource.effect.CommonColorOrTexture;
+	import aerys.minko.type.parser.collada.ressource.image.Image;
+	import aerys.minko.type.parser.collada.ressource.image.data.InitFrom;
+	
+	import flash.display.BitmapData;
 	
 	public class InstanceMaterial implements IInstance
 	{
@@ -73,16 +79,21 @@ package aerys.minko.type.parser.collada.instance
 			}
 			else throw new Error('Unknown technique type');
 			
-			if (diffuse.textureName)
+			var textureName : String = diffuse.textureName;
+			if (textureName)
 			{
-				
+				var image : Image = _document.getImageById(textureName);
+				if (image.imageData.isLoaded)
+					return new BitmapTexture(image.imageData.bitmapData);
+				else
+				{
+					return new ColorTexture(0x0000FF);
+				}
 			}
 			else
 			{
-				
+				return new ColorTexture(diffuse.color & 0xffffff);
 			}
-			
-			return null;
 		}
 	}
 }

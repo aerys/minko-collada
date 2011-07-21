@@ -2,7 +2,7 @@ package aerys.minko.type.parser.collada.instance
 {
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.TransformGroup;
-	import aerys.minko.scene.node.skeleton.Joint;
+	import aerys.minko.scene.node.group.Joint;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.enum.NodeType;
 	import aerys.minko.type.parser.collada.ressource.IRessource;

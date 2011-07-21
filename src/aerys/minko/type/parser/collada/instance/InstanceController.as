@@ -3,8 +3,8 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.IGroup;
 	import aerys.minko.scene.node.mesh.Mesh;
-	import aerys.minko.scene.node.skeleton.Joint;
-	import aerys.minko.scene.node.skeleton.SkinnedMesh;
+	import aerys.minko.scene.node.group.Joint;
+	import aerys.minko.scene.node.mesh.SkinnedMesh;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.ressource.Controller;
 	import aerys.minko.type.parser.collada.ressource.IRessource;

@@ -7,15 +7,15 @@ package aerys.minko.type.parser.collada.ressource.geometry
 	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.enum.InputType;
+	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceGeometry;
-	import aerys.minko.type.parser.collada.helper.Source;
+	import aerys.minko.type.parser.collada.ressource.IRessource;
 	import aerys.minko.type.stream.IndexStream;
 	import aerys.minko.type.stream.VertexStream;
 	import aerys.minko.type.stream.VertexStreamList;
 	import aerys.minko.type.vertex.format.VertexComponent;
 	import aerys.minko.type.vertex.format.VertexFormat;
-	import aerys.minko.type.parser.collada.ressource.IRessource;
 	
 	use namespace minko_collada;
 	
@@ -132,7 +132,7 @@ package aerys.minko.type.parser.collada.ressource.geometry
 			// fill buffers with semantics
 			var indexData				: Vector.<uint>		= new Vector.<uint>();
 			var vertexData				: Vector.<Number>	= new Vector.<Number>();
-			fillBuffers(vertexSemantics, triangleSemantics, indexData, vertexData);
+			fillBuffers(vertexSemantics, triangleSemantics, _triangleStores, indexData, vertexData);
 			
 			// merge it all
 			return createMesh(indexData, vertexData, vertexFormat);
@@ -140,13 +140,15 @@ package aerys.minko.type.parser.collada.ressource.geometry
 		
 		minko_collada function toSubMesh(triangleStore : Triangles) : IMesh
 		{
+			var triangleStores		: Vector.<Triangles> = Vector.<Triangles>([triangleStore]);
+			
 			// create mesh using the same process that this.toMesh()
 			var vertexSemantics		: Vector.<String>	= _verticesDataSemantics;
 			var triangleSemantics	: Vector.<String>	= triangleStore.semantics;
 			var vertexFormat		: VertexFormat		= createVertexFormat(vertexSemantics, triangleSemantics);
 			var indexData			: Vector.<uint>		= new Vector.<uint>();
 			var vertexData			: Vector.<Number>	= new Vector.<Number>();
-			fillBuffers(vertexSemantics, triangleSemantics, indexData, vertexData);
+			fillBuffers(vertexSemantics, triangleSemantics, triangleStores, indexData, vertexData);
 			var mesh				: IMesh				= createMesh(indexData, vertexData, vertexFormat);
 			
 			return mesh;
@@ -154,13 +156,14 @@ package aerys.minko.type.parser.collada.ressource.geometry
 		
 		minko_collada function fillBuffers(vertexSemantics		: Vector.<String>, 
 										   triangleSemantics	: Vector.<String>,
+										   triangleStores		: Vector.<Triangles>,
 										   indexData			: Vector.<uint>, 
 										   vertexData			: Vector.<Number>) : void
 		{
 			var verticesHashMap			: Object			= new Object();
 			var currentVertex			: Vector.<Number>	= new Vector.<Number>;
 			
-			for each (var triangleStore : Triangles in _triangleStores)
+			for each (var triangleStore : Triangles in triangleStores)
 			{
 				var storeVertexCount : uint = triangleStore.vertexCount;
 				
@@ -296,6 +299,7 @@ package aerys.minko.type.parser.collada.ressource.geometry
 					vertexFormat.addComponent(vertexComponent);
 				else
 				{
+					if (semantic != 'VERTEX')
 						trace('Dropping unknown triangle semantic:', semantic);
 					triangleSemantics.splice(semanticId, 1);
 					--semanticId;

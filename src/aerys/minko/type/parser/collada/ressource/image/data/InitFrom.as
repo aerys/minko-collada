@@ -1,5 +1,7 @@
 package aerys.minko.type.parser.collada.ressource.image.data
 {
+	import aerys.minko.type.parser.collada.Document;
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Loader;
@@ -11,16 +13,25 @@ package aerys.minko.type.parser.collada.ressource.image.data
 
 	public class InitFrom extends EventDispatcher implements IImageData
 	{
+		private var _document	: Document;
+		
 		private var _path		: String;
 		private var _bitmapData	: BitmapData;
 		
+		public function get path()			: String		{ return _path;					}
 		public function get isLoaded()		: Boolean		{ return _bitmapData != null;	}
 		public function get bitmapData()	: BitmapData	{ return _bitmapData;			}
 		
-		public static function createFromXML(xml : XML) : InitFrom
+		public static function createFromXML(xml : XML, document : Document) : InitFrom
 		{
+			var path		: String = xml;
+			var filename	: String = path.substr(path.lastIndexOf('/') + 1);
+			
 			var initFrom : InitFrom = new InitFrom();
-			initFrom._path = xml;
+			initFrom._path			= path;
+			initFrom._document		= document;
+			initFrom._bitmapData	= document.getTextureFromFeed(filename); 
+			
 			return initFrom;
 		}
 		

@@ -27,15 +27,44 @@ package aerys.minko.type.parser.collada.ressource.effect.technique
 		public static function createFromXML(xml : XML) : Lambert
 		{
 			var lambert : Lambert = new Lambert();
-			lambert._emission			= CommonColorOrTexture.createFromXML(xml.NS::emission[0]);
-			lambert._ambient			= CommonColorOrTexture.createFromXML(xml.NS::ambient[0]);
-			lambert._diffuse			= CommonColorOrTexture.createFromXML(xml.NS::diffuse[0]);
-			lambert._reflective			= CommonColorOrTexture.createFromXML(xml.NS::reflective[0]);
-			lambert._reflectivity		= parseFloat(xml.NS::reflectivity[0].NS::float[0]);
-			lambert._transparent		= CommonColorOrTexture.createFromXML(xml.NS::transparent[0]);
-			lambert._transparency		= parseFloat(xml.NS::transparency[0].NS::float[0]);
-			lambert._indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);
-			
+			for each (var child : XML in xml.children())
+			{
+				var localName : String = child.localName();
+				switch (child.localName())
+				{
+					case 'emission':
+						lambert._emission		= CommonColorOrTexture.createFromXML(xml.NS::emission[0]);
+						break;
+					
+					case 'ambient':
+						lambert._ambient		= CommonColorOrTexture.createFromXML(xml.NS::ambient[0]);
+						break;
+					
+					case 'diffuse':
+						lambert._diffuse		= CommonColorOrTexture.createFromXML(xml.NS::diffuse[0]);
+						break;
+					
+					case 'reflective':
+						lambert._reflective	= CommonColorOrTexture.createFromXML(xml.NS::reflective[0]);
+						break;
+					
+					case 'reflectivity':
+						lambert._reflectivity	= parseFloat(xml.NS::reflectivity[0].NS::float[0]);
+						break;
+					
+					case 'transparent':
+						lambert._transparent	= CommonColorOrTexture.createFromXML(xml.NS::transparent[0]);
+						break;
+					
+					case 'transparency':
+						lambert._transparency	= parseFloat(xml.NS::transparency[0].NS::float[0]);
+						break;
+					
+					case 'index_of_refraction':
+						lambert._indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);
+						break;
+				}
+			}
 			return lambert;
 		}
 	}

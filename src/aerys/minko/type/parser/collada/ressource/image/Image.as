@@ -48,7 +48,7 @@ package aerys.minko.type.parser.collada.ressource.image
 			image._id			= xmlImage.@id;
 			image._sid			= xmlImage.@sid;
 			image._name			= xmlImage.@name;
-			image._imageData	= ImageDataFactory.createImageData(xmlImage.children()[0]);
+			image._imageData	= ImageDataFactory.createImageData(xmlImage.children()[0], document);
 			
 			return image;
 		}
