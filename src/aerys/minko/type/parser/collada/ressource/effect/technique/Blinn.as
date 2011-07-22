@@ -31,16 +31,53 @@ package aerys.minko.type.parser.collada.ressource.effect.technique
 		public static function createFromXML(xml : XML) : Blinn
 		{
 			var blinn : Blinn = new Blinn();
-			blinn._emission				= CommonColorOrTexture.createFromXML(xml.NS::emission[0]);
-			blinn._ambient				= CommonColorOrTexture.createFromXML(xml.NS::ambient[0]);
-			blinn._diffuse				= CommonColorOrTexture.createFromXML(xml.NS::diffuse[0]);
-			blinn._specular				= CommonColorOrTexture.createFromXML(xml.NS::specular[0]);
-			blinn._shininess			= parseFloat(xml.NS::shininess[0].NS::float[0]);
-			blinn._reflective			= CommonColorOrTexture.createFromXML(xml.NS::reflective[0]);
-			blinn._reflectivity			= parseFloat(xml.NS::reflectivity[0].NS::float[0]);
-			blinn._transparent			= CommonColorOrTexture.createFromXML(xml.NS::transparent[0]);
-			blinn._transparency			= parseFloat(xml.NS::transparency[0].NS::float[0]);
-			blinn._indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);
+			for each (var child : XML in xml.children())
+			{
+				var localName : String = child.localName();
+				switch (child.localName())
+				{
+					case 'emission':
+						blinn._emission		= CommonColorOrTexture.createFromXML(xml.NS::emission[0]);
+						break;
+					
+					case 'ambient':
+						blinn._ambient		= CommonColorOrTexture.createFromXML(xml.NS::ambient[0]);
+						break;
+					
+					case 'diffuse':
+						blinn._diffuse		= CommonColorOrTexture.createFromXML(xml.NS::diffuse[0]);
+						break;
+					
+					case 'specular':
+						blinn._specular		= CommonColorOrTexture.createFromXML(xml.NS::specular[0]);
+						break;
+					
+					case 'shininess':
+						blinn._shininess	= parseFloat(xml.NS::shininess[0].NS::float[0]);
+						break;
+					
+					case 'reflective':
+						blinn._reflective	= CommonColorOrTexture.createFromXML(xml.NS::reflective[0]);
+						break;
+					
+					case 'reflectivity':
+						blinn._reflectivity	= parseFloat(xml.NS::reflectivity[0].NS::float[0]);
+						break;
+					
+					case 'transparent':
+						blinn._transparent	= CommonColorOrTexture.createFromXML(xml.NS::transparent[0]);
+						break;
+					
+					case 'transparency':
+						blinn._transparency	= parseFloat(xml.NS::transparency[0].NS::float[0]);
+						break;
+					
+					case 'index_of_refraction':
+						blinn._indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);
+						break;
+				}
+			}
+			
 			return blinn;
 		}
 	}

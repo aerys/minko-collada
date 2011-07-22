@@ -83,8 +83,14 @@ package aerys.minko.type.parser.collada.instance
 			if (textureName)
 			{
 				var image : Image = _document.getImageById(textureName);
-				if (image.imageData.isLoaded)
+				if (image == null)
+				{
+					return new ColorTexture(0x00FF00);
+				}
+				else if (image.imageData.isLoaded)
+				{
 					return new BitmapTexture(image.imageData.bitmapData);
+				}
 				else
 				{
 					return new ColorTexture(0x0000FF);

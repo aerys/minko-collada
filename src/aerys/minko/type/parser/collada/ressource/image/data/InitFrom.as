@@ -1,5 +1,6 @@
 package aerys.minko.type.parser.collada.ressource.image.data
 {
+	import aerys.minko.ns.minko_collada;
 	import aerys.minko.type.parser.collada.Document;
 	
 	import flash.display.Bitmap;
@@ -11,6 +12,8 @@ package aerys.minko.type.parser.collada.ressource.image.data
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 
+	use namespace minko_collada
+	
 	public class InitFrom extends EventDispatcher implements IImageData
 	{
 		private var _document	: Document;

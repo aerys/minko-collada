@@ -89,17 +89,6 @@ package aerys.minko.type.parser.collada
 		
 		public function Document()
 		{
-			_textureFeed = new Object();
-		}
-		
-		public function feedTexture(filename : String, bitmapData : BitmapData) : void
-		{
-			_textureFeed[filename.toLocaleLowerCase()] = bitmapData;
-		}
-		
-		public function getTextureFromFeed(filename : String) : BitmapData
-		{
-			return _textureFeed[filename.toLocaleLowerCase()];
 		}
 		
 		public function loadURL(url : String) : void
@@ -133,8 +122,9 @@ package aerys.minko.type.parser.collada
 			dispatchEvent(new Event(Event.COMPLETE));
 		}
 		
-		public function loadByteArray(data : ByteArray) : void
+		public function loadByteArray(data : ByteArray, textures : Object = null) : void
 		{
+			_textureFeed = textures;
 			loadXML(new XML(data.readUTFBytes(data.length)));
 		}
 		
@@ -227,6 +217,11 @@ package aerys.minko.type.parser.collada
 					currentGroup.addChildAt(mesh, childIndex);
 				}
 			}
+		}
+		
+		minko_collada function getTextureFromFeed(filename : String) : BitmapData
+		{
+			return _textureFeed[filename];
 		}
 		
 		minko_collada function delegateRessourceCreation(xmlNode : XML) : IInstance
