@@ -282,7 +282,7 @@ package aerys.minko.type.parser.collada.ressource.animation
 					break;
 				
 				default: 
-					trace('Unknown animation type', _transformType);
+//					trace('Unknown animation type', _transformType);
 					break;
 			}
 		}
