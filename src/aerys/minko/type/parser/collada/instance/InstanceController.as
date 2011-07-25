@@ -2,14 +2,14 @@ package aerys.minko.type.parser.collada.instance
 {
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.IGroup;
-	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.scene.node.group.Joint;
+	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.scene.node.mesh.SkinnedMesh;
+	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.Document;
-	import aerys.minko.type.parser.collada.ressource.controller.Controller;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
 	import aerys.minko.type.parser.collada.ressource.Node;
-	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.parser.collada.ressource.controller.Controller;
 	
 	public class InstanceController implements IInstance
 	{
@@ -22,6 +22,7 @@ package aerys.minko.type.parser.collada.instance
 		private var _name				: String;
 		private var _sid				: String;
 		private var _bindedSkeletonId	: String;
+		private var _bindMaterial		: Object;
 		
 		private var _minkoSkinnedMesh	: SkinnedMesh;
 		
@@ -29,6 +30,7 @@ package aerys.minko.type.parser.collada.instance
 										   sourceId			: String,
 										   name				: String = null,
 										   sid				: String = null,
+										   bindMaterial		: Object = null,
 										   bindedSkeletonId	: String = null)
 		{
 			_document			= document;
@@ -36,6 +38,7 @@ package aerys.minko.type.parser.collada.instance
 			_name				= name;
 			_sid				= sid;
 			_bindedSkeletonId	= bindedSkeletonId;
+			_bindMaterial		= bindMaterial;
 		}
 		
 		public static function createFromXML(document	: Document, 
@@ -48,7 +51,14 @@ package aerys.minko.type.parser.collada.instance
 			var xmlSkeletonId		: XML		= xml.NS::skeleton[0];
 			var bindedSkeletonId	: String	= xmlSkeletonId != null ? String(xmlSkeletonId).substr(1) : null;
 			
-			return new InstanceController(document, sourceId, name, sid, bindedSkeletonId);
+			var bindMaterial : Object = new Object();
+			for each (var xmlIm : XML in xml..NS::instance_material)
+			{
+				var instanceMaterial : InstanceMaterial = InstanceMaterial.createFromXML(xmlIm, document);
+				bindMaterial[instanceMaterial.symbol] = instanceMaterial;
+			}
+			
+			return new InstanceController(document, sourceId, name, sid, bindMaterial, bindedSkeletonId);
 		}
 		
 		public function toScene() : IScene

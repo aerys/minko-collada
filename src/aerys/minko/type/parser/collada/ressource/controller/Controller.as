@@ -264,7 +264,6 @@ package aerys.minko.type.parser.collada.ressource.controller
 			if (geometry == null)
 				return null;
 			
-			
 			// create semantic list for vertices and triangles
 			var vertexSemantics		: Vector.<String>	= geometry.verticesDataSemantics;
 			var triangleSemantics	: Vector.<String>	= geometry.createTriangleStoreSemanticList();
