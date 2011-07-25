@@ -2,6 +2,7 @@ package aerys.minko.type.parser.collada
 {
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.IScene;
+	import aerys.minko.scene.node.group.ColladaGroup;
 	import aerys.minko.scene.node.group.Group;
 	import aerys.minko.scene.node.group.Joint;
 	import aerys.minko.scene.node.mesh.IMesh;
@@ -155,6 +156,8 @@ package aerys.minko.type.parser.collada
 		{
 			var visualScene	: VisualScene	= _visualScenes[_mainSceneId];
 			var sceneGraph	: Group			= visualScene.toGroup();
+			var wrapper		: ColladaGroup	= new ColladaGroup(sceneGraph);
+			
 			setSkeletonReferenceNodes(sceneGraph, sceneGraph);
 			
 			if (dropEmptyGroups)
@@ -162,6 +165,9 @@ package aerys.minko.type.parser.collada
 			
 			if (dropSkinning)
 				removeSkinning(sceneGraph);
+			
+			for each (var anim : Animation in _animations)
+				wrapper.animations.push(anim.toMinkoAnimation());
 			
 			return sceneGraph;
 		}
