@@ -2,12 +2,12 @@ package aerys.minko.type.parser.collada
 {
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.Group;
-	import aerys.minko.type.parser.IParser3D;
+	import aerys.minko.type.parser.IParser;
 	import aerys.minko.type.parser.collada.ressource.animation.Animation;
 	
 	import flash.utils.ByteArray;
 	
-	public class ColladaParser implements IParser3D
+	public class ColladaParser implements IParser
 	{
 		public static const DROP_EMPTY_GROUPS	: uint = 1;
 		public static const DROP_SKINNING		: uint = 2;
