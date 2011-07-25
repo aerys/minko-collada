@@ -1,9 +1,7 @@
 package aerys.minko.type.parser.collada
 {
 	import aerys.minko.scene.node.IScene;
-	import aerys.minko.scene.node.group.Group;
 	import aerys.minko.type.parser.IParser;
-	import aerys.minko.type.parser.collada.ressource.animation.Animation;
 	
 	import flash.utils.ByteArray;
 	
