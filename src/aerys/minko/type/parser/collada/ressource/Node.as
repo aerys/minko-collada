@@ -2,8 +2,11 @@ package aerys.minko.type.parser.collada.ressource
 {
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.IScene;
-	import aerys.minko.scene.node.group.TransformGroup;
 	import aerys.minko.scene.node.group.Joint;
+	import aerys.minko.scene.node.group.TransformGroup;
+	import aerys.minko.type.error.collada.ColladaError;
+	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.enum.NodeType;
 	import aerys.minko.type.parser.collada.helper.TransformParser;
@@ -11,8 +14,6 @@ package aerys.minko.type.parser.collada.ressource
 	import aerys.minko.type.parser.collada.instance.InstanceController;
 	import aerys.minko.type.parser.collada.instance.InstanceGeometry;
 	import aerys.minko.type.parser.collada.instance.InstanceNode;
-	import aerys.minko.type.math.Matrix4x4;
-	import aerys.minko.type.math.Vector4;
 
 	use namespace minko_collada;
 	
@@ -115,7 +116,7 @@ package aerys.minko.type.parser.collada.ressource
 		public function toTransformGroup() : TransformGroup
 		{
 			if (_type != NodeType.NODE)
-				throw new Error('Cannot convert joint node to TransformGroup');
+				throw new ColladaError('Cannot convert joint node to TransformGroup');
 			
 			var tf : TransformGroup = new TransformGroup();
 			tf.name = _id;
@@ -136,7 +137,7 @@ package aerys.minko.type.parser.collada.ressource
 		public function toJoint() : Joint
 		{
 			if (_type != NodeType.JOINT)
-				throw new Error('Cannot convert standart node to joint');
+				throw new ColladaError('Cannot convert standard node to joint');
 			
 			var joint : Joint = new Joint();
 			joint.name = _id;

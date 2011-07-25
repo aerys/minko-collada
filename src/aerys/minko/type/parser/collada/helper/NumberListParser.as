@@ -1,5 +1,6 @@
 package aerys.minko.type.parser.collada.helper
 {
+	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.math.Vector4;
 	
@@ -48,7 +49,7 @@ package aerys.minko.type.parser.collada.helper
 			var result		: Vector.<Vector4>	= new Vector.<Vector4>();
 			
 			if (dataLength % 3 != 0)
-				throw new Error('Invalid data length');
+				throw new ColladaError('Invalid data length');
 			
 			for (var i : uint = 0; i < dataLength; i += 3)
 			{
@@ -71,7 +72,7 @@ package aerys.minko.type.parser.collada.helper
 			var result		: Vector.<Vector4>	= new Vector.<Vector4>();
 			
 			if (dataLength % 4 != 0)
-				throw new Error('Invalid data length');
+				throw new ColladaError('Invalid data length');
 			
 			for (var i : uint = 0; i < dataLength; i += 4)
 			{
@@ -95,7 +96,7 @@ package aerys.minko.type.parser.collada.helper
 			var result		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
 			
 			if (dataLength % 9 != 0)
-				throw new Error('Invalid data length');
+				throw new ColladaError('Invalid data length');
 			
 			for (var i : uint = 0; i < dataLength; i += 9)
 			{
@@ -119,7 +120,7 @@ package aerys.minko.type.parser.collada.helper
 			var result		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
 			
 			if (dataLength % 16 != 0)
-				throw new Error('Invalid data length');
+				throw new ColladaError('Invalid data length');
 			
 			for (var i : uint = 0; i < dataLength; i += 16)
 			{
@@ -146,7 +147,7 @@ package aerys.minko.type.parser.collada.helper
 			var float3		: Number	= parseFloat(data[2]);
 			
 			if (dataLength != 3)
-				throw new Error('Invalid data length');
+				throw new ColladaError('Invalid data length');
 			
 			return new Vector4(float1, float2, float3);
 		}
@@ -162,7 +163,7 @@ package aerys.minko.type.parser.collada.helper
 			var float4		: Number	= parseFloat(data[3]);
 			
 			if (dataLength != 4)
-				throw new Error('Invalid data length');
+				throw new ColladaError('Invalid data length');
 			
 			return new Vector4(float1, float2, float3, float4);
 		}
@@ -173,7 +174,7 @@ package aerys.minko.type.parser.collada.helper
 			var dataLength	: uint	= data.length;
 			
 			if (dataLength != 9)
-				throw new Error('Invalid data length');
+				throw new ColladaError('Invalid data length');
 			
 			return new Matrix4x4(
 				parseFloat(data[0]),	parseFloat(data[1]),	parseFloat(data[2]),	0,
@@ -189,7 +190,7 @@ package aerys.minko.type.parser.collada.helper
 			var dataLength	: uint	= data.length;
 			
 			if (dataLength != 16)
-				throw new Error('Invalid data length');
+				throw new ColladaError('Invalid data length');
 			
 			var matrix : Matrix4x4 = matrix = new Matrix4x4(
 				parseFloat(data[0]),	parseFloat(data[1]),	parseFloat(data[2]),	parseFloat(data[3]),

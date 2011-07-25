@@ -1,5 +1,6 @@
 package aerys.minko.type.parser.collada.ressource.geometry
 {
+	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
 	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.vertex.VertexIterator;
@@ -8,8 +9,9 @@ package aerys.minko.type.parser.collada.ressource.geometry
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private const NOT_YET_IMPLEMENTED_FAIL : Function = 
-			function(xmlPrimitive : XML) : void { throw new Error(xmlPrimitive.localName() + ' primitives are not supported yet'); };
+		private const NOT_YET_IMPLEMENTED_FAIL : Function = function(xmlPrimitive : XML) : void { 
+			throw new ColladaError(xmlPrimitive.localName() + ' primitives are not supported yet'); 
+		};
 		
 		private const NAME_TO_PARSER : Object = {
 			'lines'			: NOT_YET_IMPLEMENTED_FAIL,

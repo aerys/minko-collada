@@ -14,14 +14,8 @@ package aerys.minko.type.parser.collada
 		
 		private var _flags		: uint;
 		private var _data		: Vector.<IScene>;
-		private var _animations	: Object;
 		
 		public function get data() : Vector.<IScene> { return _data; }
-		
-		public function get animations() : Object
-		{
-			return _animations;
-		}
 		
 		public function ColladaParser(flags : uint = 0)
 		{
@@ -31,30 +25,35 @@ package aerys.minko.type.parser.collada
 		
 		public function parse(data : ByteArray) : Boolean
 		{
-			var dropEmptyGroups : Boolean = (_flags & DROP_EMPTY_GROUPS) != 0;
-			var dropSkinning	: Boolean = (_flags & DROP_SKINNING) != 0;
+			if (!isColladaDocument(data))
+				return false;
 			
+			var dropEmptyGroups : Boolean	= (_flags & DROP_EMPTY_GROUPS) != 0;
+			var dropSkinning	: Boolean	= (_flags & DROP_SKINNING) != 0;
+			var document		: Document	= new Document();
+			document.loadByteArray(data);
+			
+			_data.push(document.toGroup(dropEmptyGroups, dropSkinning));
+			
+			return true;
+		}
+		
+		private function isColladaDocument(data : ByteArray) : Boolean
+		{
 			try {
-				var document : Document = new Document();
-				document.loadByteArray(data);
+				data.position = 0;
 				
-				var scene : Group = document.toGroup(dropEmptyGroups, dropSkinning);
-				_data.push(scene);
+				var xmlDocument : XML		= new XML(data.readUTFBytes(data.length));
+				var localName	: String	= xmlDocument.localName();
 				
-				_animations = new Object();
-				for each (var colladaAnim : Animation in document.animations)
-				{
-					var animId : String = colladaAnim.id;
-					_animations[animId] = colladaAnim.toMinkoAnimation();
-				}
+				return localName.toLowerCase() == 'collada';
 			}
 			catch (e : Error)
 			{
 				return false;
 			}
 			
-			return true;
+			return false;
 		}
-		
 	}
 }

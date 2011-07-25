@@ -1,6 +1,7 @@
 package aerys.minko.type.parser.collada.instance
 {
 	import aerys.minko.scene.node.IScene;
+	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
 	
@@ -12,7 +13,7 @@ package aerys.minko.type.parser.collada.instance
 		public static function createFromXML(xml		: XML, 
 											 document	: Document) : InstanceImage
 		{
-			throw new Error('not yet implemented');
+			throw new ColladaError('not yet implemented');
 		}
 		
 		public static function createFromSourceId(sourceId	: String, 

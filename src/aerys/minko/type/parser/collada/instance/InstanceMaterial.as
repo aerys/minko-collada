@@ -3,6 +3,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.texture.BitmapTexture;
 	import aerys.minko.scene.node.texture.ColorTexture;
+	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
 	import aerys.minko.type.parser.collada.ressource.Material;
@@ -77,7 +78,7 @@ package aerys.minko.type.parser.collada.instance
 			{
 				diffuse = ILightedTechnique(technique).diffuse;
 			}
-			else throw new Error('Unknown technique type');
+			else throw new ColladaError('Unknown technique type');
 			
 			var textureName : String = diffuse.textureName;
 			if (textureName)

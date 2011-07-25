@@ -1,7 +1,8 @@
 package aerys.minko.type.parser.collada.ressource.effect
 {
-	import aerys.minko.type.parser.collada.helper.NumberListParser;
+	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.math.Vector4;
+	import aerys.minko.type.parser.collada.helper.NumberListParser;
 
 	public class CommonColorOrTexture
 	{
@@ -34,7 +35,7 @@ package aerys.minko.type.parser.collada.ressource.effect
 					element._textureCoord	= firstChild.@texcoord;
 					break;
 				
-				default: throw new Error('parse error');
+				default: throw new ColladaError('parse error');
 			}
 			
 			return element;

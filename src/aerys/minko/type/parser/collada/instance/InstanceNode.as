@@ -1,8 +1,9 @@
 package aerys.minko.type.parser.collada.instance
 {
 	import aerys.minko.scene.node.IScene;
-	import aerys.minko.scene.node.group.TransformGroup;
 	import aerys.minko.scene.node.group.Joint;
+	import aerys.minko.scene.node.group.TransformGroup;
+	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.enum.NodeType;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
@@ -51,7 +52,7 @@ package aerys.minko.type.parser.collada.instance
 			{
 				case NodeType.NODE:		return toTransformGroup();
 				case NodeType.JOINT:	return toJoint();
-				default: throw new Error('Unknown node type ' + Node(ressource).type);
+				default: throw new ColladaError('Unknown node type ' + Node(ressource).type);
 			}
 		}
 		

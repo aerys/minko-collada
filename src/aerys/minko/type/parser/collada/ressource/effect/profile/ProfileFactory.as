@@ -21,12 +21,13 @@ package aerys.minko.type.parser.collada.ressource.effect.profile
 	}
 }
 
+import aerys.minko.type.error.collada.ColladaError;
 import aerys.minko.type.parser.collada.ressource.effect.profile.IProfile;
 
 class NotYetImplemented implements IProfile
 {
 	public static function createFromXML(xml : XML) : NotYetImplemented
 	{
-		throw new Error('Not yet implemented');
+		throw new ColladaError('Not yet implemented');
 	}
 }

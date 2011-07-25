@@ -1,5 +1,6 @@
 package aerys.minko.type.parser.collada.helper
 {
+	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.math.Transform3D;
 	import aerys.minko.type.math.Vector4;
@@ -44,7 +45,7 @@ package aerys.minko.type.parser.collada.helper
 						break;
 					
 					case 'skew':
-						throw new Error('Skewed transforms are not supported');
+						throw new ColladaError('Skewed transforms are not supported');
 						break;
 					
 					case 'translate':

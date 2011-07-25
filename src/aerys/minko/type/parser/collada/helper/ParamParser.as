@@ -1,5 +1,7 @@
 package aerys.minko.type.parser.collada.helper
 {
+	import aerys.minko.type.error.collada.ColladaError;
+
 	public class ParamParser
 	{
 		private static const _PARSERS : Object = {
@@ -48,7 +50,7 @@ package aerys.minko.type.parser.collada.helper
 		
 		private static function notYetImplemented(xml : XML) : *
 		{
-			throw new Error('Not yet implemented');
+			throw new ColladaError('Not yet implemented');
 		}
 	}
 }

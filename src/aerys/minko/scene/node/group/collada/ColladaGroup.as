@@ -1,12 +1,13 @@
-package aerys.minko.scene.node.group
+package aerys.minko.scene.node.group.collada
 {
+	import aerys.minko.scene.node.group.Group;
 	import aerys.minko.type.animation.Animation;
 
 	public class ColladaGroup extends Group
 	{
-		private var _animations : Vector.<Animation>;
+		private var _animations : Object;
 		
-		public function get animations() : Vector.<Animation>
+		public function get animations() : Object
 		{
 			return _animations;
 		}
@@ -19,7 +20,7 @@ package aerys.minko.scene.node.group
 		public function ColladaGroup(...parameters)
 		{
 			super(parameters);
-			_animations = new Vector.<Animation>();
+			_animations = new Object();
 		}
 	}
 }

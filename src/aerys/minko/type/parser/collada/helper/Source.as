@@ -1,7 +1,8 @@
 package aerys.minko.type.parser.collada.helper
 {
-	import aerys.minko.type.parser.collada.enum.InputType;
+	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.parser.collada.enum.InputType;
 
 	/**
 	 * This represent a <source> node in a collada document, and provides
@@ -82,7 +83,7 @@ package aerys.minko.type.parser.collada.helper
 					xmlRawData = node;
 			
 			if (xmlRawData == null)
-				throw new Error('Source data could not be found');
+				throw new ColladaError('Source data could not be found');
 			
 			/*
 			 * End of kludge.
@@ -134,7 +135,7 @@ package aerys.minko.type.parser.collada.helper
 					}
 					else
 					{
-						throw new Error('Unknown type found');
+						throw new ColladaError('Unknown type found');
 					}
 					
 					source._data.push(currentDatum);

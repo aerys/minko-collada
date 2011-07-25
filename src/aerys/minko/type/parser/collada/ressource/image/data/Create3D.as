@@ -1,5 +1,7 @@
 package aerys.minko.type.parser.collada.ressource.image.data
 {
+	import aerys.minko.type.error.collada.ColladaError;
+	
 	import flash.display.BitmapData;
 	import flash.events.EventDispatcher;
 
@@ -10,12 +12,12 @@ package aerys.minko.type.parser.collada.ressource.image.data
 		
 		public function Create3D()
 		{
-			throw new Error('3D textures are not supported');
+			throw new ColladaError('3D textures are not supported');
 		}
 		
 		public function load() : void
 		{
-			throw new Error('3D textures are not supported');
+			throw new ColladaError('3D textures are not supported');
 		}
 	}
 }

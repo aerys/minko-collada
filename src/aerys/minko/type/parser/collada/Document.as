@@ -2,19 +2,20 @@ package aerys.minko.type.parser.collada
 {
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.IScene;
-	import aerys.minko.scene.node.group.ColladaGroup;
 	import aerys.minko.scene.node.group.Group;
 	import aerys.minko.scene.node.group.Joint;
+	import aerys.minko.scene.node.group.collada.ColladaGroup;
 	import aerys.minko.scene.node.mesh.IMesh;
 	import aerys.minko.scene.node.mesh.SkinnedMesh;
+	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
-	import aerys.minko.type.parser.collada.ressource.controller.Controller;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
 	import aerys.minko.type.parser.collada.ressource.Material;
 	import aerys.minko.type.parser.collada.ressource.Node;
 	import aerys.minko.type.parser.collada.ressource.VisualScene;
 	import aerys.minko.type.parser.collada.ressource.animation.Animation;
+	import aerys.minko.type.parser.collada.ressource.controller.Controller;
 	import aerys.minko.type.parser.collada.ressource.effect.Effect;
 	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
 	import aerys.minko.type.parser.collada.ressource.image.Image;
@@ -125,12 +126,16 @@ package aerys.minko.type.parser.collada
 		
 		public function loadByteArray(data : ByteArray, textures : Object = null) : void
 		{
-			_textureFeed = textures;
-			loadXML(new XML(data.readUTFBytes(data.length)));
+			data.position = 0;
+			
+			var xmlDocument : XML = new XML(data.readUTFBytes(data.length));
+			loadXML(xmlDocument);
 		}
 		
-		public function loadXML(xmlDocument : XML) : void
+		public function loadXML(xmlDocument : XML, textures : Object = null) : void
 		{
+			_textureFeed	= textures || new Object();
+			
 			_mainSceneId	= String(xmlDocument.NS::scene[0].NS::instance_visual_scene[0].@url).substr(1);
 			
 			_animations		= new Object();
@@ -167,9 +172,9 @@ package aerys.minko.type.parser.collada
 				removeSkinning(sceneGraph);
 			
 			for each (var anim : Animation in _animations)
-				wrapper.animations.push(anim.toMinkoAnimation());
+				wrapper.animations[anim.id] = anim.toMinkoAnimation();
 			
-			return sceneGraph;
+			return wrapper;
 		}
 		
 		private function setSkeletonReferenceNodes(currentGroup : Group, referenceNode : Group) : void
@@ -239,7 +244,7 @@ package aerys.minko.type.parser.collada
 				nodeId = xmlNode.@id = RandomStringGenerator.generateRandomString();
 			
 			if (!NODENAME_TO_LIBRARY.hasOwnProperty(nodeType))
-				throw new Error('No such handled ressource type');
+				throw new ColladaError('No such handled ressource type');
 			
 			var library			: Object		= this[NODENAME_TO_LIBRARY[nodeType]];
 			var ressourceClass	: Class			= NODENAME_TO_CLASS[nodeType];
