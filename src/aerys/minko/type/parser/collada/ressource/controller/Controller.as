@@ -1,4 +1,4 @@
-package aerys.minko.type.parser.collada.ressource
+package aerys.minko.type.parser.collada.ressource.controller
 {
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.mesh.IMesh;
@@ -13,6 +13,7 @@ package aerys.minko.type.parser.collada.ressource
 	import aerys.minko.type.vertex.format.VertexComponent;
 	import aerys.minko.type.vertex.format.VertexFormat;
 	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
+	import aerys.minko.type.parser.collada.ressource.IRessource;
 	
 	use namespace minko_collada;
 	

@@ -8,7 +8,7 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.scene.node.mesh.SkinnedMesh;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
-	import aerys.minko.type.parser.collada.ressource.Controller;
+	import aerys.minko.type.parser.collada.ressource.controller.Controller;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
 	import aerys.minko.type.parser.collada.ressource.Material;
 	import aerys.minko.type.parser.collada.ressource.Node;

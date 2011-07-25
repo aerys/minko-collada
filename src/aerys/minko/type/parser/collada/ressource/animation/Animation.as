@@ -2,11 +2,9 @@ package aerys.minko.type.parser.collada.ressource.animation
 {
 	import aerys.minko.type.animation.Animation;
 	import aerys.minko.type.animation.timeline.ITimeline;
-	import aerys.minko.type.animation.timeline.MatrixLinearTimeline;
-	import aerys.minko.type.animation.timeline.MatrixSegmentTimeline;
+	import aerys.minko.type.animation.timeline.TransformMatrixLinearTimeline;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.math.Transform3D;
-	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
@@ -107,7 +105,7 @@ package aerys.minko.type.parser.collada.ressource.animation
 				}
 				
 				
-				timelines.push(new MatrixLinearTimeline(_id, targetId, minkoTimes, minkoMatrices));
+				timelines.push(new TransformMatrixLinearTimeline(_id, targetId, minkoTimes, minkoMatrices));
 			}
 			
 			return new aerys.minko.type.animation.Animation(_id, timelines);

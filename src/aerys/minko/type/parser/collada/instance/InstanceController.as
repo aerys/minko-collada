@@ -6,7 +6,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.group.Joint;
 	import aerys.minko.scene.node.mesh.SkinnedMesh;
 	import aerys.minko.type.parser.collada.Document;
-	import aerys.minko.type.parser.collada.ressource.Controller;
+	import aerys.minko.type.parser.collada.ressource.controller.Controller;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
 	import aerys.minko.type.parser.collada.ressource.Node;
 	import aerys.minko.type.math.Matrix4x4;
