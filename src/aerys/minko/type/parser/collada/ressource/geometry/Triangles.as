@@ -95,7 +95,16 @@ package aerys.minko.type.parser.collada.ressource.geometry
 				if (offset + 1 > _indicesPerVertex)
 					_indicesPerVertex = offset + 1;
 				
-				_semantics.push(semantic);
+				// fixme dirty patch to drop duplicate semantics.
+				var isInside : Boolean = false;
+				for each (var element : String in _semantics)
+					if (element == semantic)
+					{
+						isInside = true;
+						break;
+					}
+				if (!isInside)
+					_semantics.push(semantic);
 				_offsets[semantic] = offset;
 				
 				if (semantic != 'VERTEX')
