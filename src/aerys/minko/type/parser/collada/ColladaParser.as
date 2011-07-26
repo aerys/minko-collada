@@ -11,47 +11,49 @@ package aerys.minko.type.parser.collada
 		public static const DROP_SKINNING		: uint = 2;
 		
 		private var _flags		: uint;
+		private var _textures	: Object;
 		private var _data		: Vector.<IScene>;
 		
 		public function get data() : Vector.<IScene> { return _data; }
 		
-		public function ColladaParser(flags : uint = 0)
+		public function ColladaParser(flags		: uint		= 0,
+									  textures	: Object	= null)
 		{
-			_flags	= flags;
-			_data	= new Vector.<IScene>();
+			_flags		= flags;
+			_textures	= textures;
+			_data		= new Vector.<IScene>();
 		}
 		
 		public function parse(data : ByteArray) : Boolean
 		{
-			if (!isColladaDocument(data))
-				return false;
+			var isColladaDocument	: Boolean	= false;
+			var xmlDocument			: XML		= null;
+			var localName			: String	= null;
+			
+			try {
+				data.position = 0;
+				
+				xmlDocument = new XML(data.readUTFBytes(data.length));
+				if (!xmlDocument)
+					throw new Error();
+				
+				localName = xmlDocument.localName();
+				isColladaDocument = localName.toLowerCase() == 'collada';
+			}
+			catch (e : Error)
+			{
+				isColladaDocument = false;
+			}
 			
 			var dropEmptyGroups : Boolean	= (_flags & DROP_EMPTY_GROUPS) != 0;
 			var dropSkinning	: Boolean	= (_flags & DROP_SKINNING) != 0;
 			var document		: Document	= new Document();
-			document.loadByteArray(data);
+			document.loadXML(xmlDocument, _textures);
 			
 			_data.push(document.toGroup(dropEmptyGroups, dropSkinning));
 			
 			return true;
 		}
 		
-		private function isColladaDocument(data : ByteArray) : Boolean
-		{
-			try {
-				data.position = 0;
-				
-				var xmlDocument : XML		= new XML(data.readUTFBytes(data.length));
-				var localName	: String	= xmlDocument.localName();
-				
-				return localName.toLowerCase() == 'collada';
-			}
-			catch (e : Error)
-			{
-				return false;
-			}
-			
-			return false;
-		}
 	}
 }
