@@ -129,7 +129,7 @@ package aerys.minko.type.parser.collada
 			data.position = 0;
 			
 			var xmlDocument : XML = new XML(data.readUTFBytes(data.length));
-			loadXML(xmlDocument);
+			loadXML(xmlDocument, textures);
 		}
 		
 		public function loadXML(xmlDocument : XML, textures : Object = null) : void
