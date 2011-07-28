@@ -69,16 +69,16 @@ package aerys.minko.type.parser.collada
 		private var _nodes			: Object;
 		private var _visualScenes	: Object;
 		
-		public function get mainSceneId()		: String	{ return _mainSceneId;	}
+		public function get mainSceneId()	: String	{ return _mainSceneId;	}
 		
-		public function get animations()		: Object	{ return _animations;	}
-		public function get controllers()		: Object 	{ return _controllers;	}
-		public function get effects()			: Object	{ return _effects;		}
-		public function get geometries()		: Object 	{ return _geometries;	}
-		public function get images()			: Object	{ return _images;		}
-		public function get materials()			: Object	{ return _materials;	}
-		public function get nodes()				: Object	{ return _nodes;		}
-		public function get visualScenes()		: Object 	{ return _visualScenes;	}
+		public function get animations()	: Object	{ return _animations;	}
+		public function get controllers()	: Object 	{ return _controllers;	}
+		public function get effects()		: Object	{ return _effects;		}
+		public function get geometries()	: Object 	{ return _geometries;	}
+		public function get images()		: Object	{ return _images;		}
+		public function get materials()		: Object	{ return _materials;	}
+		public function get nodes()			: Object	{ return _nodes;		}
+		public function get visualScenes()	: Object 	{ return _visualScenes;	}
 		
 		public function getAnimationById	(id : String) : Animation	{ return _animations[id];	}
 		public function getControllerById	(id : String) : Controller	{ return _controllers[id];	}

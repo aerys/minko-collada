@@ -26,7 +26,6 @@ package aerys.minko.type.parser.collada
 		
 		public function parse(data : ByteArray) : Boolean
 		{
-			var isColladaDocument	: Boolean	= false;
 			var xmlDocument			: XML		= null;
 			var localName			: String	= null;
 			
@@ -35,14 +34,16 @@ package aerys.minko.type.parser.collada
 				
 				xmlDocument = new XML(data.readUTFBytes(data.length));
 				if (!xmlDocument)
-					throw new Error();
+					return false;
 				
 				localName = xmlDocument.localName();
-				isColladaDocument = localName.toLowerCase() == 'collada';
+				
+				if (localName.toLowerCase() != 'collada')
+					return false;
 			}
 			catch (e : Error)
 			{
-				isColladaDocument = false;
+				return false;
 			}
 			
 			var dropEmptyGroups : Boolean	= (_flags & DROP_EMPTY_GROUPS) != 0;
@@ -54,6 +55,5 @@ package aerys.minko.type.parser.collada
 			
 			return true;
 		}
-		
 	}
 }
