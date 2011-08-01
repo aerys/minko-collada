@@ -157,7 +157,7 @@ package aerys.minko.type.parser.collada
 			VisualScene	.fillStoreFromXML(xmlDocument, this, _visualScenes);
 		}
 		
-		public function toGroup(dropEmptyGroups : Boolean = true, dropSkinning : Boolean = false) : Group
+		public function toGroup(dropEmptyGroups : Boolean = true, dropSkinning : Boolean = false) : ColladaGroup
 		{
 			var visualScene	: VisualScene	= _visualScenes[_mainSceneId];
 			var sceneGraph	: Group			= visualScene.toGroup();
