@@ -2,6 +2,7 @@ package aerys.minko.type.parser.collada.ressource
 {
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.group.Group;
+	import aerys.minko.scene.node.group.collada.ColladaGroup;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceNode;
@@ -36,7 +37,6 @@ package aerys.minko.type.parser.collada.ressource
 				var scene : VisualScene = new VisualScene(xmlScene, document);
 				store[scene.id] = scene;
 			}
-			
 		}
 		
 		public function VisualScene(xmlScene : XML,
@@ -56,9 +56,9 @@ package aerys.minko.type.parser.collada.ressource
 			return new InstanceVisualScene(_document, _id); 
 		}
 		
-		public function toGroup() : Group
+		public function toGroup() : ColladaGroup
 		{
-			var group : Group = new Group();
+			var group : ColladaGroup = new ColladaGroup();
 			group.name = _name;
 			
 			for each (var child : IInstance in _childs)

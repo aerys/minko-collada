@@ -160,8 +160,7 @@ package aerys.minko.type.parser.collada
 		public function toGroup(dropEmptyGroups : Boolean = true, dropSkinning : Boolean = false) : ColladaGroup
 		{
 			var visualScene	: VisualScene	= _visualScenes[_mainSceneId];
-			var sceneGraph	: Group			= visualScene.toGroup();
-			var wrapper		: ColladaGroup	= new ColladaGroup(sceneGraph);
+			var sceneGraph	: ColladaGroup	= visualScene.toGroup();
 			
 			setSkeletonReferenceNodes(sceneGraph, sceneGraph);
 			
@@ -172,9 +171,9 @@ package aerys.minko.type.parser.collada
 				removeSkinning(sceneGraph);
 			
 			for each (var anim : Animation in _animations)
-				wrapper.animations[anim.id] = anim.toMinkoAnimation();
+				sceneGraph.animations[anim.id] = anim.toSynchronizedAnimation();
 			
-			return wrapper;
+			return sceneGraph;
 		}
 		
 		private function setSkeletonReferenceNodes(currentGroup : Group, referenceNode : Group) : void

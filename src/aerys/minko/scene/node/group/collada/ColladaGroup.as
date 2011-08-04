@@ -1,7 +1,8 @@
 package aerys.minko.scene.node.group.collada
 {
 	import aerys.minko.scene.node.group.Group;
-	import aerys.minko.type.animation.Animation;
+	import aerys.minko.type.animation.AbstractAnimation;
+	import aerys.minko.type.animation.SynchronizedAnimation;
 
 	public class ColladaGroup extends Group
 	{
@@ -12,7 +13,7 @@ package aerys.minko.scene.node.group.collada
 			return _animations;
 		}
 		
-		public function getAnimationById(id : String) : Animation
+		public function getAnimationById(id : String) : SynchronizedAnimation
 		{
 			return _animations[id];
 		}

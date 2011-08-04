@@ -1,6 +1,8 @@
 package aerys.minko.type.parser.collada.ressource.animation
 {
-	import aerys.minko.type.animation.Animation;
+	import aerys.minko.type.animation.AbstractAnimation;
+	import aerys.minko.type.animation.ManualAnimation;
+	import aerys.minko.type.animation.SynchronizedAnimation;
 	import aerys.minko.type.animation.timeline.ITimeline;
 	import aerys.minko.type.animation.timeline.TransformMatrixLinearTimeline;
 	import aerys.minko.type.math.Matrix4x4;
@@ -58,7 +60,7 @@ package aerys.minko.type.parser.collada.ressource.animation
 				_channels.push(new Channel(xmlChannel, xmlAnimation));
 		}
 		
-		public function toMinkoAnimation() : aerys.minko.type.animation.Animation
+		private function computeTimeLines() : Vector.<ITimeline>
 		{
 			var times			: Vector.<Number>;
 			var timesCollection	: Object				= new Object();
@@ -108,7 +110,19 @@ package aerys.minko.type.parser.collada.ressource.animation
 				timelines.push(new TransformMatrixLinearTimeline(_id, targetId, minkoTimes, minkoMatrices));
 			}
 			
-			return new aerys.minko.type.animation.Animation(_id, timelines);
+			return timelines;
+		}
+		
+		public function toManualAnimation() : ManualAnimation
+		{
+			var timelines : Vector.<ITimeline> = computeTimeLines();
+			return new ManualAnimation(_id, timelines); 
+		}
+		
+		public function toSynchronizedAnimation() : SynchronizedAnimation
+		{
+			var timelines : Vector.<ITimeline> = computeTimeLines();
+			return new SynchronizedAnimation(_id, timelines);
 		}
 		
 		public function setMatrixData(time : Number, vector : Vector.<Number>, targetId : String) : void
