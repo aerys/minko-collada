@@ -1,19 +1,18 @@
 package aerys.minko.type.parser.collada.ressource.controller
 {
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.scene.node.mesh.IMesh;
 	import aerys.minko.scene.node.mesh.Mesh;
+	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
+	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceController;
-	import aerys.minko.type.parser.collada.helper.Source;
-	import aerys.minko.type.parser.collada.ressource.geometry.Triangles;
-	import aerys.minko.type.math.Matrix4x4;
-	import aerys.minko.type.vertex.format.VertexComponent;
-	import aerys.minko.type.vertex.format.VertexFormat;
-	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
 	import aerys.minko.type.parser.collada.ressource.IRessource;
+	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
+	import aerys.minko.type.parser.collada.ressource.geometry.Triangles;
+	import aerys.minko.type.stream.format.VertexComponent;
+	import aerys.minko.type.stream.format.VertexFormat;
 	
 	use namespace minko_collada;
 	

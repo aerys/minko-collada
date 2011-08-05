@@ -1,6 +1,6 @@
 package aerys.minko.type.parser.collada.enum
 {
-	import aerys.minko.type.vertex.format.VertexComponent;
+	
 
 	/**
 	 * All types of input nodes.

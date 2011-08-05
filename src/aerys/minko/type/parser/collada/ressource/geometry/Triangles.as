@@ -3,7 +3,6 @@ package aerys.minko.type.parser.collada.ressource.geometry
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
 	import aerys.minko.type.parser.collada.helper.Source;
-	import aerys.minko.type.vertex.VertexIterator;
 
 	public class Triangles
 	{
