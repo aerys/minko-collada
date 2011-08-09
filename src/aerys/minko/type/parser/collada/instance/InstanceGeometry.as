@@ -67,7 +67,8 @@ package aerys.minko.type.parser.collada.instance
 		
 		public function toScene() : IScene
 		{
-			return toTexturedModelGroup()
+			return toStyleGroupedMesh();
+//			return toTexturedModelGroup()
 //			return toUntexturedModel();
 		}
 		
@@ -90,7 +91,23 @@ package aerys.minko.type.parser.collada.instance
 			return _minkoModel;
 		}
 		
-		public function toTexturedModelGroup() : IGroup
+		public function toStyleGroupedMesh() : StyleGroup
+		{
+			var geometry		: Geometry	= ressource as Geometry;
+			
+			// get the mesh
+			var mesh			: IMesh		= geometry.toMesh();
+			
+			// get the first material
+			var triangleStore	: Triangles = geometry.triangleStores[0];
+			var subMeshMatSymbol	: String			= triangleStore.material;
+			var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
+			var texture				: ITexture			= instanceMaterial.toScene() as ITexture;
+			
+			return new StyleGroup(texture, mesh);
+		}
+		
+		public function toTexturedModelGroup() : Group
 		{
 			var group		: Group		= new Group();
 			var geometry	: Geometry	= ressource as Geometry;
