@@ -7,9 +7,9 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.mesh.SkinnedMesh;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.Document;
-	import aerys.minko.type.parser.collada.ressource.IRessource;
-	import aerys.minko.type.parser.collada.ressource.Node;
-	import aerys.minko.type.parser.collada.ressource.controller.Controller;
+	import aerys.minko.type.parser.collada.resource.IResource;
+	import aerys.minko.type.parser.collada.resource.Node;
+	import aerys.minko.type.parser.collada.resource.controller.Controller;
 	
 	public class InstanceController implements IInstance
 	{
@@ -70,7 +70,7 @@ package aerys.minko.type.parser.collada.instance
 		{
 			if (!_minkoSkinnedMesh)
 			{
-				var controller			: Controller			= Controller(ressource);
+				var controller			: Controller			= Controller(resource);
 				
 				var skeletonReference	: IGroup				= null;
 				var skeletonRootName	: String				= _bindedSkeletonId;
@@ -90,7 +90,7 @@ package aerys.minko.type.parser.collada.instance
 			return _minkoSkinnedMesh;
 		}
 		
-		public function get ressource() : IRessource
+		public function get resource() : IResource
 		{
 			return _document.getControllerById(_sourceId);
 		}

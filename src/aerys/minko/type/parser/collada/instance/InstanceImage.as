@@ -3,7 +3,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.Document;
-	import aerys.minko.type.parser.collada.ressource.IRessource;
+	import aerys.minko.type.parser.collada.resource.IResource;
 	
 	public class InstanceImage implements IInstance
 	{
@@ -25,7 +25,7 @@ package aerys.minko.type.parser.collada.instance
 			return im;
 		}
 		
-		public function get ressource() : IRessource
+		public function get resource() : IResource
 		{
 			return _document.getImageById(_sourceId);
 		}

@@ -6,8 +6,8 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.enum.NodeType;
-	import aerys.minko.type.parser.collada.ressource.IRessource;
-	import aerys.minko.type.parser.collada.ressource.Node;
+	import aerys.minko.type.parser.collada.resource.IResource;
+	import aerys.minko.type.parser.collada.resource.Node;
 	
 	public class InstanceNode implements IInstance
 	{
@@ -48,18 +48,18 @@ package aerys.minko.type.parser.collada.instance
 		
 		public function toScene() : IScene
 		{
-			switch (Node(ressource).type)
+			switch (Node(resource).type)
 			{
 				case NodeType.NODE:		return toTransformGroup();
 				case NodeType.JOINT:	return toJoint();
-				default: throw new ColladaError('Unknown node type ' + Node(ressource).type);
+				default: throw new ColladaError('Unknown node type ' + Node(resource).type);
 			}
 		}
 		
 		public function toTransformGroup() : TransformGroup
 		{
 			if (!_minkoScene)
-				_minkoScene = Node(ressource).toTransformGroup();
+				_minkoScene = Node(resource).toTransformGroup();
 			
 			return TransformGroup(_minkoScene);
 		}
@@ -67,12 +67,12 @@ package aerys.minko.type.parser.collada.instance
 		public function toJoint() : Joint
 		{
 			if (!_minkoScene)
-				_minkoScene = Node(ressource).toJoint();
+				_minkoScene = Node(resource).toJoint();
 			
 			return Joint(_minkoScene);
 		}
 		
-		public function get ressource() : IRessource
+		public function get resource() : IResource
 		{
 			return _document.getNodeById(_id);
 		}

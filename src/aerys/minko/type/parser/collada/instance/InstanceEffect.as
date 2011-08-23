@@ -3,7 +3,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.helper.ParamParser;
-	import aerys.minko.type.parser.collada.ressource.IRessource;
+	import aerys.minko.type.parser.collada.resource.IResource;
 	
 	public class InstanceEffect implements IInstance
 	{
@@ -41,7 +41,7 @@ package aerys.minko.type.parser.collada.instance
 			return instanceEffect;
 		}
 		
-		public function get ressource():IRessource
+		public function get resource():IResource
 		{
 			return _document.getEffectById(_sourceId);
 		}

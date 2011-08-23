@@ -11,9 +11,9 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.texture.BitmapTexture;
 	import aerys.minko.scene.node.texture.ITexture;
 	import aerys.minko.type.parser.collada.Document;
-	import aerys.minko.type.parser.collada.ressource.IRessource;
-	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
-	import aerys.minko.type.parser.collada.ressource.geometry.Triangles;
+	import aerys.minko.type.parser.collada.resource.IResource;
+	import aerys.minko.type.parser.collada.resource.geometry.Geometry;
+	import aerys.minko.type.parser.collada.resource.geometry.Triangles;
 	
 	use namespace minko_collada;
 	
@@ -76,12 +76,12 @@ package aerys.minko.type.parser.collada.instance
 		{
 			if (!_minkoModel)
 			{
-				var geometryRessource	: Geometry	= ressource as Geometry;
+				var geometryResource	: Geometry	= resource as Geometry;
 				
-				if (geometryRessource == null)
+				if (geometryResource == null)
 					return null;
 				
-				var mesh				: IMesh		= geometryRessource.toMesh();
+				var mesh				: IMesh		= geometryResource.toMesh();
 				var texture				: ITexture	= null;
 				
 				if (mesh != null)
@@ -93,7 +93,7 @@ package aerys.minko.type.parser.collada.instance
 		
 		public function toStyleGroupedMesh() : StyleGroup
 		{
-			var geometry		: Geometry	= ressource as Geometry;
+			var geometry		: Geometry	= resource as Geometry;
 			
 			// get the mesh
 			var mesh			: IMesh		= geometry.toMesh();
@@ -110,7 +110,7 @@ package aerys.minko.type.parser.collada.instance
 		public function toTexturedModelGroup() : Group
 		{
 			var group		: Group		= new Group();
-			var geometry	: Geometry	= ressource as Geometry;
+			var geometry	: Geometry	= resource as Geometry;
 			
 			for each (var triangleStore : Triangles in geometry.triangleStores)
 			{
@@ -129,7 +129,7 @@ package aerys.minko.type.parser.collada.instance
 			return group;
 		}
 		
-		public function get ressource() : IRessource
+		public function get resource() : IResource
 		{
 			return _document.getGeometryById(_sourceId);
 		}

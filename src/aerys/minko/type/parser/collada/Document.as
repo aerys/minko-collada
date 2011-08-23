@@ -2,23 +2,25 @@ package aerys.minko.type.parser.collada
 {
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.IScene;
+	import aerys.minko.scene.node.group.AnimationGroup;
 	import aerys.minko.scene.node.group.Group;
 	import aerys.minko.scene.node.group.Joint;
-	import aerys.minko.scene.node.group.collada.ColladaGroup;
 	import aerys.minko.scene.node.mesh.IMesh;
 	import aerys.minko.scene.node.mesh.SkinnedMesh;
+	import aerys.minko.type.animation.timeline.ITimeline;
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
+	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.parser.collada.instance.IInstance;
-	import aerys.minko.type.parser.collada.ressource.IRessource;
-	import aerys.minko.type.parser.collada.ressource.Material;
-	import aerys.minko.type.parser.collada.ressource.Node;
-	import aerys.minko.type.parser.collada.ressource.VisualScene;
-	import aerys.minko.type.parser.collada.ressource.animation.Animation;
-	import aerys.minko.type.parser.collada.ressource.controller.Controller;
-	import aerys.minko.type.parser.collada.ressource.effect.Effect;
-	import aerys.minko.type.parser.collada.ressource.geometry.Geometry;
-	import aerys.minko.type.parser.collada.ressource.image.Image;
+	import aerys.minko.type.parser.collada.resource.IResource;
+	import aerys.minko.type.parser.collada.resource.Material;
+	import aerys.minko.type.parser.collada.resource.Node;
+	import aerys.minko.type.parser.collada.resource.VisualScene;
+	import aerys.minko.type.parser.collada.resource.animation.Animation;
+	import aerys.minko.type.parser.collada.resource.controller.Controller;
+	import aerys.minko.type.parser.collada.resource.effect.Effect;
+	import aerys.minko.type.parser.collada.resource.geometry.Geometry;
+	import aerys.minko.type.parser.collada.resource.image.Image;
 	
 	import flash.display.BitmapData;
 	import flash.events.Event;
@@ -26,6 +28,7 @@ package aerys.minko.type.parser.collada
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	import flash.utils.getTimer;
 
 	use namespace minko_collada;
 	
@@ -134,6 +137,10 @@ package aerys.minko.type.parser.collada
 		
 		public function loadXML(xmlDocument : XML, textures : Object = null) : void
 		{
+			trace('----------loadXml begin');
+			Source.totalTime = 0;
+			Source.partialTime = 0;
+			var time : uint = getTimer();
 			_textureFeed	= textures || new Object();
 			
 			_mainSceneId	= String(xmlDocument.NS::scene[0].NS::instance_visual_scene[0].@url).substr(1);
@@ -155,23 +162,31 @@ package aerys.minko.type.parser.collada
 			Material 	.fillStoreFromXML(xmlDocument, this, _materials);
 			Node		.fillStoreFromXML(xmlDocument, this, _nodes);
 			VisualScene	.fillStoreFromXML(xmlDocument, this, _visualScenes);
+			trace('----------loadXml', getTimer() - time, Source.totalTime, Source.partialTime);
 		}
 		
-		public function toGroup(dropEmptyGroups : Boolean = true, dropSkinning : Boolean = false) : ColladaGroup
+		public function toGroup(dropEmptyGroups : Boolean = true, dropSkinning : Boolean = false) : Group
 		{
-			var visualScene	: VisualScene	= _visualScenes[_mainSceneId];
-			var sceneGraph	: ColladaGroup	= visualScene.toGroup();
+			// convert main scene to Group
+			var sceneGraph	: Group = _visualScenes[_mainSceneId].toGroup();
 			
+			// give global info to skinned meshs
 			setSkeletonReferenceNodes(sceneGraph, sceneGraph);
 			
+			// drop what is mandated
 			if (dropEmptyGroups)
 				removeEmptyGroups(sceneGraph, null);
 			
 			if (dropSkinning)
 				removeSkinning(sceneGraph);
 			
-			for each (var anim : Animation in _animations)
-				sceneGraph.animations[anim.id] = anim.toSynchronizedAnimation();
+			// wrap into an animation group if relevant
+			if (_animations.hasOwnProperty('mergedAnimations'))
+			{
+				var mainAnimation	: Animation				= _animations['mergedAnimations'];
+				var timelines		: Vector.<ITimeline>	= mainAnimation.computeTimelines();
+				sceneGraph = new AnimationGroup(timelines, null, sceneGraph);
+			}
 			
 			return sceneGraph;
 		}
@@ -184,7 +199,7 @@ package aerys.minko.type.parser.collada
 					SkinnedMesh(el).skeletonReference = referenceNode;
 				
 				else if (el is Group)
-					 setSkeletonReferenceNodes(Group(el), referenceNode);
+					setSkeletonReferenceNodes(Group(el), referenceNode);
 			}
 		}
 		
@@ -234,7 +249,7 @@ package aerys.minko.type.parser.collada
 			return _textureFeed[filename];
 		}
 		
-		minko_collada function delegateRessourceCreation(xmlNode : XML) : IInstance
+		minko_collada function delegateResourceCreation(xmlNode : XML) : IInstance
 		{
 			var nodeType	: String = xmlNode.localName();
 			var	nodeId		: String = xmlNode.@id;
@@ -243,15 +258,15 @@ package aerys.minko.type.parser.collada
 				nodeId = xmlNode.@id = RandomStringGenerator.generateRandomString();
 			
 			if (!NODENAME_TO_LIBRARY.hasOwnProperty(nodeType))
-				throw new ColladaError('No such handled ressource type');
+				throw new ColladaError('No such handled resource type');
 			
 			var library			: Object		= this[NODENAME_TO_LIBRARY[nodeType]];
-			var ressourceClass	: Class			= NODENAME_TO_CLASS[nodeType];
+			var resourceClass	: Class			= NODENAME_TO_CLASS[nodeType];
+			var resource		: IResource		= new resourceClass(xmlNode, this);
 			
-			var ressource		: IRessource	= new ressourceClass(xmlNode, this); 
-			library[ressource.id] = ressource;
+			library[resource.id] = resource;
 			
-			return ressource.createInstance();
+			return resource.createInstance();
 		}
 	}
 }

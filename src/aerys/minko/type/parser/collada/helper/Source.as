@@ -3,6 +3,10 @@ package aerys.minko.type.parser.collada.helper
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.enum.InputType;
+	
+	import flash.utils.getTimer;
+	
+	import spark.primitives.Path;
 
 	/**
 	 * This represent a <source> node in a collada document, and provides
@@ -42,7 +46,8 @@ package aerys.minko.type.parser.collada.helper
 		
 		public function set semantic(v : String) : void { _semantic = v; }
 		
-		
+		public static var totalTime : uint = 0;
+		public static var partialTime : uint = 0;
 		/*
 		 * For an obscure reason, there is no way to get the raw data using the
 		 * .(@attrName == value) syntax, so we loop over all children to find the node we are
@@ -55,6 +60,8 @@ package aerys.minko.type.parser.collada.helper
 		 */
 		public static function createFromXML(xmlSource : XML) : Source
 		{
+			var timer : uint = getTimer();
+			
 			// fill the source object.
 			var source : Source		= new Source();
 			source._id				= String(xmlSource.@id);
@@ -88,9 +95,9 @@ package aerys.minko.type.parser.collada.helper
 			/*
 			 * End of kludge.
 			 */
-			
+			var timer2 : uint = getTimer();
 			var rawData : Array = String(xmlRawData).replace(/[ \t\n\r]+/g, ' ').split(' ');
-			
+			partialTime += getTimer() - timer2;
 			
 			/* the kludge is back */
 			var size : uint = 0;
@@ -142,6 +149,7 @@ package aerys.minko.type.parser.collada.helper
 				}
 			}
 			
+			totalTime += getTimer() - timer;
 			return source;
 		}
 		
@@ -186,7 +194,6 @@ package aerys.minko.type.parser.collada.helper
 				for (var i : uint = start; i < end; ++i)
 					out.push(_data[i]);
 			}
-			
 		}
 	}
 }

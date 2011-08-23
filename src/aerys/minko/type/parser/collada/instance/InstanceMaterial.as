@@ -5,20 +5,20 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.texture.ColorTexture;
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.Document;
-	import aerys.minko.type.parser.collada.ressource.IRessource;
-	import aerys.minko.type.parser.collada.ressource.Material;
-	import aerys.minko.type.parser.collada.ressource.effect.CommonColorOrTexture;
-	import aerys.minko.type.parser.collada.ressource.effect.Effect;
-	import aerys.minko.type.parser.collada.ressource.effect.profile.IProfile;
-	import aerys.minko.type.parser.collada.ressource.effect.profile.ProfileCommon;
-	import aerys.minko.type.parser.collada.ressource.effect.technique.Blinn;
-	import aerys.minko.type.parser.collada.ressource.effect.technique.Constant;
-	import aerys.minko.type.parser.collada.ressource.effect.technique.ILightedTechnique;
-	import aerys.minko.type.parser.collada.ressource.effect.technique.ITechnique;
-	import aerys.minko.type.parser.collada.ressource.effect.technique.Lambert;
-	import aerys.minko.type.parser.collada.ressource.effect.technique.Phong;
-	import aerys.minko.type.parser.collada.ressource.image.Image;
-	import aerys.minko.type.parser.collada.ressource.image.data.InitFrom;
+	import aerys.minko.type.parser.collada.resource.IResource;
+	import aerys.minko.type.parser.collada.resource.Material;
+	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTexture;
+	import aerys.minko.type.parser.collada.resource.effect.Effect;
+	import aerys.minko.type.parser.collada.resource.effect.profile.IProfile;
+	import aerys.minko.type.parser.collada.resource.effect.profile.ProfileCommon;
+	import aerys.minko.type.parser.collada.resource.effect.technique.Blinn;
+	import aerys.minko.type.parser.collada.resource.effect.technique.Constant;
+	import aerys.minko.type.parser.collada.resource.effect.technique.ILightedTechnique;
+	import aerys.minko.type.parser.collada.resource.effect.technique.ITechnique;
+	import aerys.minko.type.parser.collada.resource.effect.technique.Lambert;
+	import aerys.minko.type.parser.collada.resource.effect.technique.Phong;
+	import aerys.minko.type.parser.collada.resource.image.Image;
+	import aerys.minko.type.parser.collada.resource.image.data.InitFrom;
 	
 	import flash.display.BitmapData;
 	
@@ -44,7 +44,7 @@ package aerys.minko.type.parser.collada.instance
 		{
 		}
 		
-		public function get ressource() : IRessource
+		public function get resource() : IResource
 		{
 			return _document.getMaterialById(_sourceId);
 		}
@@ -54,9 +54,9 @@ package aerys.minko.type.parser.collada.instance
 			// Retrieve all objects that defines a material.
 			// We assume the defaut profile is the first one and it is a ProfileCommon
 			
-			var material		: Material			= ressource as Material;
+			var material		: Material			= resource as Material;
 			var instanceEffect	: InstanceEffect	= material.instanceEffect;
-			var effect			: Effect			= instanceEffect.ressource as Effect;
+			var effect			: Effect			= instanceEffect.resource as Effect;
 			var profile			: ProfileCommon		= effect.profiles[0] as ProfileCommon;
 			var technique		: ITechnique		= profile.technique;
 			
