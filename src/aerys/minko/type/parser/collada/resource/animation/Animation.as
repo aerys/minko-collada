@@ -78,14 +78,14 @@ package aerys.minko.type.parser.collada.resource.animation
 			var vector			: Vector.<Number>		= new Vector.<Number>(16);
 			var timelines		: Vector.<ITimeline>	= new Vector.<ITimeline>();
 			
-			var timer : uint = getTimer();
+//			var timer : uint = getTimer();
 			retrieveTimes(timesCollection);
 			for each (times in timesCollection)
 				times.sort(cmp);
 			removeDuplicateTimes(timesCollection);
-			trace('computeTimelines step1', getTimer() - timer);
+//			trace('computeTimelines step1', getTimer() - timer);
 			
-			timer = getTimer();
+//			timer = getTimer();
 			
 			for (var targetId : String in timesCollection)
 			{
@@ -124,7 +124,7 @@ package aerys.minko.type.parser.collada.resource.animation
 				
 				timelines.push(new MatrixLinearTimeline(targetId, 'transform', minkoTimes, minkoMatrices));
 			}
-			trace('computeTimelines step2', getTimer() - timer);
+//			trace('computeTimelines step2', getTimer() - timer);
 			
 			return timelines;
 		}
@@ -146,7 +146,6 @@ package aerys.minko.type.parser.collada.resource.animation
 		
 		public function retrieveTimes(out : Object) : void
 		{
-			// on recup toutes les modifications que fait l'animation.
 			var channelCount	: uint	= _channels.length;
 			for (var i : uint = 0; i < channelCount; ++i)
 				_channels[i].retrieveTimes(out);
@@ -158,8 +157,6 @@ package aerys.minko.type.parser.collada.resource.animation
 		
 		private function removeDuplicateTimes(timesContainer : Object) : void
 		{
-			// on retire les doublons
-			
 			for each (var times : Vector.<Number> in timesContainer)
 			{
 				var timeCount	: uint		= times.length;
