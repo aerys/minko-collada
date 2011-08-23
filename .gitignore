@@ -4,3 +4,4 @@
 /.project
 /.settings/org.eclipse.core.resources.prefs
 /bin/minko-plugin-collada.swc
+/bin/minko-plugin-parser-collada.swc
