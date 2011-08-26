@@ -93,18 +93,25 @@ package aerys.minko.type.parser.collada.instance
 		
 		public function toStyleGroupedMesh() : StyleGroup
 		{
-			var geometry		: Geometry	= resource as Geometry;
+			var geometry	: Geometry		= resource as Geometry;
+			var group		: StyleGroup	= new StyleGroup();
+
+			if (geometry)
+			{
+				// get the mesh
+				var mesh				: IMesh				= geometry.toMesh();
+				
+				// get the first material
+				var triangleStore		: Triangles 		= geometry.triangleStores[0];
+				var subMeshMatSymbol	: String			= triangleStore.material;
+				var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
+				var texture				: ITexture			= instanceMaterial.toScene() as ITexture;
+				
+				group.addChild(texture)
+					 .addChild(mesh);
+			}
 			
-			// get the mesh
-			var mesh			: IMesh		= geometry.toMesh();
-			
-			// get the first material
-			var triangleStore	: Triangles = geometry.triangleStores[0];
-			var subMeshMatSymbol	: String			= triangleStore.material;
-			var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
-			var texture				: ITexture			= instanceMaterial.toScene() as ITexture;
-			
-			return new StyleGroup(texture, mesh);
+			return group;
 		}
 		
 		public function toTexturedModelGroup() : Group

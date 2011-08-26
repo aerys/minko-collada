@@ -21,6 +21,7 @@ package aerys.minko.type.parser.collada.helper
 		
 		private static const TYPES	: Object	= {
 			"float"		: Number,
+			"double"	: Number,
 			"Name"		: String,
 			"float4x4"	: Matrix4x4,
 			"name"		: String,

@@ -132,6 +132,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 			// fill buffers with semantics
 			var indexData				: Vector.<uint>		= new Vector.<uint>();
 			var vertexData				: Vector.<Number>	= new Vector.<Number>();
+			
 			fillBuffers(vertexSemantics, triangleSemantics, _triangleStores, indexData, vertexData);
 			
 			// merge it all
@@ -223,7 +224,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 				// create a new vertex
 				finalVertexId = verticesHashMap[vertexHash] = vertexData.length / currentVertex.length;
 				for each (var i : Number in currentVertex)
-				vertexData.push(i);
+					vertexData.push(i);
 			}
 			
 			indexData.push(finalVertexId);
@@ -316,7 +317,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 				return VertexComponent.XYZ;
 			
 			if (semantic == InputType.COLOR)
-				return VertexComponent.RGB;
+				return VertexComponent.RGBA;
 			
 			if (semantic == InputType.TEXCOORD)
 				return VertexComponent.UV;
