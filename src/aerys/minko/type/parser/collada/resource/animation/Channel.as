@@ -1,9 +1,7 @@
 package aerys.minko.type.parser.collada.resource.animation
 {
 	import aerys.minko.type.math.ConstVector4;
-	import aerys.minko.type.math.Matrix4x4;
-	import aerys.minko.type.math.Transform3D;
-	import aerys.minko.type.math.Vector4;
+	import aerys.minko.type.math.Matrix3D;
 	import aerys.minko.type.parser.collada.enum.TransformType;
 	import aerys.minko.type.parser.collada.helper.Source;
 
@@ -11,7 +9,7 @@ package aerys.minko.type.parser.collada.resource.animation
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private static const TMP_MATRIX		: Transform3D = new Transform3D();
+		private static const TMP_MATRIX		: Matrix3D = new Matrix3D();
 		
 		private var _targetId				: String;
 		private var _transformType			: String;
@@ -147,9 +145,9 @@ package aerys.minko.type.parser.collada.resource.animation
 			return out;
 		}
 		
-		private function getMatrixValueAt(t : Number, out : Matrix4x4 = null) : Matrix4x4
+		private function getMatrixValueAt(t : Number, out : Matrix3D = null) : Matrix3D
 		{
-			out ||= new Matrix4x4();
+			out ||= new Matrix3D();
 			
 			// interpolate the output source the get the wanted value.
 			// later here we should implement bezier stuff & co, but i'm way too lazy right now.
@@ -161,11 +159,11 @@ package aerys.minko.type.parser.collada.resource.animation
 			
 			if (timeIndex == 0)
 			{
-				out = outputSource.getComponentByParamIndex(0, 0) as Matrix4x4;
+				out = outputSource.getComponentByParamIndex(0, 0) as Matrix3D;
 			}
 			else if (timeIndex == timesLength)
 			{
-				out = outputSource.getComponentByParamIndex(timesLength - 1, 0) as Matrix4x4;
+				out = outputSource.getComponentByParamIndex(timesLength - 1, 0) as Matrix3D;
 			}
 			else
 			{
@@ -173,10 +171,10 @@ package aerys.minko.type.parser.collada.resource.animation
 				var nextTime			: Number	= times[timeIndex];
 				var interpolationRatio	: Number	= (t - previousTime) / (nextTime - previousTime);
 				
-				var previousValue		: Matrix4x4	= outputSource.getComponentByParamIndex(timeIndex - 1, 0) as Matrix4x4;
-				var nextValue			: Matrix4x4	= outputSource.getComponentByParamIndex(timeIndex, 0) as Matrix4x4;
+				var previousValue		: Matrix3D	= outputSource.getComponentByParamIndex(timeIndex - 1, 0) as Matrix3D;
+				var nextValue			: Matrix3D	= outputSource.getComponentByParamIndex(timeIndex, 0) as Matrix3D;
 				
-				Matrix4x4.copy(previousValue, out);
+				Matrix3D.copy(previousValue, out);
 				out.interpolateTo(nextValue, 1 - interpolationRatio);
 			}
 			
@@ -188,7 +186,7 @@ package aerys.minko.type.parser.collada.resource.animation
 			switch (_transformType)
 			{
 				case TransformType.MATRIX:
-					var matrix : Matrix4x4 = getMatrixValueAt(t);
+					var matrix : Matrix3D = getMatrixValueAt(t);
 					matrix.getRawData(data, 0, false);
 					break;
 				
@@ -258,7 +256,7 @@ package aerys.minko.type.parser.collada.resource.animation
 					
 				case TransformType.ROTATE_X:
 					TMP_MATRIX.setRawData(data);
-					TMP_MATRIX.rotation.x = getSimpleValueAt(t) / 180 * Math.PI;
+					TMP_MATRIX.appendRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.X_AXIS);
 					TMP_MATRIX.appendScale(1);
 //					TMP_MATRIX.prependRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.X_AXIS);
 					TMP_MATRIX.getRawData(data);
@@ -266,7 +264,7 @@ package aerys.minko.type.parser.collada.resource.animation
 				
 				case TransformType.ROTATE_Y:
 					TMP_MATRIX.setRawData(data);
-					TMP_MATRIX.rotation.y = getSimpleValueAt(t) / 180 * Math.PI;
+					TMP_MATRIX.appendRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.Y_AXIS);
 					TMP_MATRIX.appendScale(1);
 //					TMP_MATRIX.prependRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.Y_AXIS);
 					TMP_MATRIX.getRawData(data);
@@ -274,7 +272,7 @@ package aerys.minko.type.parser.collada.resource.animation
 				
 				case TransformType.ROTATE_Z:
 					TMP_MATRIX.setRawData(data);
-					TMP_MATRIX.rotation.z = getSimpleValueAt(t) / 180 * Math.PI;
+					TMP_MATRIX.appendRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.Z_AXIS);
 					TMP_MATRIX.appendScale(1);
 //					TMP_MATRIX.prependRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.Z_AXIS);
 					TMP_MATRIX.getRawData(data);
@@ -283,7 +281,7 @@ package aerys.minko.type.parser.collada.resource.animation
 				case TransformType.TRANSLATE:
 					var value : Object = getCompoundValueAt(t);
 					TMP_MATRIX.setRawData(data);
-					TMP_MATRIX.position.set(value.X, value.Y, value.Z);
+					TMP_MATRIX.setTranslation(value.X, value.Y, value.Z);
 					TMP_MATRIX.appendScale(1);
 //					TMP_MATRIX.prependTranslation(value.X, value.Y, value.Z);
 					TMP_MATRIX.getRawData(data);

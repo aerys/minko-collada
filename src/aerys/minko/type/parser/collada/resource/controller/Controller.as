@@ -2,7 +2,7 @@ package aerys.minko.type.parser.collada.resource.controller
 {
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.mesh.Mesh;
-	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Matrix3D;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
 	import aerys.minko.type.parser.collada.helper.Source;
@@ -29,7 +29,7 @@ package aerys.minko.type.parser.collada.resource.controller
 		private var _id					: String;
 		private var _name				: String;
 		private var _skinId				: String;
-		private var _bindShapeMatrix	: Matrix4x4;
+		private var _bindShapeMatrix	: Matrix3D;
 		
 		/**
 		 * if weightCountPerVertex == 2
@@ -39,15 +39,15 @@ package aerys.minko.type.parser.collada.resource.controller
 		 * ]
 		 */
 		private var _jointNames			: Vector.<String>;
-		private var _invBindMatrices	: Vector.<Matrix4x4>;
+		private var _invBindMatrices	: Vector.<Matrix3D>;
 		private var _boneWeights		: Vector.<Number>
 		private var _boneCountPerVertex	: uint;
 		
 		public function get id()				: String				{ return _id; }
 		public function get name()				: String				{ return _name; }
 		public function get jointNames()		: Vector.<String>		{ return _jointNames; }
-		public function get bindShapeMatrix()	: Matrix4x4				{ return _bindShapeMatrix; }
-		public function get invBindMatrices()	: Vector.<Matrix4x4>	{ return _invBindMatrices; }
+		public function get bindShapeMatrix()	: Matrix3D				{ return _bindShapeMatrix; }
+		public function get invBindMatrices()	: Vector.<Matrix3D>	{ return _invBindMatrices; }
 		public function get skin()				: Geometry				{ return _document.getGeometryById(_skinId); }
 		public function get skinId()			: String				{ return _skinId; }
 		
@@ -149,12 +149,12 @@ package aerys.minko.type.parser.collada.resource.controller
 			}
 		}
 		
-		private function parseBindShapeMatrix(xmlController : XML) : Matrix4x4
+		private function parseBindShapeMatrix(xmlController : XML) : Matrix3D
 		{
 			var xmlSkin				: XML = xmlController.NS::skin[0];
 			var xmlBindShapeMatrix	: XML = xmlSkin.NS::bind_shape_matrix[0];
 			
-			return xmlBindShapeMatrix != null ? NumberListParser.parseMatrix4x4(xmlBindShapeMatrix) : new Matrix4x4();
+			return xmlBindShapeMatrix != null ? NumberListParser.parseMatrix3D(xmlBindShapeMatrix) : new Matrix3D();
 		}
 		
 		private function parseBoneData(xmlController	: XML, 
@@ -221,14 +221,14 @@ package aerys.minko.type.parser.collada.resource.controller
 			return maxVcount;
 		}
 		
-		private static function parseInvBindMatrix(controller : XML) : Vector.<Matrix4x4>
+		private static function parseInvBindMatrix(controller : XML) : Vector.<Matrix3D>
 		{
 			var sourceId	: String	= controller..NS::joints.NS::input.(@semantic == 'INV_BIND_MATRIX').@source.substring(1);
 			var xmlSource	: XML		= controller..NS::source.(@id == sourceId)[0];			
 			
 			var source		: Source	= Source.createFromXML(xmlSource);
 			
-			return Vector.<Matrix4x4>(source.data);
+			return Vector.<Matrix3D>(source.data);
 		}
 		
 		private static function parseJoints(controller : XML) : Vector.<String>

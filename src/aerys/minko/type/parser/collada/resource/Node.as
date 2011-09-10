@@ -5,7 +5,7 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.scene.node.group.Joint;
 	import aerys.minko.scene.node.group.TransformGroup;
 	import aerys.minko.type.error.collada.ColladaError;
-	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Matrix3D;
 	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.enum.NodeType;
@@ -27,7 +27,7 @@ package aerys.minko.type.parser.collada.resource
 		private var _id			: String;
 		private var _sid		: String;
 		private var _name		: String;
-		private var _transform	: Matrix4x4;
+		private var _transform	: Matrix3D;
 		private var _type		: String;
 		
 		private var _childs		: Vector.<IInstance>;
@@ -35,7 +35,7 @@ package aerys.minko.type.parser.collada.resource
 		public function get id()		: String				{ return _id; }
 		public function get sid()		: String				{ return _sid; }
 		public function get name()		: String				{ return _name; }
-		public function get transform()	: Matrix4x4				{ return _transform; }
+		public function get transform()	: Matrix3D				{ return _transform; }
 		public function get type()		: String				{ return _type; }
 		public function get childs()	: Vector.<IInstance>	{ return _childs; }
 		
@@ -121,7 +121,7 @@ package aerys.minko.type.parser.collada.resource
 			var tf : TransformGroup = new TransformGroup();
 			tf.name = _id;
 			
-			Matrix4x4.copy(_transform, tf.transform);
+			Matrix3D.copy(_transform, tf.transform);
 			tf.transform.appendScale(1);				// used to invalidate the matrix
 			
 			for each (var child : IInstance in _childs)
@@ -143,7 +143,7 @@ package aerys.minko.type.parser.collada.resource
 			joint.name = _id;
 			joint.boneName = _sid && _sid.length != 0 ? _sid : _id;
 			
-			Matrix4x4.copy(_transform, joint.transform);
+			Matrix3D.copy(_transform, joint.transform);
 			joint.transform.appendScale(1);				// used to invalidate the matrix
 			
 			for each (var child : IInstance in _childs)

@@ -2,8 +2,7 @@ package aerys.minko.type.parser.collada.resource.animation
 {
 	import aerys.minko.type.animation.timeline.ITimeline;
 	import aerys.minko.type.animation.timeline.MatrixLinearTimeline;
-	import aerys.minko.type.math.Matrix4x4;
-	import aerys.minko.type.math.Transform3D;
+	import aerys.minko.type.math.Matrix3D;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.resource.IResource;
@@ -97,7 +96,7 @@ package aerys.minko.type.parser.collada.resource.animation
 				var timesLength			: uint					= times.length;
 				
 				var minkoTimes			: Vector.<uint>			= new Vector.<uint>();
-				var minkoMatrices		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
+				var minkoMatrices		: Vector.<Matrix3D>	= new Vector.<Matrix3D>();
 				
 				for (var i : uint = 0; i < timesLength; ++i)
 				{
@@ -114,7 +113,7 @@ package aerys.minko.type.parser.collada.resource.animation
 					// why do we have to do this? animation data from the collada file is plain wrong.
 					vector[3] = vector[7] = vector[11] = 0
 					vector[15] = 1;
-					var matrix : Transform3D = new Transform3D();
+					var matrix : Matrix3D = new Matrix3D();
 					matrix.setRawData(vector, 0, false);
 					
 					minkoTimes.push((time * 1000) << 0);

@@ -1,19 +1,18 @@
 package aerys.minko.type.parser.collada.helper
 {
 	import aerys.minko.type.error.collada.ColladaError;
-	import aerys.minko.type.math.Matrix4x4;
-	import aerys.minko.type.math.Transform3D;
+	import aerys.minko.type.math.Matrix3D;
 	import aerys.minko.type.math.Vector4;
 
 	public class TransformParser
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		public static function parseTransform(node : XML) : Matrix4x4
+		public static function parseTransform(node : XML) : Matrix3D
 		{
-			var children	: XMLList		= node.children();
-			var numChildren	: Number		= children.length();
-			var transform	: Transform3D	= new Transform3D();
+			var children	: XMLList	= node.children();
+			var numChildren	: Number	= children.length();
+			var transform	: Matrix3D	= new Matrix3D();
 			
 			for (var i : int = 0; i < numChildren; ++i)
 			{
@@ -29,7 +28,7 @@ package aerys.minko.type.parser.collada.helper
 					
 					case 'matrix':
 						// is this multiply or multiplyInverse?
-						transform.multiply(NumberListParser.parseMatrix4x4(child));
+						transform.prepend(NumberListParser.parseMatrix3D(child));
 						break;
 					
 					case 'rotate':

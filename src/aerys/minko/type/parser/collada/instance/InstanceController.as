@@ -5,7 +5,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.group.Joint;
 	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.scene.node.mesh.SkinnedMesh;
-	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Matrix3D;
 	import aerys.minko.type.parser.collada.Document;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.Node;
@@ -70,15 +70,15 @@ package aerys.minko.type.parser.collada.instance
 		{
 			if (!_minkoSkinnedMesh)
 			{
-				var controller			: Controller			= Controller(resource);
+				var controller			: Controller		= Controller(resource);
 				
-				var skeletonReference	: IGroup				= null;
-				var skeletonRootName	: String				= _bindedSkeletonId;
+				var skeletonReference	: IGroup			= null;
+				var skeletonRootName	: String			= _bindedSkeletonId;
 				
-				var mesh				: Mesh					= controller.toMesh();
-				var bindShapeMatrix		: Matrix4x4				= controller.bindShapeMatrix;
-				var jointNames			: Vector.<String>		= controller.jointNames;
-				var invBindMatrices		: Vector.<Matrix4x4>	= controller.invBindMatrices;
+				var mesh				: Mesh				= controller.toMesh();
+				var bindShapeMatrix		: Matrix3D			= controller.bindShapeMatrix;
+				var jointNames			: Vector.<String>	= controller.jointNames;
+				var invBindMatrices		: Vector.<Matrix3D>	= controller.invBindMatrices;
 				
 				if (mesh == null)
 					return null;
