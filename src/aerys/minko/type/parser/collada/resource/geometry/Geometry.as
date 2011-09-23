@@ -1,5 +1,6 @@
 package aerys.minko.type.parser.collada.resource.geometry
 {
+	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.group.Group;
 	import aerys.minko.scene.node.group.IGroup;
@@ -62,6 +63,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 			{
 				try {
 					var geometry : Geometry = Geometry.createFromXML(xmlGeometry, document);
+					
 					store[geometry.id] = geometry;
 				}
 				catch (e : Error)
@@ -286,7 +288,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 				}
 				else
 				{
-					trace('Dropping unknown vertex semantic:', semantic);
+					Minko.log(0, 'Dropping unknown vertex semantic:' + semantic);
 					vertexSemantics.splice(semanticId, 1);
 					--semanticId;
 					--semanticLength;
@@ -305,7 +307,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 				else
 				{
 					if (semantic != 'VERTEX')
-						trace('Dropping unknown triangle semantic:', semantic);
+						Minko.log(0, 'Dropping unknown triangle semantic:' + semantic);
 					triangleSemantics.splice(semanticId, 1);
 					--semanticId;
 					--semanticLength;

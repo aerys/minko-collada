@@ -7,6 +7,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.group.StyleGroup;
 	import aerys.minko.scene.node.mesh.IMesh;
 	import aerys.minko.scene.node.texture.ITexture;
+	import aerys.minko.type.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.geometry.Geometry;
@@ -69,7 +70,7 @@ package aerys.minko.type.parser.collada.instance
 //			return toUntexturedModel();
 		}
 		
-		public function toUntexturedModel() : Model
+		/*public function toUntexturedModel() : Model
 		{
 			if (!_minkoModel)
 			{
@@ -86,32 +87,40 @@ package aerys.minko.type.parser.collada.instance
 			}
 			
 			return _minkoModel;
-		}
+		}*/
 		
 		public function toStyleGroupedMesh() : StyleGroup
 		{
-			var geometry	: Geometry		= resource as Geometry;
-			var group		: StyleGroup	= new StyleGroup();
+			var group	: StyleGroup	= null;
 
 			if (geometry)
 			{
-				// get the mesh
-				var mesh				: IMesh				= geometry.toMesh();
+				var geometry	: Geometry		= resource as Geometry;
+				var options		: ParserOptions	= _document.parserOptions;
 				
-				// get the first material
-				var triangleStore		: Triangles 		= geometry.triangleStores[0];
-				var subMeshMatSymbol	: String			= triangleStore.material;
-				var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
-				var texture				: IScene			= instanceMaterial.toScene();
-				
-				group.addChild(texture)
-					 .addChild(mesh);
+				if (options.loadTextures)
+				{
+					// get the first material
+					var triangleStore		: Triangles 		= geometry.triangleStores[0];
+					var subMeshMatSymbol	: String			= triangleStore.material;
+					var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
+					var texture				: IScene			= instanceMaterial.toScene();
+					
+					group ||= new StyleGroup();
+					group.addChild(texture);
+				}
+					
+				if (options.loadMeshes)
+				{
+					group ||= new StyleGroup();
+					group.addChild(geometry.toMesh());
+				}
 			}
 			
 			return group;
 		}
 		
-		public function toTexturedModelGroup() : Group
+		/*public function toTexturedModelGroup() : Group
 		{
 			var group		: Group		= new Group();
 			var geometry	: Geometry	= resource as Geometry;
@@ -131,7 +140,7 @@ package aerys.minko.type.parser.collada.instance
 			}
 			
 			return group;
-		}
+		}*/
 		
 		public function get resource() : IResource
 		{

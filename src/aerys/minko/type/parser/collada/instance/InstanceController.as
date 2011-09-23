@@ -1,21 +1,27 @@
 package aerys.minko.type.parser.collada.instance
 {
+	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.IGroup;
 	import aerys.minko.scene.node.group.Joint;
 	import aerys.minko.scene.node.group.StyleGroup;
+	import aerys.minko.scene.node.mesh.IMesh;
 	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.scene.node.mesh.SkinnedMesh;
 	import aerys.minko.type.math.Matrix3D;
+	import aerys.minko.type.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.Node;
 	import aerys.minko.type.parser.collada.resource.controller.Controller;
+	import aerys.minko.type.parser.collada.resource.geometry.Geometry;
+	import aerys.minko.type.parser.collada.resource.geometry.Triangles;
 	
 	public class InstanceController implements IInstance
 	{
-		private static const NS : Namespace = 
-			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		use namespace minko_collada;
+		
+		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
 		private var _document			: ColladaDocument;
 		
@@ -25,7 +31,7 @@ package aerys.minko.type.parser.collada.instance
 		private var _bindedSkeletonId	: String;
 		private var _bindMaterial		: Object;
 		
-		private var _minkoSkinnedMesh	: SkinnedMesh;
+		private var _mesh				: IMesh;
 		
 		public function InstanceController(document			: ColladaDocument,
 										   sourceId			: String,
@@ -66,43 +72,60 @@ package aerys.minko.type.parser.collada.instance
 		public function toScene() : IScene
 		{
 			return toStyleGroup();
-//			return toSkinnedMesh();
-		}
-		
-		public function toSkinnedMesh() : SkinnedMesh
-		{
-			if (!_minkoSkinnedMesh)
-			{
-				var controller			: Controller		= Controller(resource);
-				
-				var skeletonReference	: IGroup			= null;
-				var skeletonRootName	: String			= _bindedSkeletonId;
-				
-				var mesh				: Mesh				= controller.toMesh();
-				var bindShapeMatrix		: Matrix3D			= controller.bindShapeMatrix;
-				var jointNames			: Vector.<String>	= controller.jointNames;
-				var invBindMatrices		: Vector.<Matrix3D>	= controller.invBindMatrices;
-				
-				if (mesh == null)
-					return null;
-				
-				_minkoSkinnedMesh		= new SkinnedMesh(mesh, skeletonReference, skeletonRootName, bindShapeMatrix, jointNames, invBindMatrices);
-				_minkoSkinnedMesh.name	= _sourceId;
-			}
-			
-			return _minkoSkinnedMesh;
 		}
 		
 		public function toStyleGroup() : StyleGroup
 		{
-			var sg : StyleGroup = new StyleGroup(); 
+			var sg 					: StyleGroup 		= new StyleGroup(); 
+			var options				: ParserOptions		= _document.parserOptions;
+			var controller			: Controller		= Controller(resource);
 			
-			for each (var instanceMaterial : InstanceMaterial in _bindMaterial)
+			if (options.loadTextures)
+			{
+				var geometry			: Geometry			= _document.getGeometryById(controller.skinId);			
+				var triangleStore		: Triangles 		= geometry.triangleStores[0];
+				var subMeshMatSymbol	: String			= triangleStore.material;
+				var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
+				
 				sg.addChild(instanceMaterial.toScene());
+			}
 			
-			sg.addChild(toSkinnedMesh());
+			if (options.loadMeshes)
+				sg.addChild(getMesh());
 			
 			return sg;
+		}
+		
+		private function getMesh() : IMesh
+		{
+			if (!_mesh)
+			{
+				var controller			: Controller		= Controller(resource);
+				
+				_mesh = controller.toMesh();
+				if (_mesh == null)
+					return null;
+				
+				if (_document.parserOptions.loadSkins)
+				{
+					var skeletonReference	: IGroup			= null;
+					var skeletonRootName	: String			= _bindedSkeletonId;
+					
+					var bindShapeMatrix		: Matrix3D			= controller.bindShapeMatrix;
+					var jointNames			: Vector.<String>	= controller.jointNames;
+					var invBindMatrices		: Vector.<Matrix3D>	= controller.invBindMatrices;
+					
+					_mesh = new SkinnedMesh(_mesh,
+						skeletonReference,
+						skeletonRootName,
+						bindShapeMatrix,
+						jointNames,
+						invBindMatrices);
+					_mesh.name = _sourceId;
+				}
+			}
+			
+			return _mesh;
 		}
 		
 		public function get resource() : IResource

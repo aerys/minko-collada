@@ -99,12 +99,7 @@ package aerys.minko.type.parser.collada.instance
 			{
 				var image : Image = _document.getImageById(textureName);
 				
-				if (image == null)
-				{
-					return new ColorTexture(0x00FF00);
-				}
-				//else if (image.imageData.isLoaded)
-				else if (image.imageData.path)
+				if (image && image.imageData.path)
 				{
 					var texture : IScene = getTextureFromPath(image.imageData.path);
 					
