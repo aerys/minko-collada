@@ -1,6 +1,6 @@
 package aerys.minko.type.parser.collada.resource.image
 {
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceImage;
 	import aerys.minko.type.parser.collada.resource.IResource;
@@ -11,7 +11,7 @@ package aerys.minko.type.parser.collada.resource.image
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _document	: Document;
+		private var _document	: ColladaDocument;
 		
 		private var _id			: String;
 		private var _sid		: String;
@@ -24,27 +24,28 @@ package aerys.minko.type.parser.collada.resource.image
 		public function get imageData()	: IImageData	{ return _imageData; }
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
-												document	: Document, 
+												document	: ColladaDocument, 
 												store		: Object) : void
 		{
-			var xmlImageLibrary	: XML		= xmlDocument..NS::library_images[0];
+			var xmlImageLibrary	: XML	= xmlDocument..NS::library_images[0];
 			if (!xmlImageLibrary)
 				return;
 			
-			var xmlImages 			: XMLList	= xmlImageLibrary.NS::image;
+			var xmlImages	: XMLList	= xmlImageLibrary.NS::image;
 			
 			for each (var xmlImage : XML in xmlImages)
 			{
 				var image : Image = createFromXML(xmlImage, document);
+				
 				store[image.id] = image;
 			}
 		}
 		
-		public static function createFromXML(xmlImage : XML, document : Document) : Image
+		public static function createFromXML(xmlImage : XML, document : ColladaDocument) : Image
 		{
 			var image : Image = new Image();
-			image._document = document;
 			
+			image._document 	= document;
 			image._id			= xmlImage.@id;
 			image._sid			= xmlImage.@sid;
 			image._name			= xmlImage.@name;
@@ -53,7 +54,7 @@ package aerys.minko.type.parser.collada.resource.image
 			return image;
 		}
 		
-		public function createInstance():IInstance
+		public function createInstance() : IInstance
 		{
 			return InstanceImage.createFromSourceId(_id, _document);
 		}

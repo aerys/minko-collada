@@ -3,7 +3,7 @@ package aerys.minko.type.parser.collada.resource.controller
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.type.math.Matrix3D;
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
 	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.parser.collada.instance.IInstance;
@@ -20,7 +20,7 @@ package aerys.minko.type.parser.collada.resource.controller
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _document			: Document;
+		private var _document			: ColladaDocument;
 		
 		// morph related data
 		/* not yet implemented */
@@ -52,7 +52,7 @@ package aerys.minko.type.parser.collada.resource.controller
 		public function get skinId()			: String				{ return _skinId; }
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
-												document	: Document, 
+												document	: ColladaDocument, 
 												store		: Object) : void
 		{
 			var xmlControllerLibrary	: XML		= xmlDocument..NS::library_controllers[0];
@@ -69,7 +69,7 @@ package aerys.minko.type.parser.collada.resource.controller
 		}
 		
 		public function Controller(xmlController	: XML, 
-								   document			: Document)
+								   document			: ColladaDocument)
 		{
 			_document				= document;
 			

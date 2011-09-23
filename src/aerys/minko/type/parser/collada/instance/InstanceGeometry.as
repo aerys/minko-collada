@@ -4,13 +4,10 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.Model;
 	import aerys.minko.scene.node.group.Group;
-	import aerys.minko.scene.node.group.IGroup;
 	import aerys.minko.scene.node.group.StyleGroup;
 	import aerys.minko.scene.node.mesh.IMesh;
-	import aerys.minko.scene.node.mesh.Mesh;
-	import aerys.minko.scene.node.texture.BitmapTexture;
 	import aerys.minko.scene.node.texture.ITexture;
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.geometry.Geometry;
 	import aerys.minko.type.parser.collada.resource.geometry.Triangles;
@@ -21,7 +18,7 @@ package aerys.minko.type.parser.collada.instance
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _document			: Document;
+		private var _document			: ColladaDocument;
 		private var _sourceId			: String;
 		private var _name				: String;
 		private var _sid				: String;
@@ -29,7 +26,7 @@ package aerys.minko.type.parser.collada.instance
 		
 		private var _minkoModel			: Model;
 		
-		public function InstanceGeometry(document			: Document,
+		public function InstanceGeometry(document			: ColladaDocument,
 										 sourceId			: String,
 										 bindMaterial		: Object = null,
 										 name				: String = null,
@@ -42,7 +39,7 @@ package aerys.minko.type.parser.collada.instance
 			_bindMaterial	= bindMaterial;
 		}
 		
-		public static function createFromXML(document	: Document,
+		public static function createFromXML(document	: ColladaDocument,
 											 xml		: XML) : InstanceGeometry
 		{
 			var sourceId	: String = String(xml.@url).substr(1);
@@ -59,7 +56,7 @@ package aerys.minko.type.parser.collada.instance
 			return new InstanceGeometry(document, sourceId, bindMaterial, name, sid);
 		}
 		
-		public static function createFromSourceId(document : Document,
+		public static function createFromSourceId(document : ColladaDocument,
 												  sourceId : String) : InstanceGeometry
 		{
 			return new InstanceGeometry(document, sourceId);
@@ -105,7 +102,7 @@ package aerys.minko.type.parser.collada.instance
 				var triangleStore		: Triangles 		= geometry.triangleStores[0];
 				var subMeshMatSymbol	: String			= triangleStore.material;
 				var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
-				var texture				: ITexture			= instanceMaterial.toScene() as ITexture;
+				var texture				: IScene			= instanceMaterial.toScene();
 				
 				group.addChild(texture)
 					 .addChild(mesh);
@@ -128,7 +125,7 @@ package aerys.minko.type.parser.collada.instance
 				
 				var subMeshMatSymbol	: String			= triangleStore.material;
 				var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
-				var texture				: ITexture			= instanceMaterial.toScene() as ITexture;
+				var texture				: IScene			= instanceMaterial.toScene();
 				
 				group.addChild(new Model(subMesh, texture));
 			}

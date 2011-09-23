@@ -3,7 +3,7 @@ package aerys.minko.type.parser.collada.resource.animation
 	import aerys.minko.type.animation.timeline.ITimeline;
 	import aerys.minko.type.animation.timeline.MatrixLinearTimeline;
 	import aerys.minko.type.math.Matrix3D;
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	
@@ -13,7 +13,7 @@ package aerys.minko.type.parser.collada.resource.animation
 	{
 		public static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _document	: Document;
+		private var _document	: ColladaDocument;
 		
 		private var _id			: String;
 		private var _animations	: Vector.<Animation>;
@@ -23,7 +23,7 @@ package aerys.minko.type.parser.collada.resource.animation
 		public function set id(v : String) : void { _id = v; }
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
-												document	: Document, 
+												document	: ColladaDocument, 
 												store		: Object) : void
 		{
 			var xmlAnimationLibrary	: XML					= xmlDocument..NS::library_animations[0];
@@ -44,7 +44,7 @@ package aerys.minko.type.parser.collada.resource.animation
 		}
 		
 		public static function createFromXML(xmlAnimation	: XML,
-											 document		: Document) : Animation
+											 document		: ColladaDocument) : Animation
 		{
 			var id			: String				= xmlAnimation.@id;
 			var channels	: Vector.<Channel>		= new Vector.<Channel>();
@@ -59,7 +59,7 @@ package aerys.minko.type.parser.collada.resource.animation
 			return new Animation(document, id, channels, animations);
 		}
 		
-		public function Animation(document		: Document,
+		public function Animation(document		: ColladaDocument,
 								  id			: String,
 								  channels		: Vector.<Channel>		= null,
 								  animations	: Vector.<Animation>	= null)

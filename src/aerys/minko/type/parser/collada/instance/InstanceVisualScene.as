@@ -2,13 +2,13 @@ package aerys.minko.type.parser.collada.instance
 {
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.Group;
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.VisualScene;
 	
 	public class InstanceVisualScene implements IInstance
 	{
-		private var _document	: Document;
+		private var _document	: ColladaDocument;
 		
 		private var _sourceId	: String;
 		private var _name		: String;
@@ -16,7 +16,7 @@ package aerys.minko.type.parser.collada.instance
 		
 		private var _minkoGroup	: Group;
 		
-		public function InstanceVisualScene(document	: Document, 
+		public function InstanceVisualScene(document	: ColladaDocument, 
 											sourceId	: String,
 											name		: String = null,
 											sid			: String = null)

@@ -4,14 +4,14 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.group.Joint;
 	import aerys.minko.scene.node.group.TransformGroup;
 	import aerys.minko.type.error.collada.ColladaError;
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.enum.NodeType;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.Node;
 	
 	public class InstanceNode implements IInstance
 	{
-		private var _document	: Document;
+		private var _document	: ColladaDocument;
 		
 		private var _id			: String;
 		private var _name		: String;
@@ -19,7 +19,7 @@ package aerys.minko.type.parser.collada.instance
 		
 		private var _minkoScene	: IScene;
 		
-		public function InstanceNode(document	: Document,
+		public function InstanceNode(document	: ColladaDocument,
 									 sourceId	: String,
 									 name		: String = null,
 									 scopedId	: String = null)
@@ -30,7 +30,7 @@ package aerys.minko.type.parser.collada.instance
 			_scopedId	= scopedId
 		}
 		
-		public static function createFromXML(document	: Document, 
+		public static function createFromXML(document	: ColladaDocument, 
 											 xml		: XML) : InstanceNode
 		{
 			var sid			: String = xml.@sid;
@@ -40,7 +40,7 @@ package aerys.minko.type.parser.collada.instance
 			return new InstanceNode(document, sourceId, name, sid);
 		}
 		
-		public static function createFromSourceId(document	: Document, 
+		public static function createFromSourceId(document	: ColladaDocument, 
 												  sourceId	: String) : InstanceNode
 		{
 			return new InstanceNode(document, sourceId);

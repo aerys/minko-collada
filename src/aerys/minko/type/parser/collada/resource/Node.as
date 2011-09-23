@@ -7,7 +7,7 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.math.Matrix3D;
 	import aerys.minko.type.math.Vector4;
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.enum.NodeType;
 	import aerys.minko.type.parser.collada.helper.TransformParser;
 	import aerys.minko.type.parser.collada.instance.IInstance;
@@ -22,7 +22,7 @@ package aerys.minko.type.parser.collada.resource
 		private static const NS	: Namespace = 
 			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _document	: Document;
+		private var _document	: ColladaDocument;
 		
 		private var _id			: String;
 		private var _sid		: String;
@@ -40,7 +40,7 @@ package aerys.minko.type.parser.collada.resource
 		public function get childs()	: Vector.<IInstance>	{ return _childs; }
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
-												document	: Document, 
+												document	: ColladaDocument, 
 												store		: Object) : void
 		{
 			var xmlNodeLibrary	: XML		= xmlDocument..NS::library_nodes[0];
@@ -56,7 +56,7 @@ package aerys.minko.type.parser.collada.resource
 			}
 		}
 		
-		public function Node(xmlNode : XML, document : Document) 
+		public function Node(xmlNode : XML, document : ColladaDocument) 
 		{
 			_document	= document;
 			
@@ -127,6 +127,7 @@ package aerys.minko.type.parser.collada.resource
 			for each (var child : IInstance in _childs)
 			{
 				var minkoChild : IScene = child.toScene();
+				
 				if (minkoChild != null)
 					tf.addChild(minkoChild);
 			}
@@ -149,6 +150,7 @@ package aerys.minko.type.parser.collada.resource
 			for each (var child : IInstance in _childs)
 			{
 				var minkoChild : IScene = child.toScene();
+				
 				if (minkoChild != null)
 					joint.addChild(minkoChild);
 			}

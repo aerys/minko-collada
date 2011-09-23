@@ -1,7 +1,7 @@
 package aerys.minko.type.parser.collada.resource.image.data
 {
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -14,26 +14,26 @@ package aerys.minko.type.parser.collada.resource.image.data
 
 	use namespace minko_collada
 	
-	public class InitFrom extends EventDispatcher implements IImageData
+	public class InitFrom/* extends EventDispatcher*/ implements IImageData
 	{
-		private var _document	: Document;
+//		private var _document	: ColladaDocument;
 		
 		private var _path		: String;
-		private var _bitmapData	: BitmapData;
+//		private var _bitmapData	: BitmapData;
 		
 		public function get path()			: String		{ return _path;					}
-		public function get isLoaded()		: Boolean		{ return _bitmapData != null;	}
-		public function get bitmapData()	: BitmapData	{ return _bitmapData;			}
+//		public function get isLoaded()		: Boolean		{ return _bitmapData != null;	}
+//		public function get bitmapData()	: BitmapData	{ return _bitmapData;			}
 		
-		public static function createFromXML(xml : XML, document : Document) : InitFrom
+		public static function createFromXML(xml : XML, document : ColladaDocument) : InitFrom
 		{
-			var path		: String = xml;
-			var filename	: String = path.substr(path.lastIndexOf('/') + 1);
+			var path		: String 	= xml;
+			var filename	: String 	= path.substr(path.lastIndexOf('/') + 1);
+			var initFrom 	: InitFrom 	= new InitFrom();
 			
-			var initFrom : InitFrom = new InitFrom();
 			initFrom._path			= path;
-			initFrom._document		= document;
-			initFrom._bitmapData	= document.getTextureFromFeed(filename); 
+//			initFrom._document		= document;
+//			initFrom._bitmapData	= document.getTextureFromFeed(filename); 
 			
 			return initFrom;
 		}
@@ -42,7 +42,7 @@ package aerys.minko.type.parser.collada.resource.image.data
 		{
 		}
 		
-		public function load() : void
+		/*public function load() : void
 		{
 			var r : URLRequest = new URLRequest();
 			r.url = _path;
@@ -56,7 +56,7 @@ package aerys.minko.type.parser.collada.resource.image.data
 		{
 			_bitmapData = Bitmap(LoaderInfo(e.currentTarget).content).bitmapData;
 			dispatchEvent(new Event(Event.COMPLETE));
-		}
+		}*/
 		
 	}
 }

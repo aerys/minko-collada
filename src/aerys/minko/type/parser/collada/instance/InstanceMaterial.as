@@ -1,10 +1,14 @@
 package aerys.minko.type.parser.collada.instance
 {
 	import aerys.minko.scene.node.IScene;
+	import aerys.minko.scene.node.group.Group;
+	import aerys.minko.scene.node.group.LoaderGroup;
 	import aerys.minko.scene.node.texture.BitmapTexture;
 	import aerys.minko.scene.node.texture.ColorTexture;
+	import aerys.minko.scene.node.texture.ITexture;
 	import aerys.minko.type.error.collada.ColladaError;
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.ParserOptions;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.Material;
 	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTexture;
@@ -18,25 +22,33 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.type.parser.collada.resource.effect.technique.Lambert;
 	import aerys.minko.type.parser.collada.resource.effect.technique.Phong;
 	import aerys.minko.type.parser.collada.resource.image.Image;
+	import aerys.minko.type.parser.collada.resource.image.data.IImageData;
 	import aerys.minko.type.parser.collada.resource.image.data.InitFrom;
 	
 	import flash.display.BitmapData;
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
+	import flash.net.URLRequest;
 	
-	public class InstanceMaterial implements IInstance
+	public class InstanceMaterial extends EventDispatcher implements IInstance
 	{
-		private var _document	: Document;
-		private var _sourceId	: String;
-		private var _symbol		: String;
+		private static const DEFAULT_TEXTURE	: ITexture	= new ColorTexture(0xffffffff);
+		
+		private var _document	: ColladaDocument	= null;
+		private var _sourceId	: String	= null;
+		private var _symbol		: String	= null;
 		
 		public function get sourceId()	: String { return _sourceId;	}
 		public function get symbol()	: String { return _symbol;		}
 		
-		public static function createFromXML(xml : XML, document : Document) : InstanceMaterial
+		public static function createFromXML(xml : XML, document : ColladaDocument) : InstanceMaterial
 		{
 			var im : InstanceMaterial = new InstanceMaterial();
+			
 			im._document	= document;
 			im._sourceId	= String(xml.@target).substr(1);
 			im._symbol		= xml.@symbol;
+			
 			return im;
 		}
 		
@@ -65,42 +77,72 @@ package aerys.minko.type.parser.collada.instance
 			var profileParameters	: Object = profile.params;
 			var effectParameters	: Object = effect.params;
 			var finalParameters		: Object = new Object();
-			for (key in profileParameters)	finalParameters[key] = profileParameters[key];
-			for (key in effectParameters)	finalParameters[key] = effectParameters[key];
+			
+			for (key in profileParameters)
+				finalParameters[key] = profileParameters[key];
+			for (key in effectParameters)
+				finalParameters[key] = effectParameters[key];
 			
 			// retrieve diffuse color/texture
 			var diffuse : CommonColorOrTexture;
+			
 			if (technique is Constant)
-			{
 				diffuse = CommonColorOrTexture.createFromColor(0xffffffff);
-			}
 			else if (technique is ILightedTechnique)
-			{
 				diffuse = ILightedTechnique(technique).diffuse;
-			}
-			else throw new ColladaError('Unknown technique type');
+			else
+				throw new ColladaError('Unknown technique type');
 			
 			var textureName : String = diffuse.textureName;
+			
 			if (textureName)
 			{
 				var image : Image = _document.getImageById(textureName);
+				
 				if (image == null)
 				{
 					return new ColorTexture(0x00FF00);
 				}
-				else if (image.imageData.isLoaded)
+				//else if (image.imageData.isLoaded)
+				else if (image.imageData.path)
 				{
-					return new BitmapTexture(image.imageData.bitmapData);
+					var texture : IScene = getTextureFromPath(image.imageData.path);
+					
+					if (texture)
+						return texture;
 				}
-				else
-				{
-					return new ColorTexture(0x0000FF);
-				}
+				
+				return DEFAULT_TEXTURE;
 			}
 			else
 			{
 				return new ColorTexture(diffuse.color & 0xffffff);
 			}
+		}
+		
+		private function getTextureFromPath(textureFilename : String) : IScene
+		{
+			var options			: ParserOptions	= _document.parserOptions;
+			var loadTextures	: Boolean		= options ? options.loadTextures : false;
+			
+			if (loadTextures)
+			{
+				var textureFilenameFunction	: Function	= options ? options.textureFilenameFunction : null;
+				var textureFunction			: Function	= options ? options.textureFunction : null;
+				
+				if (textureFilename != null && textureFilenameFunction != null)
+					textureFilename = textureFilenameFunction(textureFilename);
+				
+				if (textureFilename)
+				{
+					if (textureFunction != null)
+						return textureFunction(textureFilename);
+					else
+						return LoaderGroup.load(new URLRequest(textureFilename));
+				}
+			}
+			
+			return null;
 		}
 	}
 }

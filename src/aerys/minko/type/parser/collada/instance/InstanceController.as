@@ -3,10 +3,11 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.IGroup;
 	import aerys.minko.scene.node.group.Joint;
+	import aerys.minko.scene.node.group.StyleGroup;
 	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.scene.node.mesh.SkinnedMesh;
 	import aerys.minko.type.math.Matrix3D;
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.Node;
 	import aerys.minko.type.parser.collada.resource.controller.Controller;
@@ -16,7 +17,7 @@ package aerys.minko.type.parser.collada.instance
 		private static const NS : Namespace = 
 			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _document			: Document;
+		private var _document			: ColladaDocument;
 		
 		private var _sourceId			: String;
 		private var _name				: String;
@@ -26,7 +27,7 @@ package aerys.minko.type.parser.collada.instance
 		
 		private var _minkoSkinnedMesh	: SkinnedMesh;
 		
-		public function InstanceController(document			: Document,
+		public function InstanceController(document			: ColladaDocument,
 										   sourceId			: String,
 										   name				: String = null,
 										   sid				: String = null,
@@ -41,7 +42,7 @@ package aerys.minko.type.parser.collada.instance
 			_bindMaterial		= bindMaterial;
 		}
 		
-		public static function createFromXML(document	: Document, 
+		public static function createFromXML(document	: ColladaDocument, 
 											 xml		: XML) : InstanceController
 		{
 			var sourceId			: String	= String(xml.@url).substr(1);
@@ -55,6 +56,7 @@ package aerys.minko.type.parser.collada.instance
 			for each (var xmlIm : XML in xml..NS::instance_material)
 			{
 				var instanceMaterial : InstanceMaterial = InstanceMaterial.createFromXML(xmlIm, document);
+				
 				bindMaterial[instanceMaterial.symbol] = instanceMaterial;
 			}
 			
@@ -63,7 +65,8 @@ package aerys.minko.type.parser.collada.instance
 		
 		public function toScene() : IScene
 		{
-			return toSkinnedMesh();
+			return toStyleGroup();
+//			return toSkinnedMesh();
 		}
 		
 		public function toSkinnedMesh() : SkinnedMesh
@@ -88,6 +91,18 @@ package aerys.minko.type.parser.collada.instance
 			}
 			
 			return _minkoSkinnedMesh;
+		}
+		
+		public function toStyleGroup() : StyleGroup
+		{
+			var sg : StyleGroup = new StyleGroup(); 
+			
+			for each (var instanceMaterial : InstanceMaterial in _bindMaterial)
+				sg.addChild(instanceMaterial.toScene());
+			
+			sg.addChild(toSkinnedMesh());
+			
+			return sg;
 		}
 		
 		public function get resource() : IResource

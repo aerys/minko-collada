@@ -5,7 +5,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 	import aerys.minko.scene.node.group.IGroup;
 	import aerys.minko.scene.node.mesh.IMesh;
 	import aerys.minko.scene.node.mesh.Mesh;
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.enum.InputType;
 	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.parser.collada.instance.IInstance;
@@ -23,7 +23,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _document				: Document;
+		private var _document				: ColladaDocument;
 		
 		private var _id						: String;
 		private var _name					: String;
@@ -49,7 +49,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 		}
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
-												document	: Document, 
+												document	: ColladaDocument, 
 												store		: Object) : void
 		{
 			var xmlGeometryLibrary	: XML		= xmlDocument..NS::library_geometries[0];
@@ -71,7 +71,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 			}
 		}
 		
-		public static function createFromXML(xmlGeometry : XML, document : Document) : Geometry
+		public static function createFromXML(xmlGeometry : XML, document : ColladaDocument) : Geometry
 		{
 			var newGeometry : Geometry = new Geometry();
 			
@@ -102,8 +102,12 @@ package aerys.minko.type.parser.collada.resource.geometry
 			for each (var child : XML in xmlMesh.children())
 				switch (child.localName())
 				{
-					case 'lines':		case 'linestrips':		case 'polygons':
-					case 'polylist':	case 'triangles':		case 'trifans':
+					case 'lines':
+					case 'linestrips':
+					case 'polygons':
+					case 'polylist':
+					case 'triangles':
+					case 'trifans':
 					case 'tristrips':
 						newGeometry._triangleStores.push(new Triangles(child, xmlMesh));
 						break;
@@ -324,6 +328,9 @@ package aerys.minko.type.parser.collada.resource.geometry
 			
 			if (semantic == InputType.NORMAL)
 				return VertexComponent.NORMAL;
+			
+			if (semantic == InputType.TANGENT)
+				return VertexComponent.TANGENT;
 			
 			return null;
 		}

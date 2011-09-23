@@ -1,6 +1,6 @@
 package aerys.minko.type.parser.collada.resource.effect
 {
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.ParamParser;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceEffect;
@@ -12,7 +12,7 @@ package aerys.minko.type.parser.collada.resource.effect
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _document	: Document;
+		private var _document	: ColladaDocument;
 		private var _id			: String;
 		private var _name		: String;
 		private var _params		: Object;
@@ -24,7 +24,7 @@ package aerys.minko.type.parser.collada.resource.effect
 		public function get profiles()	: Vector.<IProfile>	{ return _profiles; }
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
-												document	: Document, 
+												document	: ColladaDocument, 
 												store		: Object) : void
 		{
 			var xmlEffectLibrary	: XML		= xmlDocument..NS::library_effects[0];
@@ -41,7 +41,7 @@ package aerys.minko.type.parser.collada.resource.effect
 		}
 		
 		public static function createFromXML(xml		: XML, 
-											 document	: Document) : Effect
+											 document	: ColladaDocument) : Effect
 		{
 			var effect : Effect = new Effect();
 			

@@ -2,7 +2,7 @@ package aerys.minko.type.parser.collada.resource
 {
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.group.Group;
-	import aerys.minko.type.parser.collada.Document;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceNode;
 	import aerys.minko.type.parser.collada.instance.InstanceVisualScene;
@@ -14,7 +14,7 @@ package aerys.minko.type.parser.collada.resource
 		private static const NS	: Namespace = 
 			new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _document	: Document;
+		private var _document	: ColladaDocument;
 		private var _id			: String;
 		private var _name		: String;
 		private var _childs		: Vector.<IInstance>;
@@ -23,7 +23,7 @@ package aerys.minko.type.parser.collada.resource
 		public function get childs()	: Vector.<IInstance>	{ return _childs; }
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
-												document	: Document,
+												document	: ColladaDocument,
 												store		: Object) : void
 		{
 			var xmlSceneLibrary	: XML		= xmlDocument..NS::library_visual_scenes[0];
@@ -39,7 +39,7 @@ package aerys.minko.type.parser.collada.resource
 		}
 		
 		public function VisualScene(xmlScene : XML,
-									document : Document)
+									document : ColladaDocument)
 		{
 			_document	= document;
 			_id			= xmlScene.@id;
