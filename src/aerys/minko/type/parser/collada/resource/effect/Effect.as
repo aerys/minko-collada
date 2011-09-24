@@ -68,7 +68,9 @@ package aerys.minko.type.parser.collada.resource.effect
 					case 'newparam':
 						var paramName	: String	= child.@sid;
 						var paramValue	: *			= ParamParser.parseParam(child);
+						
 						effect._params[paramName]	= paramValue;
+						
 						break;
 				}
 			}

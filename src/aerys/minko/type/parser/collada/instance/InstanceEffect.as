@@ -18,6 +18,7 @@ package aerys.minko.type.parser.collada.instance
 											 document	: ColladaDocument) : InstanceEffect
 		{
 			var instanceEffect : InstanceEffect = new InstanceEffect();
+			
 			instanceEffect._document	= document;
 			instanceEffect._sourceId	= String(xml.@url).substr(1);
 			instanceEffect._params		= new Object();
@@ -26,6 +27,7 @@ package aerys.minko.type.parser.collada.instance
 			{
 				var paramName	: String	= setparam.@ref;
 				var paramValue	: *			= ParamParser.parseParam(setparam);
+				
 				instanceEffect._params[paramName] = paramValue;
 			}
 			
@@ -36,8 +38,10 @@ package aerys.minko.type.parser.collada.instance
 												  document	: ColladaDocument) : InstanceEffect
 		{
 			var instanceEffect : InstanceEffect = new InstanceEffect();
+			
 			instanceEffect._document = document;
 			instanceEffect._sourceId = sourceId;
+			
 			return instanceEffect;
 		}
 		

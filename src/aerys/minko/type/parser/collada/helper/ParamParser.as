@@ -1,9 +1,13 @@
 package aerys.minko.type.parser.collada.helper
 {
 	import aerys.minko.type.error.collada.ColladaError;
+	import aerys.minko.type.parser.collada.ColladaDocument;
+	import aerys.minko.type.parser.collada.resource.image.data.InitFrom;
 
 	public class ParamParser
 	{
+		private static const NS	: Namespace	= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
 		private static const _PARSERS : Object = {
 			'bool'				: notYetImplemented,
 			'bool2'				: notYetImplemented,
@@ -36,16 +40,39 @@ package aerys.minko.type.parser.collada.helper
 			'float4x4'			: notYetImplemented,
 			
 			'enum'				: notYetImplemented,
+			'sampler2D'			: sampler2DParser,
 			'sampler_image'		: notYetImplemented,
-			'sampler_states'	: notYetImplemented
+			'sampler_states'	: notYetImplemented,
+			
+			'surface'			: surfaceParser
 		};
 		
 		public static function parseParam(xml : XML) : *
 		{
-			return null;
+			var valueNode		: XML		= xml.children()[0];
+			var localName 		: String 	= valueNode.localName();
+			var parserFunction	: Function	= _PARSERS[localName];
 			
-			var localName : String = xml.localName();
-			return _PARSERS[localName](xml);
+			// FIXME: throw the exception but handle it properly
+			if (parserFunction == null || parserFunction == notYetImplemented)
+				return null;
+			
+			return parserFunction(valueNode);
+		}
+		
+		private static function surfaceParser(param : XML) : Object
+		{
+			if (param.@type != "2D")
+				notYetImplemented(param);
+			
+			return InitFrom.createFromXML(param.NS::init_from[0]);
+		}
+		
+		private static function sampler2DParser(param : XML) : Object
+		{
+			// FIXME: what should we store if there is more than <source> ?
+			
+			return param.NS::source[0].toString();
 		}
 		
 		private static function notYetImplemented(xml : XML) : *

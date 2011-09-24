@@ -16,6 +16,7 @@ package aerys.minko.type.parser.collada.resource.effect.profile
 		public static function createProfile(xml : XML) : IProfile
 		{
 			var firstSonName : String = xml.localName();
+			
 			return NAME_TO_PROFILE[firstSonName].createFromXML(xml);
 		}
 	}

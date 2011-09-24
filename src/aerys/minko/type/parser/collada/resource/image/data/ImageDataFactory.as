@@ -14,7 +14,8 @@ package aerys.minko.type.parser.collada.resource.image.data
 		public static function createImageData(xml : XML, document : ColladaDocument) : IImageData
 		{
 			var firstSonName : String = xml.localName();
-			return NAME_TO_IMGDATA[firstSonName].createFromXML(xml, document);
+			
+			return NAME_TO_IMGDATA[firstSonName].createFromXML(xml);
 		}
 	}
 }

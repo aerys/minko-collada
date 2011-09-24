@@ -97,7 +97,20 @@ package aerys.minko.type.parser.collada.instance
 			
 			if (textureName)
 			{
-				var image : Image = _document.getImageById(textureName);
+				var image 	: Image = _document.getImageById(textureName);
+				
+				// try to find the texture name in the (effect) parameters
+				while (!image && finalParameters.hasOwnProperty(textureName))
+				{
+					var parameterValue : Object = finalParameters[textureName];
+					
+					if (parameterValue is IImageData)
+						textureName = (parameterValue as IImageData).path;
+					else
+						textureName = parameterValue as String;
+					
+					image = _document.getImageById(textureName);
+				}
 				
 				if (image && image.imageData.path)
 				{
@@ -117,10 +130,9 @@ package aerys.minko.type.parser.collada.instance
 		
 		private function getTextureFromPath(textureFilename : String) : IScene
 		{
-			var options			: ParserOptions	= _document.parserOptions;
-			var loadTextures	: Boolean		= options ? options.loadTextures : false;
+			var options	: ParserOptions	= _document.parserOptions;
 			
-			if (loadTextures)
+			if (!options || options.loadTextures)
 			{
 				var textureFilenameFunction	: Function	= options ? options.textureFilenameFunction : null;
 				var textureFunction			: Function	= options ? options.textureFunction : null;
