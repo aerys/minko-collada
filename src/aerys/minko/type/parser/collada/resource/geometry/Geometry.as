@@ -54,6 +54,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 												store		: Object) : void
 		{
 			var xmlGeometryLibrary	: XML		= xmlDocument..NS::library_geometries[0];
+			
 			if (xmlGeometryLibrary == null)
 				return;
 			
@@ -61,15 +62,10 @@ package aerys.minko.type.parser.collada.resource.geometry
 			
 			for each (var xmlGeometry : XML in xmlGeometries)
 			{
-				try {
-					var geometry : Geometry = Geometry.createFromXML(xmlGeometry, document);
-					
+				var geometry : Geometry = Geometry.createFromXML(xmlGeometry, document);
+				
+				if (geometry)
 					store[geometry.id] = geometry;
-				}
-				catch (e : Error)
-				{
-					trace('Failed to parse Mesh: ' + e.message);
-				}
 			}
 		}
 		
@@ -86,6 +82,14 @@ package aerys.minko.type.parser.collada.resource.geometry
 			newGeometry._triangleStores			= new Vector.<Triangles>();
 			
 			var xmlMesh		: XML = xmlGeometry.NS::mesh[0];
+			
+			if (!xmlMesh)
+			{
+				Minko.log(0, "Unsupported geometry: '" + newGeometry._name + "'.");
+				
+				return null;
+			}
+			
 			var xmlVertices	: XML = xmlMesh.NS::vertices[0];
 			
 			for each (var input : XML in xmlVertices.NS::input)
@@ -155,10 +159,10 @@ package aerys.minko.type.parser.collada.resource.geometry
 			var vertexFormat		: VertexFormat		= createVertexFormat(vertexSemantics, triangleSemantics);
 			var indexData			: Vector.<uint>		= new Vector.<uint>();
 			var vertexData			: Vector.<Number>	= new Vector.<Number>();
-			fillBuffers(vertexSemantics, triangleSemantics, triangleStores, indexData, vertexData);
-			var mesh				: IMesh				= createMesh(indexData, vertexData, vertexFormat);
 			
-			return mesh;
+			fillBuffers(vertexSemantics, triangleSemantics, triangleStores, indexData, vertexData);
+			
+			return createMesh(indexData, vertexData, vertexFormat);
 		}
 		
 		minko_collada function fillBuffers(vertexSemantics		: Vector.<String>, 

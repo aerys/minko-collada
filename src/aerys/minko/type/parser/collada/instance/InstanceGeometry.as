@@ -4,6 +4,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.Model;
 	import aerys.minko.scene.node.group.Group;
+	import aerys.minko.scene.node.group.IGroup;
 	import aerys.minko.scene.node.group.StyleGroup;
 	import aerys.minko.scene.node.mesh.IMesh;
 	import aerys.minko.scene.node.texture.ITexture;
@@ -19,13 +20,13 @@ package aerys.minko.type.parser.collada.instance
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _document			: ColladaDocument;
-		private var _sourceId			: String;
-		private var _name				: String;
-		private var _sid				: String;
-		private var _bindMaterial		: Object;
+		private var _document		: ColladaDocument;
+		private var _sourceId		: String;
+		private var _name			: String;
+		private var _sid			: String;
+		private var _bindMaterial	: Object;
 		
-		private var _minkoModel			: Model;
+		private var _scene			: IScene;
 		
 		public function InstanceGeometry(document			: ColladaDocument,
 										 sourceId			: String,
@@ -65,40 +66,17 @@ package aerys.minko.type.parser.collada.instance
 		
 		public function toScene() : IScene
 		{
-			return toStyleGroupedMesh();
-//			return toTexturedModelGroup()
-//			return toUntexturedModel();
-		}
-		
-		/*public function toUntexturedModel() : Model
-		{
-			if (!_minkoModel)
-			{
-				var geometryResource	: Geometry	= resource as Geometry;
-				
-				if (geometryResource == null)
-					return null;
-				
-				var mesh				: IMesh		= geometryResource.toMesh();
-				var texture				: ITexture	= null;
-				
-				if (mesh != null)
-					_minkoModel = new Model(mesh);
-			}
-			
-			return _minkoModel;
-		}*/
-		
-		public function toStyleGroupedMesh() : StyleGroup
-		{
-			var group	: StyleGroup	= null;
+			var geometry	: Geometry		= resource as Geometry;
 
-			if (geometry)
+			if (geometry && !_scene)
 			{
-				var geometry	: Geometry		= resource as Geometry;
-				var options		: ParserOptions	= _document.parserOptions;
+				var options	: ParserOptions	= _document.parserOptions;
+				var group	: IGroup		= null;
 				
-				if (options.loadTextures)
+				if (!options || options.loadMeshes)
+					_scene = geometry.toMesh();
+				
+				if (!options || options.loadTextures)
 				{
 					// get the first material
 					var triangleStore		: Triangles 		= geometry.triangleStores[0];
@@ -106,41 +84,17 @@ package aerys.minko.type.parser.collada.instance
 					var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
 					var texture				: IScene			= instanceMaterial.toScene();
 					
-					group ||= new StyleGroup();
-					group.addChild(texture);
+					group = new StyleGroup(texture);
+					
+					if (_scene)
+						group.addChild(_scene);
+					_scene = group;
 				}
 					
-				if (options.loadMeshes)
-				{
-					group ||= new StyleGroup();
-					group.addChild(geometry.toMesh());
-				}
 			}
 			
-			return group;
+			return _scene;
 		}
-		
-		/*public function toTexturedModelGroup() : Group
-		{
-			var group		: Group		= new Group();
-			var geometry	: Geometry	= resource as Geometry;
-			
-			for each (var triangleStore : Triangles in geometry.triangleStores)
-			{
-				if (triangleStore.vertexCount == 0)
-					continue;
-				
-				var subMesh				: IMesh				= geometry.toSubMesh(triangleStore);
-				
-				var subMeshMatSymbol	: String			= triangleStore.material;
-				var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
-				var texture				: IScene			= instanceMaterial.toScene();
-				
-				group.addChild(new Model(subMesh, texture));
-			}
-			
-			return group;
-		}*/
 		
 		public function get resource() : IResource
 		{

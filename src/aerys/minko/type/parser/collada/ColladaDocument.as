@@ -215,11 +215,6 @@ package aerys.minko.type.parser.collada
 			}
 		}
 		
-	/*	minko_collada function getTextureFromFeed(filename : String) : BitmapData
-		{
-			return _textureFeed[filename];
-		}*/
-		
 		minko_collada function delegateResourceCreation(xmlNode : XML) : IInstance
 		{
 			var nodeType	: String = xmlNode.localName();

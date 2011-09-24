@@ -24,12 +24,14 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 		public static function createFromXML(xml : XML) : Constant
 		{
 			var constant : Constant = new Constant();
+			
 			constant._emission			= CommonColorOrTexture.createFromXML(xml.NS::emission[0]);
 			constant._reflective		= CommonColorOrTexture.createFromXML(xml.NS::reflective[0]);
 			constant._reflectivity		= parseFloat(xml.NS::reflectivity[0].NS::float[0]);
 			constant._transparent		= CommonColorOrTexture.createFromXML(xml.NS::transparent[0]);
 			constant._transparency		= parseFloat(xml.NS::transparency[0].NS::float[0]);
 			constant._indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);
+			
 			return constant;
 		}
 	}

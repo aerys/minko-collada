@@ -80,7 +80,7 @@ package aerys.minko.type.parser.collada.instance
 			var options				: ParserOptions		= _document.parserOptions;
 			var controller			: Controller		= Controller(resource);
 			
-			if (options.loadTextures)
+			if (!options || options.loadTextures)
 			{
 				var geometry			: Geometry			= _document.getGeometryById(controller.skinId);			
 				var triangleStore		: Triangles 		= geometry.triangleStores[0];
@@ -90,7 +90,7 @@ package aerys.minko.type.parser.collada.instance
 				sg.addChild(instanceMaterial.toScene());
 			}
 			
-			if (options.loadMeshes)
+			if (!options || options.loadMeshes)
 				sg.addChild(getMesh());
 			
 			return sg;
@@ -106,7 +106,9 @@ package aerys.minko.type.parser.collada.instance
 				if (_mesh == null)
 					return null;
 				
-				if (_document.parserOptions.loadSkins)
+				var options	: ParserOptions	= _document.parserOptions;
+				
+				if (!options || options.loadSkins)
 				{
 					var skeletonReference	: IGroup			= null;
 					var skeletonRootName	: String			= _bindedSkeletonId;
