@@ -90,7 +90,8 @@ package aerys.minko.type.parser.collada.instance
 						group.addChild(_scene);
 					_scene = group;
 				}
-					
+
+				_scene.name = geometry.id;
 			}
 			
 			return _scene;
