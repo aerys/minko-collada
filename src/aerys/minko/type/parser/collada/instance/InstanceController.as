@@ -8,7 +8,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.mesh.IMesh;
 	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.scene.node.mesh.SkinnedMesh;
-	import aerys.minko.type.math.Matrix3D;
+	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
@@ -113,9 +113,9 @@ package aerys.minko.type.parser.collada.instance
 					var skeletonReference	: IGroup			= null;
 					var skeletonRootName	: String			= _bindedSkeletonId;
 					
-					var bindShapeMatrix		: Matrix3D			= controller.bindShapeMatrix;
+					var bindShapeMatrix		: Matrix4x4			= controller.bindShapeMatrix;
 					var jointNames			: Vector.<String>	= controller.jointNames;
-					var invBindMatrices		: Vector.<Matrix3D>	= controller.invBindMatrices;
+					var invBindMatrices		: Vector.<Matrix4x4>	= controller.invBindMatrices;
 					
 					_mesh = new SkinnedMesh(_mesh,
 						skeletonReference,

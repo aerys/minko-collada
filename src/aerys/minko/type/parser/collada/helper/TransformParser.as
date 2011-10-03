@@ -1,18 +1,18 @@
 package aerys.minko.type.parser.collada.helper
 {
 	import aerys.minko.type.error.collada.ColladaError;
-	import aerys.minko.type.math.Matrix3D;
+	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.math.Vector4;
 
 	public class TransformParser
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		public static function parseTransform(node : XML) : Matrix3D
+		public static function parseTransform(node : XML) : Matrix4x4
 		{
 			var children	: XMLList	= node.children();
 			var numChildren	: Number	= children.length();
-			var transform	: Matrix3D	= new Matrix3D();
+			var transform	: Matrix4x4	= new Matrix4x4();
 			
 			for (var i : int = 0; i < numChildren; ++i)
 			{

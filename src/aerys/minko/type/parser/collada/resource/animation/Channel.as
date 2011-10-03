@@ -1,7 +1,7 @@
 package aerys.minko.type.parser.collada.resource.animation
 {
 	import aerys.minko.type.math.ConstVector4;
-	import aerys.minko.type.math.Matrix3D;
+	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.enum.TransformType;
 	import aerys.minko.type.parser.collada.helper.Source;
 
@@ -9,7 +9,7 @@ package aerys.minko.type.parser.collada.resource.animation
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private static const TMP_MATRIX		: Matrix3D = new Matrix3D();
+		private static const TMP_MATRIX		: Matrix4x4 = new Matrix4x4();
 		
 		private var _targetId				: String;
 		private var _transformType			: String;
@@ -145,9 +145,9 @@ package aerys.minko.type.parser.collada.resource.animation
 			return out;
 		}
 		
-		private function getMatrixValueAt(t : Number, out : Matrix3D = null) : Matrix3D
+		private function getMatrixValueAt(t : Number, out : Matrix4x4 = null) : Matrix4x4
 		{
-			out ||= new Matrix3D();
+			out ||= new Matrix4x4();
 			
 			// interpolate the output source the get the wanted value.
 			// later here we should implement bezier stuff & co, but i'm way too lazy right now.
@@ -159,11 +159,11 @@ package aerys.minko.type.parser.collada.resource.animation
 			
 			if (timeIndex == 0)
 			{
-				out = outputSource.getComponentByParamIndex(0, 0) as Matrix3D;
+				out = outputSource.getComponentByParamIndex(0, 0) as Matrix4x4;
 			}
 			else if (timeIndex == timesLength)
 			{
-				out = outputSource.getComponentByParamIndex(timesLength - 1, 0) as Matrix3D;
+				out = outputSource.getComponentByParamIndex(timesLength - 1, 0) as Matrix4x4;
 			}
 			else
 			{
@@ -171,10 +171,10 @@ package aerys.minko.type.parser.collada.resource.animation
 				var nextTime			: Number	= times[timeIndex];
 				var interpolationRatio	: Number	= (t - previousTime) / (nextTime - previousTime);
 				
-				var previousValue		: Matrix3D	= outputSource.getComponentByParamIndex(timeIndex - 1, 0) as Matrix3D;
-				var nextValue			: Matrix3D	= outputSource.getComponentByParamIndex(timeIndex, 0) as Matrix3D;
+				var previousValue		: Matrix4x4	= outputSource.getComponentByParamIndex(timeIndex - 1, 0) as Matrix4x4;
+				var nextValue			: Matrix4x4	= outputSource.getComponentByParamIndex(timeIndex, 0) as Matrix4x4;
 				
-				Matrix3D.copy(previousValue, out);
+				Matrix4x4.copy(previousValue, out);
 				out.interpolateTo(nextValue, 1 - interpolationRatio);
 			}
 			
@@ -186,7 +186,7 @@ package aerys.minko.type.parser.collada.resource.animation
 			switch (_transformType)
 			{
 				case TransformType.MATRIX:
-					var matrix : Matrix3D = getMatrixValueAt(t);
+					var matrix : Matrix4x4 = getMatrixValueAt(t);
 					matrix.getRawData(data, 0, false);
 					break;
 				

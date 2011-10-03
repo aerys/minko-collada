@@ -1,7 +1,7 @@
 package aerys.minko.type.parser.collada.helper
 {
 	import aerys.minko.type.error.collada.ColladaError;
-	import aerys.minko.type.math.Matrix3D;
+	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.math.Vector4;
 	
 	public class NumberListParser
@@ -89,18 +89,18 @@ package aerys.minko.type.parser.collada.helper
 			return result;
 		}
 		
-		public static function parseMatrix3x3List(xml : XML) : Vector.<Matrix3D>
+		public static function parseMatrix3x3List(xml : XML) : Vector.<Matrix4x4>
 		{
 			var data		: Array					= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint					= data.length;
-			var result		: Vector.<Matrix3D>	= new Vector.<Matrix3D>();
+			var result		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
 			
 			if (dataLength % 9 != 0)
 				throw new ColladaError('Invalid data length');
 			
 			for (var i : uint = 0; i < dataLength; i += 9)
 			{
-				var matrix	: Matrix3D	= new Matrix3D(
+				var matrix	: Matrix4x4	= new Matrix4x4(
 					parseFloat(data[i]),		parseFloat(data[i + 1]),	parseFloat(data[i + 2]),	0,
 					parseFloat(data[i + 3]),	parseFloat(data[i + 4]),	parseFloat(data[i + 5]),	0,
 					parseFloat(data[i + 6]),	parseFloat(data[i + 7]),	parseFloat(data[i + 8]),	0,
@@ -113,18 +113,18 @@ package aerys.minko.type.parser.collada.helper
 			return result;
 		}
 		
-		public static function parseMatrix3DList(xml : XML) : Vector.<Matrix3D>
+		public static function parseMatrix3DList(xml : XML) : Vector.<Matrix4x4>
 		{
 			var data		: Array					= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint					= data.length;
-			var result		: Vector.<Matrix3D>	= new Vector.<Matrix3D>();
+			var result		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
 			
 			if (dataLength % 16 != 0)
 				throw new ColladaError('Invalid data length');
 			
 			for (var i : uint = 0; i < dataLength; i += 16)
 			{
-				var matrix	: Matrix3D	= new Matrix3D(
+				var matrix	: Matrix4x4	= new Matrix4x4(
 					parseFloat(data[i]),		parseFloat(data[i + 1]),	parseFloat(data[i + 2]),	parseFloat(data[i + 3]),
 					parseFloat(data[i + 4]),	parseFloat(data[i + 5]),	parseFloat(data[i + 6]),	parseFloat(data[i + 7]),
 					parseFloat(data[i + 8]),	parseFloat(data[i + 9]),	parseFloat(data[i + 10]),	parseFloat(data[i + 11]),
@@ -168,7 +168,7 @@ package aerys.minko.type.parser.collada.helper
 			return new Vector4(float1, float2, float3, float4);
 		}
 		
-		public static function parseMatrix3x3(xml : XML) : Matrix3D
+		public static function parseMatrix3x3(xml : XML) : Matrix4x4
 		{
 			var data		: Array	= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint	= data.length;
@@ -176,7 +176,7 @@ package aerys.minko.type.parser.collada.helper
 			if (dataLength != 9)
 				throw new ColladaError('Invalid data length');
 			
-			return new Matrix3D(
+			return new Matrix4x4(
 				parseFloat(data[0]),	parseFloat(data[1]),	parseFloat(data[2]),	0,
 				parseFloat(data[3]),	parseFloat(data[4]),	parseFloat(data[5]),	0,
 				parseFloat(data[6]),	parseFloat(data[7]),	parseFloat(data[8]),	0,
@@ -184,7 +184,7 @@ package aerys.minko.type.parser.collada.helper
 			).transpose();
 		}
 		
-		public static function parseMatrix3D(xml : XML) : Matrix3D
+		public static function parseMatrix3D(xml : XML) : Matrix4x4
 		{
 			var data		: Array	= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint	= data.length;
@@ -192,7 +192,7 @@ package aerys.minko.type.parser.collada.helper
 			if (dataLength != 16)
 				throw new ColladaError('Invalid data length');
 			
-			var matrix : Matrix3D = matrix = new Matrix3D(
+			var matrix : Matrix4x4 = matrix = new Matrix4x4(
 				parseFloat(data[0]),	parseFloat(data[1]),	parseFloat(data[2]),	parseFloat(data[3]),
 				parseFloat(data[4]),	parseFloat(data[5]),	parseFloat(data[6]),	parseFloat(data[7]),
 				parseFloat(data[8]),	parseFloat(data[9]),	parseFloat(data[10]),	parseFloat(data[11]),

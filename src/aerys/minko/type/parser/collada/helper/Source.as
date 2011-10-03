@@ -1,7 +1,7 @@
 package aerys.minko.type.parser.collada.helper
 {
 	import aerys.minko.type.error.collada.ColladaError;
-	import aerys.minko.type.math.Matrix3D;
+	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.enum.InputType;
 	
 	import flash.utils.getTimer;
@@ -23,7 +23,7 @@ package aerys.minko.type.parser.collada.helper
 			"float"		: Number,
 			"double"	: Number,
 			"Name"		: String,
-			"float4x4"	: Matrix3D,
+			"float4x4"	: Matrix4x4,
 			"name"		: String,
 			"IDREF"		: String
 		};
@@ -103,7 +103,7 @@ package aerys.minko.type.parser.collada.helper
 			/* the kludge is back */
 			var size : uint = 0;
 			for each (var paramType2 : Class in source._paramTypes)
-				size += paramType2 == Matrix3D ? 16 : 1;
+				size += paramType2 == Matrix4x4 ? 16 : 1;
 			source._count = rawData.length / size;
 			/* end of second kludge */
 			
@@ -128,9 +128,9 @@ package aerys.minko.type.parser.collada.helper
 					{
 						currentDatum = parseFloat(rawData[int(currentOffset++)]);
 					}
-					else if (paramType == Matrix3D)
+					else if (paramType == Matrix4x4)
 					{
-						currentDatum = new Matrix3D(
+						currentDatum = new Matrix4x4(
 							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
 							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
 							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
