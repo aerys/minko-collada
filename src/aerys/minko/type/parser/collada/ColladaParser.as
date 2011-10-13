@@ -81,7 +81,7 @@ package aerys.minko.type.parser.collada
 				}
 			}
 			
-			if (_numTextureToLoad != 0)
+			if (_numTextureToLoad == 0)
 				dispatchEvent(new Event(Event.COMPLETE));
 			
 			return true;
