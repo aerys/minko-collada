@@ -192,7 +192,7 @@ package aerys.minko.type.parser.collada.resource.controller
 				
 				for (var j : int = 0; j < vc; j++)
 				{
-					// in collada, the bone numbered -1 does reference the bind shape matrix
+					// in collada, the bone numbered -1 references to the bind shape matrix
 					
 					if (v[int(k + offsetJoint)] != -1)
 					{

@@ -4,6 +4,7 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.AnimationGroup;
 	import aerys.minko.scene.node.group.Group;
+	import aerys.minko.scene.node.group.IGroup;
 	import aerys.minko.scene.node.group.Joint;
 	import aerys.minko.scene.node.group.LoaderGroup;
 	import aerys.minko.scene.node.mesh.IMesh;
@@ -85,6 +86,7 @@ package aerys.minko.type.parser.collada
 		public function get materials()		: Object		{ return _materials;	}
 		public function get nodes()			: Object		{ return _nodes;		}
 		public function get visualScenes()	: Object 		{ return _visualScenes;	}
+		
 		public function get parserOptions()	: ParserOptions	{ return _parserOptions; }
 		
 		public function getAnimationById	(id : String) : Animation	{ return _animations[id];	}
@@ -156,15 +158,14 @@ package aerys.minko.type.parser.collada
 			return sceneGraph;
 		}
 		
-		private function setSkeletonReferenceNodes(currentGroup : Group, referenceNode : Group) : void
+		private function setSkeletonReferenceNodes(currentGroup : IGroup, referenceNode : IGroup) : void
 		{
 			for each (var el : IScene in currentGroup)
 			{
 				if (el is SkinnedMesh)
 					SkinnedMesh(el).skeletonReference = referenceNode;
-				
-				else if (el is Group)
-					setSkeletonReferenceNodes(Group(el), referenceNode);
+				else
+					setSkeletonReferenceNodes(IGroup(el), referenceNode);
 			}
 		}
 		

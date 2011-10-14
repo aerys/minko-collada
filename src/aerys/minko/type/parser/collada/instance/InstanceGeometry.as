@@ -74,7 +74,10 @@ package aerys.minko.type.parser.collada.instance
 				var group	: IGroup		= null;
 				
 				if (!options || options.loadMeshes)
+				{
 					_scene = geometry.toMesh();
+					_scene = options.replaceNodeFunction(_scene);
+				}
 				
 				if (!options || options.loadTextures)
 				{

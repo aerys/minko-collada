@@ -345,9 +345,9 @@ package aerys.minko.type.parser.collada.resource.geometry
 										  vertexData	: Vector.<Number>, 
 										  vertexFormat	: VertexFormat) : Mesh
 		{
-			var vertexStream		: VertexStream		= new VertexStream(vertexData, vertexFormat, true);
+			var vertexStream		: VertexStream		= new VertexStream(vertexData, vertexFormat, _document.parserOptions.keepStreamsDynamic);
 			var vertexStreamList	: VertexStreamList	= new VertexStreamList(vertexStream);
-			var indexStream			: IndexStream		= new IndexStream(indexData);
+			var indexStream			: IndexStream		= new IndexStream(indexData, 0, _document.parserOptions.keepStreamsDynamic);
 			var mesh				: Mesh				= new Mesh(vertexStreamList, indexStream);
 			
 			return mesh

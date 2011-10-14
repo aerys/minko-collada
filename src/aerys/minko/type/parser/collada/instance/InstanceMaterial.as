@@ -131,25 +131,26 @@ package aerys.minko.type.parser.collada.instance
 		private function getTextureFromPath(textureFilename : String) : IScene
 		{
 			var options	: ParserOptions	= _document.parserOptions;
+			var result	: IScene		= null;
 			
-			if (!options || options.loadTextures)
+			if (options.loadTextures)
 			{
-				var textureFilenameFunction	: Function	= options ? options.textureFilenameFunction : null;
-				var textureFunction			: Function	= options ? options.textureFunction : null;
-				
-				if (textureFilename != null && textureFilenameFunction != null)
-					textureFilename = textureFilenameFunction(textureFilename);
+				if (textureFilename != null)
+					textureFilename = options.replaceDependencyPathFunction(textureFilename);
 				
 				if (textureFilename)
 				{
-					if (textureFunction != null)
-						return textureFunction(textureFilename);
+					if (options.loadDependencyFunction != null)
+					{
+						result = options.loadDependencyFunction(textureFilename);
+						result = options.replaceNodeFunction(result);
+					}
 					else
-						return LoaderGroup.load(new URLRequest(textureFilename));
+						return LoaderGroup.load(new URLRequest(textureFilename), options);
 				}
 			}
 			
-			return null;
+			return result;
 		}
 	}
 }

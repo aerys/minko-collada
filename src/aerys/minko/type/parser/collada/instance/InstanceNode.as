@@ -56,20 +56,26 @@ package aerys.minko.type.parser.collada.instance
 			}
 		}
 		
-		public function toTransformGroup() : TransformGroup
+		public function toTransformGroup() : IScene
 		{
 			if (!_minkoScene)
+			{
 				_minkoScene = Node(resource).toTransformGroup();
+				_minkoScene = _document.parserOptions.replaceNodeFunction(_minkoScene);
+			}
 			
-			return TransformGroup(_minkoScene);
+			return _minkoScene;
 		}
 		
-		public function toJoint() : Joint
+		public function toJoint() : IScene
 		{
 			if (!_minkoScene)
+			{
 				_minkoScene = Node(resource).toJoint();
+				_minkoScene = _document.parserOptions.replaceNodeFunction(_minkoScene);
+			}
 			
-			return Joint(_minkoScene);
+			return _minkoScene;
 		}
 		
 		public function get resource() : IResource
