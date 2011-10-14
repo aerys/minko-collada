@@ -68,17 +68,21 @@ package aerys.minko.type.parser.collada
 			_numTextureToLoad = loaders.length;
 			if (_numTextureToLoad != 0)
 			{
-				for (var loaderIndex : int = 0; loaderIndex < _numTextureToLoad; ++loaderIndex)
+				var numItems : int = _numTextureToLoad;
+				
+				for (var loaderIndex : int = 0; loaderIndex < numItems; ++loaderIndex)
 				{
 					var loader : LoaderGroup	= loaders[loaderIndex] as LoaderGroup;
 					
-					loader.addEventListener(Event.COMPLETE, loaderCompleteHandler);
+					if (loader.numChildren != 0)
+						--_numTextureToLoad;
+					else
+						loader.addEventListener(Event.COMPLETE, loaderCompleteHandler);
 				}
 			}
-			else
-			{
+			
+			if (_numTextureToLoad == 0)
 				dispatchEvent(new Event(Event.COMPLETE));
-			}
 			
 			return true;
 		}
