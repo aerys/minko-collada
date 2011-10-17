@@ -136,18 +136,10 @@ package aerys.minko.type.parser.collada.instance
 			if (options.loadTextures)
 			{
 				if (textureFilename != null)
-					textureFilename = options.replaceDependencyPathFunction(textureFilename);
+					textureFilename = options.rewritePathFunction(textureFilename);
 				
 				if (textureFilename)
-				{
-					if (options.loadDependencyFunction != null)
-					{
-						result = options.loadDependencyFunction(textureFilename);
-						result = options.replaceNodeFunction(result);
-					}
-					else
-						return LoaderGroup.load(new URLRequest(textureFilename), options);
-				}
+					return options.loadFunction(new URLRequest(textureFilename), options);
 			}
 			
 			return result;

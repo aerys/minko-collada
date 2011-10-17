@@ -164,7 +164,7 @@ package aerys.minko.type.parser.collada
 			{
 				if (el is SkinnedMesh)
 					SkinnedMesh(el).skeletonReference = referenceNode;
-				else
+				else if (el is IGroup)
 					setSkeletonReferenceNodes(IGroup(el), referenceNode);
 			}
 		}
