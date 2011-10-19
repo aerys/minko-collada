@@ -6,8 +6,6 @@ package aerys.minko.type.parser.collada.helper
 	
 	import flash.utils.getTimer;
 	
-	import spark.primitives.Path;
-
 	/**
 	 * This represent a <source> node in a collada document, and provides
 	 * methods to easily access the contained data.
