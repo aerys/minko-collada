@@ -124,7 +124,7 @@ package aerys.minko.type.parser.collada.instance
 			}
 			else
 			{
-				return new ColorTexture(diffuse.color & 0xffffff);
+				return new ColorTexture(diffuse.color);
 			}
 		}
 		
