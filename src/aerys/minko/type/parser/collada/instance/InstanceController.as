@@ -4,6 +4,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.IGroup;
 	import aerys.minko.scene.node.group.Joint;
+	import aerys.minko.scene.node.group.MaterialGroup;
 	import aerys.minko.scene.node.group.StyleGroup;
 	import aerys.minko.scene.node.mesh.IMesh;
 	import aerys.minko.scene.node.mesh.Mesh;
@@ -71,7 +72,8 @@ package aerys.minko.type.parser.collada.instance
 		
 		public function toScene() : IScene
 		{
-			return toStyleGroup();
+//			return toStyleGroup();
+			return toMaterialGroup();
 		}
 		
 		public function toStyleGroup() : StyleGroup
@@ -94,6 +96,28 @@ package aerys.minko.type.parser.collada.instance
 				sg.addChild(getMesh());
 			
 			return sg;
+		}
+		
+		public function toMaterialGroup() : MaterialGroup
+		{
+			var mg 			: MaterialGroup 	= new MaterialGroup();
+			var options		: ParserOptions		= _document.parserOptions;
+			var controller	: Controller		= Controller(resource);
+			
+			if (!options || options.loadTextures)
+			{
+				var geometry			: Geometry			= _document.getGeometryById(controller.skinId);			
+				var triangleStore		: Triangles 		= geometry.triangleStores[0];
+				var subMeshMatSymbol	: String			= triangleStore.material;
+				var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
+				
+				mg.textures.addChild(instanceMaterial.toScene());
+			}
+			
+			if (!options || options.loadMeshes)
+				mg.addChild(getMesh());
+			
+			return mg;
 		}
 		
 		private function getMesh() : IMesh

@@ -63,7 +63,7 @@ package aerys.minko.type.parser.collada.resource
 			for each (var child : IInstance in _childs)
 				group.addChild(child.toScene());
 			
-			return group;
+			return _document.parserOptions.replaceNodeFunction(group);
 		}
 	}
 }
