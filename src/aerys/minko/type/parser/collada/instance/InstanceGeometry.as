@@ -2,12 +2,8 @@ package aerys.minko.type.parser.collada.instance
 {
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.node.IScene;
-	import aerys.minko.scene.node.Model;
-	import aerys.minko.scene.node.group.Group;
 	import aerys.minko.scene.node.group.IGroup;
-	import aerys.minko.scene.node.group.StyleGroup;
-	import aerys.minko.scene.node.mesh.IMesh;
-	import aerys.minko.scene.node.texture.ITexture;
+	import aerys.minko.scene.node.group.MaterialGroup;
 	import aerys.minko.type.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
@@ -87,7 +83,7 @@ package aerys.minko.type.parser.collada.instance
 					var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
 					var texture				: IScene			= instanceMaterial.toScene();
 					
-					group = new StyleGroup(texture);
+					group = new MaterialGroup(null, texture);
 					
 					if (_scene)
 						group.addChild(_scene);
