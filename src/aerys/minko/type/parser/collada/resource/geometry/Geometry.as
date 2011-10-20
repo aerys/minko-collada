@@ -22,6 +22,9 @@ package aerys.minko.type.parser.collada.resource.geometry
 	
 	public class Geometry implements IResource
 	{
+		private static const INDEX_LIMIT	: uint = 524287;
+		private static const VERTEX_LIMIT	: uint = 65536;
+		
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
 		private var _document				: ColladaDocument;
@@ -40,17 +43,17 @@ package aerys.minko.type.parser.collada.resource.geometry
 		}
 		
 		minko_collada function get verticesDataSources() : Object
-		{ 
-			return _verticesDataSources; 
+		{
+			return _verticesDataSources;
 		}
 		
 		minko_collada function get triangleStores() : Vector.<Triangles>
 		{
-			return _triangleStores; 
+			return _triangleStores;
 		}
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
-												document	: ColladaDocument, 
+												document	: ColladaDocument,
 												store		: Object) : void
 		{
 			var xmlGeometryLibrary	: XML		= xmlDocument..NS::library_geometries[0];
@@ -106,69 +109,142 @@ package aerys.minko.type.parser.collada.resource.geometry
 			}
 			
 			for each (var child : XML in xmlMesh.children())
-				switch (child.localName())
-				{
-					case 'lines':
-					case 'linestrips':
-					case 'polygons':
-					case 'polylist':
-					case 'triangles':
-					case 'trifans':
-					case 'tristrips':
-						newGeometry._triangleStores.push(new Triangles(child, xmlMesh));
-						break;
-				}
-				
+			switch (child.localName())
+			{
+				case 'lines':
+				case 'linestrips':
+				case 'polygons':
+				case 'polylist':
+				case 'triangles':
+				case 'trifans':
+				case 'tristrips':
+					newGeometry._triangleStores.push(new Triangles(child, xmlMesh));
+					break;
+			}
+			
 			return newGeometry;
 		}
 		
 		public function createInstance() : IInstance
 		{
-			return new InstanceGeometry(_document, _id); 
+			return new InstanceGeometry(_document, _id);
 		}
 		
-		public function toMesh() : IMesh
+		minko_collada function toSubMeshes(triangleStore	: Triangles,
+										   group			: IGroup) : void
 		{
-			if (_triangleStores.length == 0)
-				return null;
-			
-			// create semantic list for vertices and triangles
-			var vertexSemantics			: Vector.<String>	= _verticesDataSemantics;
-			var triangleSemantics		: Vector.<String>	= createTriangleStoreSemanticList();
-			
-			// create vertexformat with semantics
-			var vertexFormat			: VertexFormat		= createVertexFormat(vertexSemantics, triangleSemantics);
-			
-			// fill buffers with semantics
-			var indexData				: Vector.<uint>		= new Vector.<uint>();
-			var vertexData				: Vector.<Number>	= new Vector.<Number>();
-			
-			fillBuffers(vertexSemantics, triangleSemantics, _triangleStores, indexData, vertexData);
-			
-			// merge it all
-			return createMesh(indexData, vertexData, vertexFormat);
-		}
-		
-		minko_collada function toSubMesh(triangleStore : Triangles) : IMesh
-		{
-			var triangleStores		: Vector.<Triangles> = Vector.<Triangles>([triangleStore]);
+			var triangleStores		: Vector.<Triangles>	= Vector.<Triangles>([triangleStore]);
 			
 			// create mesh using the same process that this.toMesh()
-			var vertexSemantics		: Vector.<String>	= _verticesDataSemantics;
-			var triangleSemantics	: Vector.<String>	= triangleStore.semantics;
-			var vertexFormat		: VertexFormat		= createVertexFormat(vertexSemantics, triangleSemantics);
-			var indexData			: Vector.<uint>		= new Vector.<uint>();
-			var vertexData			: Vector.<Number>	= new Vector.<Number>();
+			var vertexSemantics		: Vector.<String>		= _verticesDataSemantics;
+			var triangleSemantics	: Vector.<String>		= triangleStore.semantics;
+			var vertexFormat		: VertexFormat			= createVertexFormat(vertexSemantics, triangleSemantics);
+			var indexData			: Vector.<uint>			= new Vector.<uint>();
+			var vertexData			: Vector.<Number>		= new Vector.<Number>();
 			
 			fillBuffers(vertexSemantics, triangleSemantics, triangleStores, indexData, vertexData);
 			
-			return createMesh(indexData, vertexData, vertexFormat);
+			if (indexData.length <= INDEX_LIMIT && vertexData.length <= VERTEX_LIMIT)
+			{
+				group.addChild(createMesh(indexData, vertexData, vertexFormat));
+			}
+			else
+			{
+				while (indexData.length != 0)
+				{
+					var dwordsPerVertex		: uint				= vertexFormat.dwordsPerVertex;
+					var indexDataLength		: uint				= indexData.length;
+					
+					// new buffers
+					var partialVertexData	: Vector.<Number>	= new Vector.<Number>();
+					var partialIndexData	: Vector.<uint>		= new Vector.<uint>();
+					
+					// local variables
+					var oldVertexIds		: Vector.<int>		= new Vector.<int>(3, true);
+					var newVertexIds		: Vector.<int>		= new Vector.<int>(3, true);
+					var newVertexNeeded		: Vector.<Boolean>	= new Vector.<Boolean>(3, true);
+					
+					var usedVertices		: Vector.<uint>		= new Vector.<uint>();	// tableau de correspondance entre anciens et nouveaux indices
+					var usedVerticesCount	: uint				= 0;					// taille du tableau ci dessus
+					var usedIndicesCount	: uint				= 0;					// quantitee d'indices utilises pour l'instant
+					var neededVerticesCount	: uint;
+					
+					// iterators & limits
+					var localVertexId		: uint;
+					var dwordId				: uint;
+					var dwordIdLimit		: uint;
+					
+					while (usedIndicesCount < indexDataLength)
+					{
+						
+						// check si le triangle suivant rentrera dans l'index buffer
+						var remainingIndexes	: uint		= INDEX_LIMIT - usedIndicesCount;
+						if (remainingIndexes < 3)
+							break;
+						
+						// check si le triangle suivant rentre dans le vertex buffer
+						var remainingVertices	: uint		= VERTEX_LIMIT - usedVerticesCount;
+						
+						neededVerticesCount = 0;
+						for (localVertexId = 0; localVertexId < 3; ++localVertexId)
+						{
+							oldVertexIds[localVertexId]		= indexData[uint(usedIndicesCount + localVertexId)];
+							newVertexIds[localVertexId]		= usedVertices.indexOf(oldVertexIds[localVertexId]);
+							newVertexNeeded[localVertexId]	= newVertexIds[localVertexId] == -1;
+							
+							if (newVertexNeeded[localVertexId])
+								++neededVerticesCount;
+						}
+						
+						if (remainingVertices < neededVerticesCount)
+							break;
+						
+						// ca rentre, on insere le triangle avec les donnees qui vont avec
+						for (localVertexId = 0; localVertexId < 3; ++localVertexId)
+						{
+							
+							if (newVertexNeeded[localVertexId])
+							{
+								// on copie le vertex dans le nouveau tableau
+								dwordId			= oldVertexIds[localVertexId] * dwordsPerVertex;
+								dwordIdLimit	= dwordId + dwordsPerVertex;
+								for (; dwordId < dwordIdLimit; ++dwordId)
+									partialVertexData.push(vertexData[dwordId]);
+								
+								// on met a jour l'id dans notre variable temporaire pour remplir le nouvel indexData
+								newVertexIds[localVertexId] = usedVerticesCount;
+								
+								// on note son ancien id dans le tableau temporaire
+								usedVertices[usedVerticesCount++] = oldVertexIds[localVertexId];
+							}
+							
+							partialIndexData.push(newVertexIds[localVertexId]);
+						}
+						
+						// ... on incremente le compteur
+						usedIndicesCount += 3;
+						
+						// on fait des assertions, sinon ca marchera jamais
+						if (usedIndicesCount != partialIndexData.length)
+							throw new Error('');
+						
+						if (usedVerticesCount != usedVertices.length)
+							throw new Error('');
+						
+						if (usedVerticesCount != partialVertexData.length / dwordsPerVertex)
+							throw new Error('');
+					}
+					
+					group.addChild(createMesh(partialIndexData, partialVertexData, vertexFormat));
+					indexData.splice(0, usedIndicesCount);
+				}
+			}
 		}
 		
-		minko_collada function fillBuffers(vertexSemantics		: Vector.<String>, 
+		minko_collada function fillBuffers(vertexSemantics		: Vector.<String>,
 										   triangleSemantics	: Vector.<String>,
 										   triangleStores		: Vector.<Triangles>,
-										   indexData			: Vector.<uint>, 
+										   indexData			: Vector.<uint>,
 										   vertexData			: Vector.<Number>) : void
 		{
 			var verticesHashMap			: Object			= new Object();
@@ -234,7 +310,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 				// create a new vertex
 				finalVertexId = verticesHashMap[vertexHash] = vertexData.length / currentVertex.length;
 				for each (var i : Number in currentVertex)
-					vertexData.push(i);
+				vertexData.push(i);
 			}
 			
 			indexData.push(finalVertexId);
@@ -245,7 +321,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 			// intersect semantics binded to the primitives contained in this geometry.
 			var semantics	: Vector.<String>	= _triangleStores[0].semantics;
 			for each (var triangleStore : Triangles in _triangleStores)
-				semantics = intersectSemantics(semantics, triangleStore.semantics);
+			semantics = intersectSemantics(semantics, triangleStore.semantics);
 			
 			/*	FIXME maybe we should check here that we have no duplicates?
 			what should we do if it is the case? raise an exception? */
@@ -262,9 +338,9 @@ package aerys.minko.type.parser.collada.resource.geometry
 			var result : Vector.<String> = new Vector.<String>();
 			
 			for each (var semanticToMatch : String in semantics1)
-				for each (var semanticToTest : String in semantics2)
-					if (semanticToMatch == semanticToTest)
-						result.push(semanticToMatch);
+			for each (var semanticToTest : String in semantics2)
+			if (semanticToMatch == semanticToTest)
+				result.push(semanticToMatch);
 			
 			return result;
 		}
@@ -279,9 +355,9 @@ package aerys.minko.type.parser.collada.resource.geometry
 			
 			var semanticId			: uint;
 			var semanticLength		: uint;
-			for (semanticId = 0, semanticLength = vertexSemantics.length; 
-				 semanticId < semanticLength; 
-				 ++semanticId)
+			for (semanticId = 0, semanticLength = vertexSemantics.length;
+				semanticId < semanticLength;
+				++semanticId)
 			{
 				semantic = vertexSemantics[semanticId];
 				vertexComponent = createComponentFromSemantic(semantic);
@@ -299,9 +375,9 @@ package aerys.minko.type.parser.collada.resource.geometry
 				}
 			}
 			
-			for (semanticId = 0, semanticLength = triangleSemantics.length; 
-				 semanticId < semanticLength; 
-				 ++semanticId)
+			for (semanticId = 0, semanticLength = triangleSemantics.length;
+				semanticId < semanticLength;
+				++semanticId)
 			{
 				semantic = triangleSemantics[semanticId];
 				
@@ -341,8 +417,8 @@ package aerys.minko.type.parser.collada.resource.geometry
 			return null;
 		}
 		
-		minko_collada function createMesh(indexData		: Vector.<uint>, 
-										  vertexData	: Vector.<Number>, 
+		minko_collada function createMesh(indexData		: Vector.<uint>,
+										  vertexData	: Vector.<Number>,
 										  vertexFormat	: VertexFormat) : Mesh
 		{
 			var vertexStream		: VertexStream		= new VertexStream(vertexData, vertexFormat, _document.parserOptions.keepStreamsDynamic);

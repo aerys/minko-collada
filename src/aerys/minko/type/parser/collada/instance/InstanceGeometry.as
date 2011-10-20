@@ -65,40 +65,67 @@ package aerys.minko.type.parser.collada.instance
 			return new InstanceGeometry(document, sourceId);
 		}
 		
+//		public function toScene() : IScene
+//		{
+//			var geometry	: Geometry		= resource as Geometry;
+//
+//			if (geometry && !_scene)
+//			{
+//				var options	: ParserOptions	= _document.parserOptions;
+//				var group	: IGroup		= null;
+//				
+//				if (!options || options.loadMeshes)
+//				{
+//					_scene = geometry.toMesh();
+//					_scene = options.replaceNodeFunction(_scene);
+//				}
+//				
+//				if (!options || options.loadTextures)
+//				{
+//					// get the first material
+//					var triangleStore		: Triangles 		= geometry.triangleStores[0];
+//					var subMeshMatSymbol	: String			= triangleStore.material;
+//					var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
+//					var texture				: IScene			= instanceMaterial.toScene();
+//					
+//					group = new MaterialGroup(null, texture);
+//					
+//					if (_scene)
+//						group.addChild(_scene);
+//					_scene = group;
+//				}
+//
+//				_scene.name = geometry.id;
+//			}
+//			
+//			return _scene;
+//		}
+		
 		public function toScene() : IScene
 		{
-			var geometry	: Geometry		= resource as Geometry;
-
-			if (geometry && !_scene)
+			var geometry    : Geometry        = resource as Geometry;
+			var options        : ParserOptions    = _document.parserOptions;
+			
+			var group        : Group            = new StyleGroup();
+			
+			for each (var triangleStore : Triangles in
+				geometry.triangleStores)
 			{
-				var options	: ParserOptions	= _document.parserOptions;
-				var group	: IGroup		= null;
+				if (triangleStore.vertexCount == 0)
+					continue;
 				
-				if (!options || options.loadMeshes)
-				{
-					_scene = geometry.toMesh();
-					_scene = options.replaceNodeFunction(_scene);
-				}
+				var subMeshMatSymbol    : String            =
+					triangleStore.material;
+				var instanceMaterial    : InstanceMaterial    =
+					_bindMaterial[subMeshMatSymbol];
+				var texture                : IScene            =
+					instanceMaterial.toScene();
+				group.addChild(texture);
 				
-				if (!options || options.loadTextures)
-				{
-					// get the first material
-					var triangleStore		: Triangles 		= geometry.triangleStores[0];
-					var subMeshMatSymbol	: String			= triangleStore.material;
-					var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
-					var texture				: IScene			= instanceMaterial.toScene();
-					
-					group = new MaterialGroup(null, texture);
-					
-					if (_scene)
-						group.addChild(_scene);
-					_scene = group;
-				}
-
-				_scene.name = geometry.id;
+				geometry.toSubMeshes(triangleStore, group);
 			}
 			
-			return _scene;
+			return group;
 		}
 		
 		public function get resource() : IResource
