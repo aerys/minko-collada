@@ -152,7 +152,7 @@ package aerys.minko.type.parser.collada
 				var mainAnimation	: Animation				= _animations['mergedAnimations'];
 				var timelines		: Vector.<ITimeline>	= mainAnimation.computeTimelines();
 				
-				sceneGraph = new AnimationGroup(timelines, null, sceneGraph);
+				sceneGraph = _parserOptions.replaceNodeFunction(new AnimationGroup(timelines, null, sceneGraph));
 			}
 			
 			return sceneGraph;
