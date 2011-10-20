@@ -10,6 +10,7 @@ package aerys.minko.type.parser.collada
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
 	
 	public class ColladaParser extends EventDispatcher implements IParser
 	{
@@ -61,6 +62,7 @@ package aerys.minko.type.parser.collada
 			
 			var group 	: Group				= document.toGroup(dropEmptyGroups, dropSkinning);
 			var loaders : Vector.<IScene> 	= group.getDescendantsByType(LoaderGroup);
+			var marked	: Dictionary		= new Dictionary(true);
 			
 			_data.push(group);
 			
@@ -74,10 +76,17 @@ package aerys.minko.type.parser.collada
 				{
 					var loader : LoaderGroup	= loaders[loaderIndex] as LoaderGroup;
 					
-					if (loader.numChildren != 0)
+					// do not listen if the loader is already
+					// complete or already being listened
+					if (marked[loader] || loader.numChildren != 0)
+					{
 						--_numTextureToLoad;
+					}
 					else
+					{
+						marked[loader] = true;
 						loader.addEventListener(Event.COMPLETE, loaderCompleteHandler);
+					}
 				}
 			}
 			
