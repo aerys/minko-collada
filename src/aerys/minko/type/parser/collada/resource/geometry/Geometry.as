@@ -144,7 +144,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 			
 			fillBuffers(vertexSemantics, triangleSemantics, triangleStores, indexData, vertexData);
 			
-			if (indexData.length <= INDEX_LIMIT && vertexData.length <= VERTEX_LIMIT)
+			if (indexData.length <= INDEX_LIMIT && vertexData.length / vertexFormat.dwordsPerVertex <= VERTEX_LIMIT)
 			{
 				group.addChild(createMesh(indexData, vertexData, vertexFormat));
 			}
@@ -176,7 +176,6 @@ package aerys.minko.type.parser.collada.resource.geometry
 					
 					while (usedIndicesCount < indexDataLength)
 					{
-						
 						// check si le triangle suivant rentrera dans l'index buffer
 						var remainingIndexes	: uint		= INDEX_LIMIT - usedIndicesCount;
 						if (remainingIndexes < 3)
@@ -310,7 +309,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 				// create a new vertex
 				finalVertexId = verticesHashMap[vertexHash] = vertexData.length / currentVertex.length;
 				for each (var i : Number in currentVertex)
-				vertexData.push(i);
+					vertexData.push(i);
 			}
 			
 			indexData.push(finalVertexId);
@@ -338,9 +337,9 @@ package aerys.minko.type.parser.collada.resource.geometry
 			var result : Vector.<String> = new Vector.<String>();
 			
 			for each (var semanticToMatch : String in semantics1)
-			for each (var semanticToTest : String in semantics2)
-			if (semanticToMatch == semanticToTest)
-				result.push(semanticToMatch);
+				for each (var semanticToTest : String in semantics2)
+					if (semanticToMatch == semanticToTest)
+						result.push(semanticToMatch);
 			
 			return result;
 		}
