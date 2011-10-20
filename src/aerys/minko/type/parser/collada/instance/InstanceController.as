@@ -72,7 +72,7 @@ package aerys.minko.type.parser.collada.instance
 		
 		public function toScene() : IScene
 		{
-//			return toStyleGroup();
+			//return toStyleGroup();
 			return toMaterialGroup();
 		}
 		
