@@ -15,10 +15,10 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.type.parser.collada.resource.geometry.Geometry;
 	import aerys.minko.type.parser.collada.resource.geometry.Triangles;
 	
-	use namespace minko_collada;
-	
 	public class InstanceGeometry implements IInstance
 	{
+		use namespace minko_collada;
+		
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
 		private var _document		: ColladaDocument;
@@ -53,6 +53,7 @@ package aerys.minko.type.parser.collada.instance
 			for each (var xmlIm : XML in xml..NS::instance_material)
 			{
 				var instanceMaterial : InstanceMaterial = InstanceMaterial.createFromXML(xmlIm, document);
+				
 				bindMaterial[instanceMaterial.symbol] = instanceMaterial;
 			}
 			
@@ -65,61 +66,22 @@ package aerys.minko.type.parser.collada.instance
 			return new InstanceGeometry(document, sourceId);
 		}
 		
-//		public function toScene() : IScene
-//		{
-//			var geometry	: Geometry		= resource as Geometry;
-//
-//			if (geometry && !_scene)
-//			{
-//				var options	: ParserOptions	= _document.parserOptions;
-//				var group	: IGroup		= null;
-//				
-//				if (!options || options.loadMeshes)
-//				{
-//					_scene = geometry.toMesh();
-//					_scene = options.replaceNodeFunction(_scene);
-//				}
-//				
-//				if (!options || options.loadTextures)
-//				{
-//					// get the first material
-//					var triangleStore		: Triangles 		= geometry.triangleStores[0];
-//					var subMeshMatSymbol	: String			= triangleStore.material;
-//					var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
-//					var texture				: IScene			= instanceMaterial.toScene();
-//					
-//					group = new MaterialGroup(null, texture);
-//					
-//					if (_scene)
-//						group.addChild(_scene);
-//					_scene = group;
-//				}
-//
-//				_scene.name = geometry.id;
-//			}
-//			
-//			return _scene;
-//		}
-		
 		public function toScene() : IScene
 		{
-			var geometry    : Geometry        = resource as Geometry;
-			var options        : ParserOptions    = _document.parserOptions;
+			var geometry	: Geometry        	= resource as Geometry;
+			var options     : ParserOptions    	= _document.parserOptions;
+			var group       : Group            	= new StyleGroup();
 			
-			var group        : Group            = new StyleGroup();
-			
-			for each (var triangleStore : Triangles in
-				geometry.triangleStores)
+			for each (var triangleStore : Triangles in geometry.triangleStores)
 			{
 				if (triangleStore.vertexCount == 0)
 					continue;
 				
-				var subMeshMatSymbol    : String            =
-					triangleStore.material;
-				var instanceMaterial    : InstanceMaterial    =
-					_bindMaterial[subMeshMatSymbol];
-				var texture                : IScene            =
-					instanceMaterial.toScene();
+				var subMeshMatSymbol    : String			= triangleStore.material;
+				var instanceMaterial	: InstanceMaterial  = _bindMaterial[subMeshMatSymbol];
+				var texture 			: IScene 			= instanceMaterial.toScene();
+				
+				texture = _document.parserOptions.replaceNodeFunction(texture);
 				group.addChild(texture);
 				
 				geometry.toSubMeshes(triangleStore, group);

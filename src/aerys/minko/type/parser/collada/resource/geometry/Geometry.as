@@ -141,12 +141,16 @@ package aerys.minko.type.parser.collada.resource.geometry
 			var vertexFormat		: VertexFormat			= createVertexFormat(vertexSemantics, triangleSemantics);
 			var indexData			: Vector.<uint>			= new Vector.<uint>();
 			var vertexData			: Vector.<Number>		= new Vector.<Number>();
+			var mesh					: IMesh					= null;
 			
 			fillBuffers(vertexSemantics, triangleSemantics, triangleStores, indexData, vertexData);
 			
 			if (indexData.length <= INDEX_LIMIT && vertexData.length / vertexFormat.dwordsPerVertex <= VERTEX_LIMIT)
 			{
-				group.addChild(createMesh(indexData, vertexData, vertexFormat));
+				mesh = createMesh(indexData, vertexData, vertexFormat);
+				
+				if (mesh)
+					group.addChild(mesh);
 			}
 			else
 			{
@@ -234,7 +238,10 @@ package aerys.minko.type.parser.collada.resource.geometry
 							throw new Error('');
 					}
 					
-					group.addChild(createMesh(partialIndexData, partialVertexData, vertexFormat));
+					mesh = createMesh(partialIndexData, partialVertexData, vertexFormat);
+					
+					if (mesh)
+						group.addChild(mesh);
 					indexData.splice(0, usedIndicesCount);
 				}
 			}
@@ -424,6 +431,8 @@ package aerys.minko.type.parser.collada.resource.geometry
 			var vertexStreamList	: VertexStreamList	= new VertexStreamList(vertexStream);
 			var indexStream			: IndexStream		= new IndexStream(indexData, 0, _document.parserOptions.keepStreamsDynamic);
 			var mesh				: Mesh				= new Mesh(vertexStreamList, indexStream);
+			
+			mesh = _document.parserOptions.replaceNodeFunction(mesh);
 			
 			return mesh
 		}
