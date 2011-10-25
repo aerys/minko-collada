@@ -70,7 +70,7 @@ package aerys.minko.type.parser.collada.instance
 		{
 			var geometry	: Geometry        	= resource as Geometry;
 			var options     : ParserOptions    	= _document.parserOptions;
-			var group       : Group            	= new StyleGroup();
+			var group       : MaterialGroup     = new MaterialGroup();
 			
 			for each (var triangleStore : Triangles in geometry.triangleStores)
 			{
@@ -81,8 +81,8 @@ package aerys.minko.type.parser.collada.instance
 				var instanceMaterial	: InstanceMaterial  = _bindMaterial[subMeshMatSymbol];
 				var texture 			: IScene 			= instanceMaterial.toScene();
 				
-				texture = _document.parserOptions.replaceNodeFunction(texture);
-				group.addChild(texture);
+				if (texture)
+					group.textures.addChild(texture);
 				
 				geometry.toSubMeshes(triangleStore, group);
 			}

@@ -72,11 +72,6 @@ package aerys.minko.type.parser.collada.instance
 		
 		public function toScene() : IScene
 		{
-			return toMaterialGroup();
-		}
-		
-		public function toMaterialGroup() : MaterialGroup
-		{
 			var mg 			: MaterialGroup 	= new MaterialGroup();
 			var options		: ParserOptions		= _document.parserOptions;
 			var controller	: Controller		= Controller(resource);
@@ -89,7 +84,8 @@ package aerys.minko.type.parser.collada.instance
 				var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
 				var texture				: IScene			= instanceMaterial.toScene();
 				
-				mg.textures.addChild(texture);
+				if (texture)
+					mg.textures.addChild(texture);
 			}
 			
 			if (!options || options.loadMeshes)
@@ -102,7 +98,7 @@ package aerys.minko.type.parser.collada.instance
 		{
 			if (!_mesh)
 			{
-				var controller			: Controller		= Controller(resource);
+				var controller	: Controller	= Controller(resource);
 				
 				_mesh = controller.toMesh();
 				if (_mesh == null)
