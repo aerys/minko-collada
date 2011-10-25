@@ -129,7 +129,11 @@ package aerys.minko.type.parser.collada.resource
 				var minkoChild : IScene = child.toScene();
 				
 				if (minkoChild != null)
+				{
+					minkoChild = _document.parserOptions.replaceNodeFunction(minkoChild);
+					
 					tf.addChild(minkoChild);
+				}
 			}
 			
 			return tf;
@@ -152,7 +156,11 @@ package aerys.minko.type.parser.collada.resource
 				var minkoChild : IScene = child.toScene();
 				
 				if (minkoChild != null)
+				{
+					minkoChild = _document.parserOptions.replaceNodeFunction(minkoChild);
+					
 					joint.addChild(minkoChild);
+				}
 			}
 			
 			return joint;

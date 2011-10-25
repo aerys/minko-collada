@@ -65,7 +65,7 @@ package aerys.minko.type.parser.collada.instance
 		{
 			// Retrieve all objects that defines a material.
 			// We assume the defaut profile is the first one and it is a ProfileCommon
-			
+			var texture 		: IScene 			= null;
 			var material		: Material			= resource as Material;
 			var instanceEffect	: InstanceEffect	= material.instanceEffect;
 			var effect			: Effect			= instanceEffect.resource as Effect;
@@ -113,19 +113,17 @@ package aerys.minko.type.parser.collada.instance
 				}
 				
 				if (image && image.imageData.path)
-				{
-					var texture : IScene = getTextureFromPath(image.imageData.path);
-					
-					if (texture)
-						return texture;
-				}
-				
-				return DEFAULT_TEXTURE;
+					texture = getTextureFromPath(image.imageData.path);
 			}
 			else
 			{
-				return new ColorTexture(diffuse.color);
+				texture = new ColorTexture(diffuse.color);
 			}
+			
+			texture ||= DEFAULT_TEXTURE;
+			texture = _document.parserOptions.replaceNodeFunction(texture);
+			
+			return texture;
 		}
 		
 		private function getTextureFromPath(textureFilename : String) : IScene

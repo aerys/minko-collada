@@ -2,7 +2,6 @@ package aerys.minko.type.parser.collada.resource.geometry
 {
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.scene.node.group.Group;
 	import aerys.minko.scene.node.group.IGroup;
 	import aerys.minko.scene.node.mesh.IMesh;
 	import aerys.minko.scene.node.mesh.Mesh;
@@ -22,7 +21,9 @@ package aerys.minko.type.parser.collada.resource.geometry
 	
 	public class Geometry implements IResource
 	{
-		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		private static const NS 			: Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		private static const INDEX_LIMIT	: uint 		= 524287;
+		private static const VERTEX_LIMIT	: uint 		= 65536;
 		
 		private var _document				: ColladaDocument;
 		
@@ -149,20 +150,121 @@ package aerys.minko.type.parser.collada.resource.geometry
 			return createMesh(indexData, vertexData, vertexFormat);
 		}
 		
-		minko_collada function toSubMesh(triangleStore : Triangles) : IMesh
+		minko_collada function toSubMeshes(triangleStore : Triangles, group : IGroup) : void
 		{
 			var triangleStores		: Vector.<Triangles> = Vector.<Triangles>([triangleStore]);
 			
 			// create mesh using the same process that this.toMesh()
-			var vertexSemantics		: Vector.<String>	= _verticesDataSemantics;
-			var triangleSemantics	: Vector.<String>	= triangleStore.semantics;
-			var vertexFormat		: VertexFormat		= createVertexFormat(vertexSemantics, triangleSemantics);
-			var indexData			: Vector.<uint>		= new Vector.<uint>();
-			var vertexData			: Vector.<Number>	= new Vector.<Number>();
+			var vertexSemantics		: Vector.<String>		= _verticesDataSemantics;
+			var triangleSemantics	: Vector.<String>		= triangleStore.semantics;
+			var vertexFormat		: VertexFormat			= createVertexFormat(vertexSemantics, triangleSemantics);
+			var indexData			: Vector.<uint>			= new Vector.<uint>();
+			var vertexData			: Vector.<Number>		= new Vector.<Number>();
+			var mesh					: IMesh					= null;
 			
 			fillBuffers(vertexSemantics, triangleSemantics, triangleStores, indexData, vertexData);
 			
-			return createMesh(indexData, vertexData, vertexFormat);
+			if (indexData.length <= INDEX_LIMIT && vertexData.length / vertexFormat.dwordsPerVertex <= VERTEX_LIMIT)
+			{
+				mesh = createMesh(indexData, vertexData, vertexFormat);
+				
+				if (mesh)
+					group.addChild(mesh);
+			}
+			else
+			{
+				while (indexData.length != 0)
+				{
+					var dwordsPerVertex		: uint				= vertexFormat.dwordsPerVertex;
+					var indexDataLength		: uint				= indexData.length;
+					
+					// new buffers
+					var partialVertexData	: Vector.<Number>	= new Vector.<Number>();
+					var partialIndexData	: Vector.<uint>		= new Vector.<uint>();
+					
+					// local variables
+					var oldVertexIds		: Vector.<int>		= new Vector.<int>(3, true);
+					var newVertexIds		: Vector.<int>		= new Vector.<int>(3, true);
+					var newVertexNeeded		: Vector.<Boolean>	= new Vector.<Boolean>(3, true);
+					
+					var usedVertices		: Vector.<uint>		= new Vector.<uint>();	// tableau de correspondance entre anciens et nouveaux indices
+					var usedVerticesCount	: uint				= 0;					// taille du tableau ci dessus
+					var usedIndicesCount	: uint				= 0;					// quantitee d'indices utilises pour l'instant
+					var neededVerticesCount	: uint;
+					
+					// iterators & limits
+					var localVertexId		: uint;
+					var dwordId				: uint;
+					var dwordIdLimit		: uint;
+					
+					while (usedIndicesCount < indexDataLength)
+					{
+						// check si le triangle suivant rentrera dans l'index buffer
+						var remainingIndexes	: uint		= INDEX_LIMIT - usedIndicesCount;
+						if (remainingIndexes < 3)
+							break;
+						
+						// check si le triangle suivant rentre dans le vertex buffer
+						var remainingVertices	: uint		= VERTEX_LIMIT - usedVerticesCount;
+						
+						neededVerticesCount = 0;
+						for (localVertexId = 0; localVertexId < 3; ++localVertexId)
+						{
+							oldVertexIds[localVertexId]		= indexData[uint(usedIndicesCount + localVertexId)];
+							newVertexIds[localVertexId]		= usedVertices.indexOf(oldVertexIds[localVertexId]);
+							newVertexNeeded[localVertexId]	= newVertexIds[localVertexId] == -1;
+							
+							if (newVertexNeeded[localVertexId])
+								++neededVerticesCount;
+						}
+						
+						if (remainingVertices < neededVerticesCount)
+							break;
+						
+						// ca rentre, on insere le triangle avec les donnees qui vont avec
+						for (localVertexId = 0; localVertexId < 3; ++localVertexId)
+						{
+							
+							if (newVertexNeeded[localVertexId])
+							{
+								// on copie le vertex dans le nouveau tableau
+								dwordId			= oldVertexIds[localVertexId] * dwordsPerVertex;
+								dwordIdLimit	= dwordId + dwordsPerVertex;
+								for (; dwordId < dwordIdLimit; ++dwordId)
+									partialVertexData.push(vertexData[dwordId]);
+								
+								// on met a jour l'id dans notre variable temporaire pour remplir le nouvel indexData
+								newVertexIds[localVertexId] = usedVerticesCount;
+								
+								// on note son ancien id dans le tableau temporaire
+								usedVertices[usedVerticesCount++] = oldVertexIds[localVertexId];
+							}
+							
+							partialIndexData.push(newVertexIds[localVertexId]);
+						}
+						
+						// ... on incremente le compteur
+						usedIndicesCount += 3;
+						
+						// on fait des assertions, sinon ca marchera jamais
+						if (usedIndicesCount != partialIndexData.length)
+							throw new Error('');
+						
+						if (usedVerticesCount != usedVertices.length)
+							throw new Error('');
+						
+						if (usedVerticesCount != partialVertexData.length / dwordsPerVertex)
+							throw new Error('');
+					}
+					
+					mesh = createMesh(partialIndexData, partialVertexData, vertexFormat);
+					
+					if (mesh)
+						group.addChild(mesh);
+					
+					indexData.splice(0, usedIndicesCount);
+				}
+			}
 		}
 		
 		minko_collada function fillBuffers(vertexSemantics		: Vector.<String>, 
@@ -349,6 +451,8 @@ package aerys.minko.type.parser.collada.resource.geometry
 			var vertexStreamList	: VertexStreamList	= new VertexStreamList(vertexStream);
 			var indexStream			: IndexStream		= new IndexStream(indexData, 0, _document.parserOptions.keepStreamsDynamic);
 			var mesh				: Mesh				= new Mesh(vertexStreamList, indexStream);
+			
+			mesh = _document.parserOptions.replaceNodeFunction(mesh);
 			
 			return mesh
 		}

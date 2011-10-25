@@ -72,34 +72,6 @@ package aerys.minko.type.parser.collada.instance
 		
 		public function toScene() : IScene
 		{
-			//return toStyleGroup();
-			return toMaterialGroup();
-		}
-		
-		public function toStyleGroup() : StyleGroup
-		{
-			var sg 					: StyleGroup 		= new StyleGroup(); 
-			var options				: ParserOptions		= _document.parserOptions;
-			var controller			: Controller		= Controller(resource);
-			
-			if (!options || options.loadTextures)
-			{
-				var geometry			: Geometry			= _document.getGeometryById(controller.skinId);			
-				var triangleStore		: Triangles 		= geometry.triangleStores[0];
-				var subMeshMatSymbol	: String			= triangleStore.material;
-				var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
-				
-				sg.addChild(instanceMaterial.toScene());
-			}
-			
-			if (!options || options.loadMeshes)
-				sg.addChild(getMesh());
-			
-			return sg;
-		}
-		
-		public function toMaterialGroup() : MaterialGroup
-		{
 			var mg 			: MaterialGroup 	= new MaterialGroup();
 			var options		: ParserOptions		= _document.parserOptions;
 			var controller	: Controller		= Controller(resource);
@@ -110,8 +82,9 @@ package aerys.minko.type.parser.collada.instance
 				var triangleStore		: Triangles 		= geometry.triangleStores[0];
 				var subMeshMatSymbol	: String			= triangleStore.material;
 				var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
+				var texture				: IScene			= instanceMaterial.toScene();
 				
-				mg.textures.addChild(instanceMaterial.toScene());
+				mg.textures.addChild(texture);
 			}
 			
 			if (!options || options.loadMeshes)
@@ -134,21 +107,25 @@ package aerys.minko.type.parser.collada.instance
 				
 				if (!options || options.loadSkins)
 				{
-					var skeletonReference	: IGroup			= null;
-					var skeletonRootName	: String			= _bindedSkeletonId;
+					var skeletonReference	: IGroup				= null;
+					var skeletonRootName	: String				= _bindedSkeletonId;
 					
-					var bindShapeMatrix		: Matrix4x4			= controller.bindShapeMatrix;
-					var jointNames			: Vector.<String>	= controller.jointNames;
+					var bindShapeMatrix		: Matrix4x4				= controller.bindShapeMatrix;
+					var jointNames			: Vector.<String>		= controller.jointNames;
 					var invBindMatrices		: Vector.<Matrix4x4>	= controller.invBindMatrices;
 					
-					_mesh = new SkinnedMesh(_mesh,
+					_mesh = new SkinnedMesh(
+						_mesh,
 						skeletonReference,
 						skeletonRootName,
 						bindShapeMatrix,
 						jointNames,
-						invBindMatrices);
+						invBindMatrices
+					);
 					_mesh.name = _sourceId;
 				}
+				
+				_mesh = _document.parserOptions.replaceNodeFunction(_mesh);
 			}
 			
 			return _mesh;
