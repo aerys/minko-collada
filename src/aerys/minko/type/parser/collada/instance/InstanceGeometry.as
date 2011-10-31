@@ -68,9 +68,10 @@ package aerys.minko.type.parser.collada.instance
 		
 		public function toScene() : IScene
 		{
-			var geometry	: Geometry        	= resource as Geometry;
-			var options     : ParserOptions    	= _document.parserOptions;
-			var group       : MaterialGroup     = new MaterialGroup();
+			var geometry	: Geometry			= resource as Geometry;
+			var options		: ParserOptions		= _document.parserOptions;
+			var group		: MaterialGroup		= new MaterialGroup();
+			group.name = geometry.id;
 			
 			for each (var triangleStore : Triangles in geometry.triangleStores)
 			{

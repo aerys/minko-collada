@@ -32,7 +32,7 @@ package aerys.minko.type.parser.collada.instance
 	
 	public class InstanceMaterial extends EventDispatcher implements IInstance
 	{
-		private static const DEFAULT_TEXTURE	: ITexture	= new ColorTexture(0xffffffff);
+		private static const DEFAULT_TEXTURE	: ITexture	= new ColorTexture(0xff00ff00);
 		
 		private var _document	: ColladaDocument	= null;
 		private var _sourceId	: String	= null;
