@@ -164,10 +164,10 @@ package aerys.minko.type.parser.collada.resource.geometry
 				
 				for (var i : uint = 0; i < numMeshes; ++i)
 				{
-					indexStream		= new IndexStream(indexBuffers[i], 0, _options.keepStreamsDynamic);
-					vertexStream	= new VertexStream(vertexBuffers[i], format, _options.keepStreamsDynamic);
+					mesh = createMesh(indexBuffers[i], vertexBuffers[i], vertexFormat);
 					
-					result.push(new Mesh(vertexStream, indexStream));
+					if (mesh)
+						group.addChild(mesh);
 				}
 			}
 		}
@@ -450,12 +450,12 @@ package aerys.minko.type.parser.collada.resource.geometry
 		
 		minko_collada function createMesh(indexData		: Vector.<uint>,
 										  vertexData	: Vector.<Number>,
-										  vertexFormat	: VertexFormat) : Mesh
+										  vertexFormat	: VertexFormat) : IScene
 		{
 			var vertexStream		: VertexStream		= new VertexStream(vertexData, vertexFormat, _document.parserOptions.keepStreamsDynamic);
 			var vertexStreamList	: VertexStreamList	= new VertexStreamList(vertexStream);
 			var indexStream			: IndexStream		= new IndexStream(indexData, 0, _document.parserOptions.keepStreamsDynamic);
-			var mesh				: Mesh				= new Mesh(vertexStreamList, indexStream);
+			var mesh				: IScene			= new Mesh(vertexStreamList, indexStream);
 			
 			mesh = _document.parserOptions.replaceNodeFunction(mesh);
 			

@@ -1,6 +1,7 @@
 package aerys.minko.type.parser.collada.resource.controller
 {
 	import aerys.minko.ns.minko_collada;
+	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
@@ -256,7 +257,7 @@ package aerys.minko.type.parser.collada.resource.controller
 			return new InstanceController(_document, _id); 
 		}
 		
-		public function toMesh() : Mesh
+		public function toMesh() : IScene
 		{
 			// get geometry, as most tasks are going to be delegated to it
 			var geometry			: Geometry			= _document.getGeometryById(_skinId);

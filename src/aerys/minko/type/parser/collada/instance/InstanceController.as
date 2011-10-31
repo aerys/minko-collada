@@ -32,7 +32,7 @@ package aerys.minko.type.parser.collada.instance
 		private var _bindedSkeletonId	: String;
 		private var _bindMaterial		: Object;
 		
-		private var _mesh				: IMesh;
+		private var _mesh				: IScene;
 		
 		public function InstanceController(document			: ColladaDocument,
 										   sourceId			: String,
@@ -94,7 +94,7 @@ package aerys.minko.type.parser.collada.instance
 			return mg;
 		}
 		
-		private function getMesh() : IMesh
+		private function getMesh() : IScene
 		{
 			if (!_mesh)
 			{
@@ -116,7 +116,7 @@ package aerys.minko.type.parser.collada.instance
 					var invBindMatrices		: Vector.<Matrix4x4>	= controller.invBindMatrices;
 					
 					_mesh = new SkinnedMesh(
-						_mesh,
+						IMesh(_mesh),
 						skeletonReference,
 						skeletonRootName,
 						bindShapeMatrix,
