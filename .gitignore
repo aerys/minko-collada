@@ -3,6 +3,7 @@
 .flexLibProperties
 .project
 .settings
+bin
 bin-debug/
 bin-release/
 build/
