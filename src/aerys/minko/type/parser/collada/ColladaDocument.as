@@ -150,9 +150,18 @@ package aerys.minko.type.parser.collada
 			if (_animations.hasOwnProperty('mergedAnimations'))
 			{
 				var mainAnimation	: Animation				= _animations['mergedAnimations'];
-				var timelines		: Vector.<ITimeline>	= mainAnimation.computeTimelines();
+				var timelines		: Vector.<ITimeline>	= new <ITimeline>[];
+				var targetNames		: Vector.<String>		= new <String>[];
+				var targets			: Vector.<IScene>		= new <IScene>[];
 				
-				sceneGraph = _parserOptions.replaceNodeFunction(new AnimationGroup(timelines, null, sceneGraph));
+				mainAnimation.getTimelines(timelines, targetNames);
+				
+				for each (var targetName : String in targetNames)
+					targets.push(sceneGraph.getDescendantByName(targetName));
+				
+				sceneGraph = _parserOptions.replaceNodeFunction(
+					new AnimationGroup(timelines, targets, null, sceneGraph)
+				);
 			}
 			
 			return sceneGraph;
