@@ -1,7 +1,10 @@
 package aerys.minko.type.parser.collada.resource.animation
 {
+	import aerys.minko.scene.node.IScene;
 	import aerys.minko.type.animation.timeline.ITimeline;
+	import aerys.minko.type.animation.timeline.MatrixLinearRegularTimeline;
 	import aerys.minko.type.animation.timeline.MatrixLinearTimeline;
+	import aerys.minko.type.animation.timeline.MatrixSegmentTimeline;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
@@ -70,31 +73,26 @@ package aerys.minko.type.parser.collada.resource.animation
 			_animations = animations || new Vector.<Animation>();
 		}
 		
-		public function computeTimelines() : Vector.<ITimeline>
+		public function getTimelines(timelines 		: Vector.<ITimeline>,
+									 targetNames	: Vector.<String>) : void
 		{
 			var times			: Vector.<Number>;
 			var timesCollection	: Object				= new Object();
 			var vector			: Vector.<Number>		= new Vector.<Number>(16);
-			var timelines		: Vector.<ITimeline>	= new Vector.<ITimeline>();
 			
-//			var timer : uint = getTimer();
 			retrieveTimes(timesCollection);
 			for each (times in timesCollection)
 				times.sort(cmp);
 			removeDuplicateTimes(timesCollection);
-//			trace('computeTimelines step1', getTimer() - timer);
 			
-//			timer = getTimer();
-			
-			for (var targetId : String in timesCollection)
+			for (var targetName : String in timesCollection)
 			{
-				times = timesCollection[targetId];
+				times = timesCollection[targetName];
 				
 				if (times.length == 1 && isNaN(times[0]))
 					continue;
 				
 				var timesLength			: uint					= times.length;
-				
 				var minkoTimes			: Vector.<uint>			= new Vector.<uint>();
 				var minkoMatrices		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
 				
@@ -108,7 +106,7 @@ package aerys.minko.type.parser.collada.resource.animation
 					vector[8]	= vector[9]  = vector[11] = 0;
 					vector[12]	= vector[13] = vector[14] = 0;
 					
-					setMatrixData(time, vector, targetId);
+					setMatrixData(time, vector, targetName);
 					
 					// why do we have to do this? animation data from the collada file is plain wrong.
 					vector[3] = vector[7] = vector[11] = 0
@@ -120,12 +118,18 @@ package aerys.minko.type.parser.collada.resource.animation
 					minkoMatrices.push(matrix);
 				}
 				
+//				var deltaTime : uint = minkoTimes[1] - minkoTimes[0];
+//				for (i = 1; i < timesLength; ++i)
+//					if (Math.abs(deltaTime - minkoTimes[i] + minkoTimes[i - 1]) > 1)
+//						break;
 				
-				timelines.push(new MatrixLinearTimeline(targetId, 'transform', minkoTimes, minkoMatrices));
+//				if (i != timesLength)
+					timelines.push(new MatrixLinearTimeline('transform', minkoTimes, minkoMatrices));
+//				else
+//					timelines.push(new MatrixLinearRegularTimeline('transform', deltaTime, minkoMatrices));
+				
+				targetNames.push(targetName);
 			}
-//			trace('computeTimelines step2', getTimer() - timer);
-			
-			return timelines;
 		}
 		
 		public function setMatrixData(time : Number, vector : Vector.<Number>, targetId : String) : void
