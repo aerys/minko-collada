@@ -274,6 +274,7 @@ package aerys.minko.type.parser.collada.resource.controller
 			// fill buffers with semantics
 			var indexData			: Vector.<uint>		= new Vector.<uint>();
 			var vertexData			: Vector.<Number>	= new Vector.<Number>();
+			
 			fillBuffers(geometry, vertexSemantics, triangleSemantics, indexData, vertexData);
 			
 			// merge it all

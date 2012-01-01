@@ -17,6 +17,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.type.parser.collada.resource.controller.Controller;
 	import aerys.minko.type.parser.collada.resource.geometry.Geometry;
 	import aerys.minko.type.parser.collada.resource.geometry.Triangles;
+	import aerys.minko.type.stream.VertexStream;
 	
 	public class InstanceController implements IInstance
 	{
@@ -122,9 +123,11 @@ package aerys.minko.type.parser.collada.instance
 						jointNames,
 						invBindMatrices
 					);
-					_mesh.name = _sourceId;
+					
 				}
 				
+				_mesh.name = _sourceId;
+				VertexStream(_mesh.vertexStream).name = _mesh.name;
 				_mesh = _document.parserOptions.replaceNodeFunction(_mesh);
 			}
 			

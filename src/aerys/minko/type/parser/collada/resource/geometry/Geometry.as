@@ -13,14 +13,13 @@ package aerys.minko.type.parser.collada.resource.geometry
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.stream.IndexStream;
 	import aerys.minko.type.stream.VertexStream;
-	import aerys.minko.type.stream.VertexStreamList;
 	import aerys.minko.type.stream.format.VertexComponent;
 	import aerys.minko.type.stream.format.VertexFormat;
 	
-	use namespace minko_collada;
-	
 	public class Geometry implements IResource
 	{
+		use namespace minko_collada;
+		
 		private static const NS 			: Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		private static const INDEX_LIMIT	: uint 		= 524287;
 		private static const VERTEX_LIMIT	: uint 		= 65536;
@@ -447,14 +446,14 @@ package aerys.minko.type.parser.collada.resource.geometry
 										  vertexData	: Vector.<Number>, 
 										  vertexFormat	: VertexFormat) : Mesh
 		{
-			var vertexStream		: VertexStream		= new VertexStream(vertexData, vertexFormat, _document.parserOptions.keepStreamsDynamic);
-			var vertexStreamList	: VertexStreamList	= new VertexStreamList(vertexStream);
-			var indexStream			: IndexStream		= new IndexStream(indexData, 0, _document.parserOptions.keepStreamsDynamic);
-			var mesh				: Mesh				= new Mesh(vertexStreamList, indexStream);
+			var mesh : Mesh	= new Mesh(
+				new VertexStream(_document.parserOptions.defaultVertexStreamUsage, vertexFormat, vertexData),
+				new IndexStream(_document.parserOptions.defaultIndexStreamUsage, indexData, 0)
+			);
 			
 			mesh = _document.parserOptions.replaceNodeFunction(mesh);
 			
-			return mesh
+			return mesh;
 		}
 	}
 }
