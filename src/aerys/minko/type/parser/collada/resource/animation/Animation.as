@@ -87,48 +87,56 @@ package aerys.minko.type.parser.collada.resource.animation
 			
 			for (var targetName : String in timesCollection)
 			{
-				times = timesCollection[targetName];
-				
-				if (times.length == 1 && isNaN(times[0]))
-					continue;
-				
-				var timesLength			: uint					= times.length;
-				var minkoTimes			: Vector.<uint>			= new Vector.<uint>();
-				var minkoMatrices		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
-				
-				for (var i : uint = 0; i < timesLength; ++i)
+				try
 				{
-					var time : Number = times[i];
+					times = timesCollection[targetName];
 					
-					vector[0]	= vector[5]	 = vector[10] = vector[15] = 1;
-					vector[1]	= vector[2]	 = vector[3]  = 0;
-					vector[4]	= vector[6]  = vector[7]  = 0;
-					vector[8]	= vector[9]  = vector[11] = 0;
-					vector[12]	= vector[13] = vector[14] = 0;
+					if (times.length == 1 && isNaN(times[0]))
+						continue;
 					
-					setMatrixData(time, vector, targetName);
+					var timesLength			: uint					= times.length;
+					var minkoTimes			: Vector.<uint>			= new Vector.<uint>();
+					var minkoMatrices		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
 					
-					// why do we have to do this? animation data from the collada file is plain wrong.
-					vector[3] = vector[7] = vector[11] = 0
-					vector[15] = 1;
-					var matrix : Matrix4x4 = new Matrix4x4();
-					matrix.setRawData(vector, 0, false);
+					for (var i : uint = 0; i < timesLength; ++i)
+					{
+						var time : Number = times[i];
+						
+						vector[0]	= vector[5]	 = vector[10] = vector[15] = 1;
+						vector[1]	= vector[2]	 = vector[3]  = 0;
+						vector[4]	= vector[6]  = vector[7]  = 0;
+						vector[8]	= vector[9]  = vector[11] = 0;
+						vector[12]	= vector[13] = vector[14] = 0;
+						
+						setMatrixData(time, vector, targetName);
+						
+						// why do we have to do this? animation data from the collada file is plain wrong.
+						vector[3] = vector[7] = vector[11] = 0
+						vector[15] = 1;
+						var matrix : Matrix4x4 = new Matrix4x4();
+						matrix.setRawData(vector, 0, false);
+						
+						minkoTimes.push((time * 1000) << 0);
+						minkoMatrices.push(matrix);
+					}
 					
-					minkoTimes.push((time * 1000) << 0);
-					minkoMatrices.push(matrix);
+	//				var deltaTime : uint = minkoTimes[1] - minkoTimes[0];
+	//				for (i = 1; i < timesLength; ++i)
+	//					if (Math.abs(deltaTime - minkoTimes[i] + minkoTimes[i - 1]) > 1)
+	//						break;
+					
+	//				if (i != timesLength)
+						timelines.push(new MatrixLinearTimeline('transform', minkoTimes, minkoMatrices));
+	//				else
+	//					timelines.push(new MatrixLinearRegularTimeline('transform', deltaTime, minkoMatrices));
+					
+					targetNames.push(targetName);
 				}
-				
-//				var deltaTime : uint = minkoTimes[1] - minkoTimes[0];
-//				for (i = 1; i < timesLength; ++i)
-//					if (Math.abs(deltaTime - minkoTimes[i] + minkoTimes[i - 1]) > 1)
-//						break;
-				
-//				if (i != timesLength)
-					timelines.push(new MatrixLinearTimeline('transform', minkoTimes, minkoMatrices));
-//				else
-//					timelines.push(new MatrixLinearRegularTimeline('transform', deltaTime, minkoMatrices));
-				
-				targetNames.push(targetName);
+				catch (e : Error)
+				{
+					trace('Droping animation for \'' + targetName + '\' (' + e.message + ')');
+					continue;
+				}
 			}
 		}
 		

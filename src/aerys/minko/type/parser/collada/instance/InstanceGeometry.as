@@ -4,6 +4,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.scene.node.group.IGroup;
 	import aerys.minko.scene.node.group.MaterialGroup;
+	import aerys.minko.scene.node.texture.ColorTexture;
 	import aerys.minko.type.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
@@ -72,12 +73,19 @@ package aerys.minko.type.parser.collada.instance
 				if (triangleStore.vertexCount == 0)
 					continue;
 				
-				var subMeshMatSymbol    : String			= triangleStore.material;
-				var instanceMaterial	: InstanceMaterial  = _bindMaterial[subMeshMatSymbol];
-				var texture 			: IScene 			= instanceMaterial.toScene();
+				var subMeshMatSymbol : String = triangleStore.material;
 				
-				texture = _document.parserOptions.replaceNodeFunction(texture);
-				group.textures.addChild(texture);
+				if (subMeshMatSymbol != "" && subMeshMatSymbol != null)
+				{
+					var instanceMaterial	: InstanceMaterial  = _bindMaterial[subMeshMatSymbol];
+					var texture 			: IScene 			= instanceMaterial.toScene();
+					texture = _document.parserOptions.replaceNodeFunction(texture);
+					group.addChild(texture);
+				}
+				else
+				{
+					group.addChild(new ColorTexture(0x00ff00));
+				}
 				
 				geometry.toSubMeshes(triangleStore, group);
 			}

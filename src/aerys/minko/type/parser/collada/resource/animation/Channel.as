@@ -255,40 +255,11 @@ package aerys.minko.type.parser.collada.resource.animation
 					break;
 					
 				case TransformType.ROTATE_X:
-					TMP_MATRIX.setRawData(data);
-					TMP_MATRIX.appendRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.X_AXIS);
-					TMP_MATRIX.appendScale(1);
-//					TMP_MATRIX.prependRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.X_AXIS);
-					TMP_MATRIX.getRawData(data);
-					break;
-				
 				case TransformType.ROTATE_Y:
-					TMP_MATRIX.setRawData(data);
-					TMP_MATRIX.appendRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.Y_AXIS);
-					TMP_MATRIX.appendScale(1);
-//					TMP_MATRIX.prependRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.Y_AXIS);
-					TMP_MATRIX.getRawData(data);
-					break;
-				
 				case TransformType.ROTATE_Z:
-					TMP_MATRIX.setRawData(data);
-					TMP_MATRIX.appendRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.Z_AXIS);
-					TMP_MATRIX.appendScale(1);
-//					TMP_MATRIX.prependRotation(getSimpleValueAt(t) / 180 * Math.PI, ConstVector4.Z_AXIS);
-					TMP_MATRIX.getRawData(data);
-					break;
-				
 				case TransformType.TRANSLATE:
-					var value : Object = getCompoundValueAt(t);
-					TMP_MATRIX.setRawData(data);
-					TMP_MATRIX.setTranslation(value.X, value.Y, value.Z);
-					TMP_MATRIX.appendScale(1);
-//					TMP_MATRIX.prependTranslation(value.X, value.Y, value.Z);
-					TMP_MATRIX.getRawData(data);
-					break;
-				
 				default: 
-//					trace('Unknown animation type', _transformType);
+					throw new Error("Unknown animation type: '" + _transformType + "'.");
 					break;
 			}
 		}

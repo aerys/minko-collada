@@ -159,7 +159,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 			var vertexFormat		: VertexFormat			= createVertexFormat(vertexSemantics, triangleSemantics);
 			var indexData			: Vector.<uint>			= new Vector.<uint>();
 			var vertexData			: Vector.<Number>		= new Vector.<Number>();
-			var mesh					: IMesh					= null;
+			var mesh				: IMesh					= null;
 			
 			fillBuffers(vertexSemantics, triangleSemantics, triangleStores, indexData, vertexData);
 			
