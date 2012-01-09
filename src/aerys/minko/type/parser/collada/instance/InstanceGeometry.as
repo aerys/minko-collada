@@ -75,9 +75,10 @@ package aerys.minko.type.parser.collada.instance
 				
 				var subMeshMatSymbol : String = triangleStore.material;
 				
-				if (subMeshMatSymbol != "" && subMeshMatSymbol != null)
+				if (subMeshMatSymbol != "" && subMeshMatSymbol != null && _bindMaterial[subMeshMatSymbol] != undefined)
 				{
 					var instanceMaterial	: InstanceMaterial  = _bindMaterial[subMeshMatSymbol];
+					
 					var texture 			: IScene 			= instanceMaterial.toScene();
 					texture = _document.parserOptions.replaceNodeFunction(texture);
 					group.addChild(texture);
