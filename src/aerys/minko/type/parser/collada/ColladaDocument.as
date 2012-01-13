@@ -105,10 +105,6 @@ package aerys.minko.type.parser.collada
 		
 		public function loadXML(xmlDocument : XML) : void
 		{
-//			trace('----------loadXml begin');
-//			Source.totalTime = 0;
-//			Source.partialTime = 0;
-//			var time : uint = getTimer();
 			_mainSceneId	= String(xmlDocument.NS::scene[0].NS::instance_visual_scene[0].@url).substr(1);
 			
 			_animations		= new Object();
@@ -128,7 +124,6 @@ package aerys.minko.type.parser.collada
 			Material 	.fillStoreFromXML(xmlDocument, this, _materials);
 			Node		.fillStoreFromXML(xmlDocument, this, _nodes);
 			VisualScene	.fillStoreFromXML(xmlDocument, this, _visualScenes);
-//			trace('----------loadXml', getTimer() - time, Source.totalTime, Source.partialTime);
 		}
 		
 		public function toGroup(dropEmptyGroups : Boolean = true, dropSkinning : Boolean = false) : Group

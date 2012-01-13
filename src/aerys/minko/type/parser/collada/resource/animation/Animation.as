@@ -1,10 +1,12 @@
 package aerys.minko.type.parser.collada.resource.animation
 {
+	import aerys.minko.Minko;
 	import aerys.minko.scene.node.IScene;
 	import aerys.minko.type.animation.timeline.ITimeline;
 	import aerys.minko.type.animation.timeline.MatrixLinearRegularTimeline;
 	import aerys.minko.type.animation.timeline.MatrixLinearTimeline;
 	import aerys.minko.type.animation.timeline.MatrixSegmentTimeline;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
@@ -134,7 +136,7 @@ package aerys.minko.type.parser.collada.resource.animation
 				}
 				catch (e : Error)
 				{
-					trace('Droping animation for \'' + targetName + '\' (' + e.message + ')');
+					Minko.log(DebugLevel.PLUGIN_WARNING, 'Droping animation for \'' + targetName + '\' (' + e.message + ')');
 					continue;
 				}
 			}
