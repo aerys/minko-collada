@@ -33,17 +33,12 @@ package aerys.minko.type.parser.collada.helper
 		protected var _paramTypes	: Vector.<Class>;
 		protected var _data			: Array;
 		
-//		protected var _semantic		: String;
-		
 		public function get id()			: String			{ return _id;			}
 		public function get stride()		: uint				{ return _stride;		}
 		public function get count()			: uint				{ return _count;		}
 		public function get paramNames()	: Vector.<String>	{ return _paramNames;	}
 		public function get paramTypes()	: Vector.<Class>	{ return _paramTypes;	}
 		public function get data()			: Array				{ return _data;			}
-//		public function get semantic()		: String			{ return _semantic;		}
-		
-//		public function set semantic(v : String) : void { _semantic = v; }
 		
 		public static var totalTime : uint = 0;
 		public static var partialTime : uint = 0;
@@ -174,26 +169,5 @@ package aerys.minko.type.parser.collada.helper
 		{
 			return _data[index * _paramNames.length + _paramNames.indexOf(paramName)];
 		}
-		
-//		public function pushVertexComponent(vertexId	: uint, 
-//											out			: Vector.<Number>,
-//											uv			: Boolean = false) : void
-//		{
-//			var start	: uint = vertexId * _stride;
-//			var end		: uint = start + _stride;
-//			
-//			// if this is a texture coord, we drop the w coordinate.
-//			if (_semantic == InputType.TEXCOORD)
-//			{
-//				out.push(_data[start]);
-//				out.push(1 - _data[start + 1]);
-//			}
-//			else
-//			{
-//				// if data[i] is no float, an exception will be raised because of the implicit cast.
-//				for (var i : uint = start; i < end; ++i)
-//					out.push(_data[i]);
-//			}
-//		}
 	}
 }
