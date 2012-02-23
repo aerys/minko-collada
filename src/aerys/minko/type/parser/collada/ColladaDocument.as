@@ -1,37 +1,33 @@
 package aerys.minko.type.parser.collada
 {
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.scene.node.IScene;
-	import aerys.minko.scene.node.group.AnimationGroup;
-	import aerys.minko.scene.node.group.Group;
-	import aerys.minko.scene.node.group.IGroup;
-	import aerys.minko.scene.node.group.Joint;
-	import aerys.minko.scene.node.group.LoaderGroup;
-	import aerys.minko.scene.node.mesh.IMesh;
-	import aerys.minko.scene.node.mesh.SkinnedMesh;
+	import aerys.minko.scene.controller.AbstractController;
+	import aerys.minko.scene.controller.AnimationController;
+	import aerys.minko.scene.controller.IControllerTarget;
+	import aerys.minko.scene.controller.SkinningController;
+	import aerys.minko.scene.node.AbstractSceneNode;
+	import aerys.minko.scene.node.Group;
+	import aerys.minko.scene.node.ISceneNode;
+	import aerys.minko.scene.node.mesh.Mesh;
+	import aerys.minko.type.animation.SkinningMethod;
 	import aerys.minko.type.animation.timeline.ITimeline;
 	import aerys.minko.type.error.collada.ColladaError;
-	import aerys.minko.type.parser.ParserOptions;
+	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
-	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.parser.collada.instance.IInstance;
+	import aerys.minko.type.parser.collada.instance.InstanceVisualScene;
+	import aerys.minko.type.parser.collada.resource.Geometry;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.Material;
 	import aerys.minko.type.parser.collada.resource.Node;
 	import aerys.minko.type.parser.collada.resource.VisualScene;
 	import aerys.minko.type.parser.collada.resource.animation.Animation;
 	import aerys.minko.type.parser.collada.resource.controller.Controller;
+	import aerys.minko.type.parser.collada.resource.controller.Skin;
 	import aerys.minko.type.parser.collada.resource.effect.Effect;
-	import aerys.minko.type.parser.collada.resource.geometry.Geometry;
 	import aerys.minko.type.parser.collada.resource.image.Image;
 	
-	import flash.display.BitmapData;
-	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	import flash.net.URLLoader;
-	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	import flash.utils.getTimer;
 
 	use namespace minko_collada;
 	
@@ -39,7 +35,7 @@ package aerys.minko.type.parser.collada
 	{
 		private static const NS	: Namespace	= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private static const NODENAME_TO_LIBRARY	: Object = {
+		private static const NODENAME_TO_LIBRARY : Object = {
 			'animation'		: '_animations',
 			'controller'	: '_controllers',
 			'effect'		: '_effects',
@@ -50,22 +46,20 @@ package aerys.minko.type.parser.collada
 			'visual_scene'	: '_visualScenes'
 		};
 		
-		private static const NODENAME_TO_CLASS		: Object = {
-			'animation'				: Animation,
-			'controller'			: Controller,
-			'effect'				: Effect,
-			'geometry'				: Geometry,
-			'image'					: Image,
-			'material'				: Material,
-			'node'					: Node,
-			'visual_scene'			: VisualScene
+		private static const NODENAME_TO_CLASS : Object = {
+			'animation'		: Animation,
+			'controller'	: Controller,
+			'effect'		: Effect,
+			'geometry'		: Geometry,
+			'image'			: Image,
+			'material'		: Material,
+			'node'			: Node,
+			'visual_scene'	: VisualScene
 		};
 		
-		private var _parserOptions	: ParserOptions;
-		
-		private var _url			: String;
-		
 		private var _mainSceneId	: String;
+		
+		private var _metaData		: Object;
 		
 		private var _animations		: Object;
 		private var _controllers	: Object;
@@ -76,18 +70,16 @@ package aerys.minko.type.parser.collada
 		private var _nodes			: Object;
 		private var _visualScenes	: Object;
 		
-		public function get mainSceneId()	: String		{ return _mainSceneId;	}
+		public function get mainSceneId()	: String { return _mainSceneId;	}
 		
-		public function get animations()	: Object		{ return _animations;	}
-		public function get controllers()	: Object 		{ return _controllers;	}
-		public function get effects()		: Object		{ return _effects;		}
-		public function get geometries()	: Object 		{ return _geometries;	}
-		public function get images()		: Object		{ return _images;		}
-		public function get materials()		: Object		{ return _materials;	}
-		public function get nodes()			: Object		{ return _nodes;		}
-		public function get visualScenes()	: Object 		{ return _visualScenes;	}
-		
-		public function get parserOptions()	: ParserOptions	{ return _parserOptions; }
+		public function get animations()	: Object { return _animations;	}
+		public function get controllers()	: Object { return _controllers;	}
+		public function get effects()		: Object { return _effects;		}
+		public function get geometries()	: Object { return _geometries;	}
+		public function get images()		: Object { return _images;		}
+		public function get materials()		: Object { return _materials;	}
+		public function get nodes()			: Object { return _nodes;		}
+		public function get visualScenes()	: Object { return _visualScenes;	}
 		
 		public function getAnimationById	(id : String) : Animation	{ return _animations[id];	}
 		public function getControllerById	(id : String) : Controller	{ return _controllers[id];	}
@@ -98,14 +90,15 @@ package aerys.minko.type.parser.collada
 		public function getNodeById			(id	: String) : Node		{ return _nodes[id];		}
 		public function getVisualSceneById	(id	: String) : VisualScene	{ return _visualScenes[id];	}
 		
-		public function ColladaDocument(parserOptions	: ParserOptions)
+		public function ColladaDocument()
 		{
-			_parserOptions = parserOptions;
 		}
 		
-		public function loadXML(xmlDocument : XML) : void
+		public function loadFromXML(xmlDocument : XML) : void
 		{
 			_mainSceneId	= String(xmlDocument.NS::scene[0].NS::instance_visual_scene[0].@url).substr(1);
+			
+			_metaData		= createMetaDataFromXML(xmlDocument.NS::asset[0]);
 			
 			_animations		= new Object();
 			_controllers	= new Object();
@@ -126,98 +119,49 @@ package aerys.minko.type.parser.collada
 			VisualScene	.fillStoreFromXML(xmlDocument, this, _visualScenes);
 		}
 		
-		public function toGroup(dropEmptyGroups : Boolean = true, dropSkinning : Boolean = false) : Group
+		private function createMetaDataFromXML(xmlMetaData : XML) : Object
 		{
-			// convert main scene to Group
-			var sceneGraph	: Group = _visualScenes[_mainSceneId].toGroup();
+			var metaData : Object = new Object();
+			metaData.contributor	= new Vector.<Object>();
+			metaData.unit			= new Object();
 			
-			// give global info to skinned meshs
-			setSkeletonReferenceNodes(sceneGraph, sceneGraph);
+			metaData.unit.meter		= parseFloat(String(xmlMetaData.NS::unit[0].@meter));
+			metaData.unit.name		= String(xmlMetaData.NS::unit[0].@name);
+			metaData.created		= new Date();
+			metaData.modified		= new Date();
+			metaData.upAxis			= String(xmlMetaData.NS::up_axis[0]);
+			metaData.created.time	= Date.parse(String(xmlMetaData.NS::created[0]));
+			metaData.modified.time	= Date.parse(String(xmlMetaData.NS::modified[0]));
 			
-			// drop what is mandated
-			if (dropEmptyGroups)
-				removeEmptyGroups(sceneGraph, null);
-			
-			if (dropSkinning)
-				removeSkinning(sceneGraph);
-			
-			// wrap into an animation group if relevant
-			if (_animations.hasOwnProperty('mergedAnimations'))
+			for each (var xmlContributor : XML in xmlMetaData.NS::contributor)
 			{
-				var mainAnimation	: Animation				= _animations['mergedAnimations'];
-				var timelines		: Vector.<ITimeline>	= new <ITimeline>[];
-				var targetNames		: Vector.<String>		= new <String>[];
-				var targets			: Vector.<IScene>		= new <IScene>[];
+				var contributor : Object = new Object();
 				
-				mainAnimation.getTimelines(timelines, targetNames);
+				if (xmlContributor.NS::author.length() != 0)
+					contributor.author = String(xmlContributor.NS::author);
 				
-				for each (var targetName : String in targetNames)
-					targets.push(sceneGraph.getDescendantByName(targetName));
+				if (xmlContributor.NS::author_email.length() != 0)
+					contributor.authorEmail = String(xmlContributor.NS::author_email);
 				
-				sceneGraph = _parserOptions.replaceNodeFunction(
-					new AnimationGroup(timelines, targets, null, sceneGraph)
-				);
+				if (xmlContributor.NS::author_website.length() != 0)
+					contributor.authorWebsite = String(xmlContributor.NS::author_website);
+				
+				if (xmlContributor.NS::authoring_tool.length() != 0)
+					contributor.authoringTool = String(xmlContributor.NS::authoring_tool);
+				
+				if (xmlContributor.NS::comments.length() != 0)
+					contributor.comments = String(xmlContributor.NS::comments);
+				
+				if (xmlContributor.NS::copyright.length() != 0)
+					contributor.copyright = String(xmlContributor.NS::copyright);
+				
+				if (xmlContributor.NS::source_data.length() != 0)
+					contributor.sourceData = String(xmlContributor.NS::source_data);
+				
+				metaData.contributor.push(contributor);
 			}
 			
-			return sceneGraph;
-		}
-		
-		private function setSkeletonReferenceNodes(currentGroup : IGroup, referenceNode : IGroup) : void
-		{
-			for each (var el : IScene in currentGroup)
-			{
-				if (el is SkinnedMesh)
-					SkinnedMesh(el).skeletonReference = referenceNode;
-				else if (el is IGroup)
-					setSkeletonReferenceNodes(IGroup(el), referenceNode);
-			}
-		}
-		
-		private function removeEmptyGroups(currentGroup : Group, parentGroup : Group) : Boolean
-		{
-			var childCount : uint = currentGroup.numChildren;
-			
-			for (var childIndex : uint = 0; childIndex < childCount; ++childIndex)
-			{
-				var el : Group = currentGroup.getChildAt(childIndex) as Group;
-				
-				if (el != null && removeEmptyGroups(Group(el), currentGroup))
-				{
-					--childIndex;
-					--childCount;
-				}
-			}
-			
-			if (!(currentGroup is Joint) && currentGroup.numChildren == 0 && parentGroup != null)
-			{
-				parentGroup.removeChild(currentGroup);
-				
-				return true;
-			}
-			
-			return false;
-		}
-		
-		private function removeSkinning(currentGroup : Group) : void
-		{
-			var childCount : uint = currentGroup.numChildren;
-			
-			for (var childIndex : uint = 0; childIndex < childCount; ++childIndex)
-			{
-				var el : IScene = currentGroup.getChildAt(childIndex);
-				
-				if (el is Group)
-				{
-					removeSkinning(el as Group);
-				}
-				else if (el is SkinnedMesh)
-				{
-					var mesh : IMesh = SkinnedMesh(el).mesh;
-					
-					currentGroup.removeChildAt(childIndex);
-					currentGroup.addChildAt(mesh, childIndex);
-				}
-			}
+			return metaData;
 		}
 		
 		minko_collada function delegateResourceCreation(xmlNode : XML) : IInstance
@@ -233,11 +177,90 @@ package aerys.minko.type.parser.collada
 			
 			var library			: Object		= this[NODENAME_TO_LIBRARY[nodeType]];
 			var resourceClass	: Class			= NODENAME_TO_CLASS[nodeType];
-			var resource		: IResource		= new resourceClass(xmlNode, this);
+			var resource		: IResource		= resourceClass['createFromXML'](xmlNode, this);
 			
 			library[resource.id] = resource;
 			
 			return resource.createInstance();
+		}
+		
+		public function generateScene(options : ParserOptions) : ISceneNode
+		{
+			var instance		: IInstance	 = getVisualSceneById(_mainSceneId).createInstance();
+			var sourceIdToScene	: Object	 = new Object();
+			var scopedIdToScene	: Object	 = new Object();
+			var mainScene		: ISceneNode = instance.createSceneNode(options, sourceIdToScene, scopedIdToScene);
+			var wrapper			: Group		 = new Group(mainScene);
+			
+			// scale depending on collada unit, and switch from right to left handed
+			var unit : Number = _metaData.unit.meter;
+			if (!isNaN(unit) && unit != 0)
+				wrapper.transform.setScale(unit, unit, -unit);
+			
+			// change up axis
+			var upAxis : String = _metaData.upAxis;
+			if (upAxis == 'Z_UP')
+				wrapper.transform.setRotation(Math.PI / 2, 0, 0);
+			else if (upAxis == 'X_UP')
+				wrapper.transform.setRotation(0, 0, Math.PI / 2);
+			
+			// add animation controllers
+			var animationStore : Animation = _animations['mergedAnimations'];
+			if (animationStore)
+			{
+				var timelines			: Vector.<ITimeline>	= new Vector.<ITimeline>();
+				var targetNames			: Vector.<String>		= new Vector.<String>();
+				animationStore.getTimelines(timelines, targetNames);
+				
+				var numTimelines		: uint					= timelines.length;
+				var timeLinesByNodeName	: Object				= new Object();
+				
+				for (var timelineId : uint = 0; timelineId < numTimelines; ++timelineId)
+				{
+					var timeline	: ITimeline	= timelines[timelineId];
+					var targetName	: String	= targetNames[timelineId];
+					
+					if (timeLinesByNodeName[targetName] == undefined)
+						timeLinesByNodeName[targetName] = new Vector.<ITimeline>();
+					
+					timeLinesByNodeName[targetName].push(timeline);
+				}
+				
+				for (var targetName_ : String in timeLinesByNodeName)
+					sourceIdToScene[targetName_].controller =
+						new AnimationController(timeLinesByNodeName[targetName_]);
+			}
+			
+//			// add skinning controllers
+//			for each (var controller : Controller in _controllers)
+//			{
+//				var skin		 : Skin			= controller.skin;
+//				var scene		 : ISceneNode	= sourceIdToScene[skin.sourceId];
+//				if (scene == null)
+//					continue;
+//				
+//				var meshes : Vector.<ISceneNode> = 
+//					scene is Group ? Group(scene).getDescendantsByType(Mesh) : new <ISceneNode>[scene];
+//				
+//				var skeletonRoot : Group			= null;
+//				var joints		 : Vector.<Group>	= new Vector.<Group>();
+//				for each (var jointName : String in skin.jointNames)
+//				{
+//					
+//				}
+//				
+//				var skinController	: AbstractController = new SkinningController(
+//					SkinningMethod.DUAL_QUATERNION,
+//					skeletonRoot,
+//					joints,
+//					skin.invBindMatrices
+//				);
+//				
+//				for each (var mesh : ISceneNode in meshes)
+//					Mesh(mesh).controller = skinController;
+//			}
+			
+			return wrapper;
 		}
 	}
 }

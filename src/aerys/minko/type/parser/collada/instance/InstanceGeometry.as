@@ -1,41 +1,41 @@
 package aerys.minko.type.parser.collada.instance
 {
+	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.scene.node.IScene;
-	import aerys.minko.scene.node.group.IGroup;
-	import aerys.minko.scene.node.group.MaterialGroup;
-	import aerys.minko.scene.node.texture.ColorTexture;
-	import aerys.minko.type.parser.ParserOptions;
+	import aerys.minko.render.effect.Effect;
+	import aerys.minko.scene.node.AbstractSceneNode;
+	import aerys.minko.scene.node.Group;
+	import aerys.minko.scene.node.ISceneNode;
+	import aerys.minko.scene.node.mesh.Mesh;
+	import aerys.minko.type.error.collada.ColladaError;
+	import aerys.minko.type.loader.parser.ParserOptions;
+	import aerys.minko.type.log.DebugLevel;
+	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
+	import aerys.minko.type.parser.collada.helper.MeshTemplate;
+	import aerys.minko.type.parser.collada.resource.Geometry;
 	import aerys.minko.type.parser.collada.resource.IResource;
-	import aerys.minko.type.parser.collada.resource.geometry.Geometry;
-	import aerys.minko.type.parser.collada.resource.geometry.Triangles;
+	import aerys.minko.type.parser.collada.resource.Material;
+	import aerys.minko.type.stream.IVertexStream;
+	import aerys.minko.type.stream.IndexStream;
 	
 	public class InstanceGeometry implements IInstance
 	{
-		use namespace minko_collada;
-		
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
+		use namespace minko_collada;
 		
 		private var _document		: ColladaDocument;
 		private var _sourceId		: String;
+		private var _scopedId		: String;
 		private var _name			: String;
-		private var _sid			: String;
 		private var _bindMaterial	: Object;
 		
-		private var _scene			: IScene;
+		private var _scene			: ISceneNode;
 		
-		public function InstanceGeometry(document			: ColladaDocument,
-										 sourceId			: String,
-										 bindMaterial		: Object = null,
-										 name				: String = null,
-										 sid				: String = null)
+		public function get resource() : IResource
 		{
-			_document		= document;
-			_sourceId		= sourceId;
-			_name			= name;
-			_sid			= sid;
-			_bindMaterial	= bindMaterial;
+			return _document.getGeometryById(_sourceId);
 		}
 		
 		public static function createFromXML(document	: ColladaDocument,
@@ -56,47 +56,87 @@ package aerys.minko.type.parser.collada.instance
 			return new InstanceGeometry(document, sourceId, bindMaterial, name, sid);
 		}
 		
-		public static function createFromSourceId(document : ColladaDocument,
-												  sourceId : String) : InstanceGeometry
+		public function InstanceGeometry(document		: ColladaDocument,
+										 sourceId		: String,
+										 bindMaterial	: Object = null,
+										 name			: String = null,
+										 scopedId		: String = null)
 		{
-			return new InstanceGeometry(document, sourceId);
+			_document		= document;
+			_sourceId		= sourceId;
+			_name			= name;
+			_scopedId		= scopedId;
+			_bindMaterial	= bindMaterial;
 		}
 		
-		public function toScene() : IScene
+		public function createSceneNode(options				: ParserOptions,
+										sourceIdToSceneNode	: Object,
+										scopedIdToSceneNode	: Object) : ISceneNode
 		{
-			var geometry	: Geometry        	= resource as Geometry;
-			var options     : ParserOptions    	= _document.parserOptions;
-			var group       : MaterialGroup    	= new MaterialGroup();
+			var geometry			: Geometry				= Geometry(resource);
+			geometry.computeMeshTemplates(options);
 			
-			for each (var triangleStore : Triangles in geometry.triangleStores)
+			var effect				: Effect				= options.effect;
+			var subMeshTemplates	: Vector.<MeshTemplate>	= geometry.meshTemplates;
+			var numMeshes			: uint					= subMeshTemplates != null ? subMeshTemplates.length : 0;
+			var group				: Group					= new Group();
+			
+			for (var meshTemplateId : uint = 0; meshTemplateId < numMeshes; ++meshTemplateId)
 			{
-				if (triangleStore.vertexCount == 0)
-					continue;
+				var meshTemplate : MeshTemplate = subMeshTemplates[meshTemplateId];
 				
-				var subMeshMatSymbol : String = triangleStore.material;
+				var diffuseValue : Object = 
+					getDiffuseValueFromMaterialName(meshTemplate.materialName);
 				
-				if (subMeshMatSymbol != "" && subMeshMatSymbol != null && _bindMaterial[subMeshMatSymbol] != undefined)
+				var localMeshes : Vector.<Mesh> = 
+					meshTemplate.generateMeshes(effect, options.vertexStreamUsage, options.indexStreamUsage);
+				
+				var i : uint = 0;
+				for each (var localMesh : Mesh in localMeshes)
 				{
-					var instanceMaterial	: InstanceMaterial  = _bindMaterial[subMeshMatSymbol];
-					
-					var texture 			: IScene 			= instanceMaterial.toScene();
-					texture = _document.parserOptions.replaceNodeFunction(texture);
-					group.addChild(texture);
+					localMesh.effectData.setProperty('diffuse', diffuseValue);
+					localMesh.name = _name + i++;
+					group.addChild(localMesh);
 				}
-				else
-				{
-					group.addChild(new ColorTexture(0x00ff00));
-				}
-				
-				geometry.toSubMeshes(triangleStore, group);
 			}
 			
-			return group;
+			if (group.numChildren == 0)
+				return null;
+			
+			var result : ISceneNode;
+			if (group.numChildren == 1)
+				result = group[0];
+			else
+				result = group;
+			
+			result.name = _name;
+			
+			if (_scopedId != null)
+				scopedIdToSceneNode[_scopedId] = result;
+			
+			if (_sourceId != null)
+				sourceIdToSceneNode[_sourceId] = result;
+			
+			return result;
 		}
 		
-		public function get resource() : IResource
+		private function getDiffuseValueFromMaterialName(materialName : String) : Object
 		{
-			return _document.getGeometryById(_sourceId);
+			var diffuseValue	 : Object;
+			var materialInstance : InstanceMaterial = 
+				materialName != null && materialName != '' ? _bindMaterial[materialName] : null;
+			
+			if (materialInstance == null)
+			{
+				Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: "' + materialName + '" is ' +
+					'not a valid material name. Fallbacking to pure green');
+				
+				diffuseValue = new Vector4(0, 1, 0, 1);
+			}
+			else
+				diffuseValue = materialInstance.computeDiffuse();
+			
+			return diffuseValue;
 		}
 	}
 }

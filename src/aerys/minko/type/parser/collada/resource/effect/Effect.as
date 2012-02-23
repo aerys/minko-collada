@@ -19,7 +19,7 @@ package aerys.minko.type.parser.collada.resource.effect
 		private var _profiles	: Vector.<IProfile>;
 		
 		public function get id()		: String 			{ return _id;		}
-		public function get name()		: String 			{ return _name;	}
+		public function get name()		: String 			{ return _name;		}
 		public function get params()	: Object 			{ return _params;	}
 		public function get profiles()	: Vector.<IProfile>	{ return _profiles; }
 		
@@ -43,14 +43,10 @@ package aerys.minko.type.parser.collada.resource.effect
 		public static function createFromXML(xml		: XML, 
 											 document	: ColladaDocument) : Effect
 		{
-			var effect : Effect = new Effect();
-			
-			effect._document	= document;
-			effect._id			= xml.@id;
-			effect._name		= xml.@name;
-			
-			effect._profiles	= new Vector.<IProfile>();
-			effect._params		= new Object();
+			var id			: String			= xml.@id;
+			var name		: String			= xml.@name;
+			var profiles	: Vector.<IProfile>	= new Vector.<IProfile>();
+			var params		: Object			= new Object();
 			
 			for each (var child : XML in xml.children())
 			{
@@ -62,25 +58,37 @@ package aerys.minko.type.parser.collada.resource.effect
 					case 'profile_GLES':
 					case 'profile_GLES2':
 					case 'profile_GLSL':
-						effect._profiles.push(ProfileFactory.createProfile(child));
+						profiles.push(ProfileFactory.createProfile(child));
 						break;
-						
+					
 					case 'newparam':
 						var paramName	: String	= child.@sid;
 						var paramValue	: *			= ParamParser.parseParam(child);
 						
-						effect._params[paramName]	= paramValue;
-						
+						params[paramName]	= paramValue;
 						break;
 				}
 			}
 			
-			return effect;
+			return new Effect(id, name, params, profiles, document);
 		}
 		
-		public function createInstance():IInstance
+		public function Effect(id		: String,
+							   name		: String,
+							   params	: Object,
+							   profiles	: Vector.<IProfile>,
+							   document	: ColladaDocument)
 		{
-			return InstanceEffect.createFromSourceId(_id, _document);
+			_id			= id;
+			_name		= name;
+			_params		= params;
+			_profiles	= profiles;
+			_document	= document;
+		}
+		
+		public function createInstance() : IInstance
+		{
+			return new InstanceEffect(_id, {}, _document);
 		}
 	}
 }

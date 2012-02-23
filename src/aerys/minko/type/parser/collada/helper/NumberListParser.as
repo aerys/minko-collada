@@ -10,10 +10,10 @@ package aerys.minko.type.parser.collada.helper
 		{
 			var data		: Array			= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint			= data.length;
-			var result		: Vector.<int>	= new Vector.<int>();
+			var result		: Vector.<int>	= new Vector.<int>(dataLength, true);
 			
 			for (var i : uint = 0; i < dataLength; ++i)
-				result.push(parseInt(data[i]));
+				result[i] = parseInt(data[i]);
 			
 			return result;
 		}
@@ -22,10 +22,10 @@ package aerys.minko.type.parser.collada.helper
 		{
 			var data		: Array			= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint			= data.length;
-			var result		: Vector.<uint>	= new Vector.<uint>();
+			var result		: Vector.<uint>	= new Vector.<uint>(dataLength, true);
 			
 			for (var i : uint = 0; i < dataLength; ++i)
-				result.push(parseInt(data[i]));
+				result[i] = parseInt(data[i]);
 			
 			return result;
 		}
@@ -34,10 +34,10 @@ package aerys.minko.type.parser.collada.helper
 		{
 			var data		: Array				= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint				= data.length;
-			var result		: Vector.<Number>	= new Vector.<Number>();
+			var result		: Vector.<Number>	= new Vector.<Number>(dataLength, true);
 			
 			for (var i : uint = 0; i < dataLength; ++i)
-				result.push(parseFloat(data[i]));
+				result[i] = parseFloat(data[i]);
 			
 			return result;
 		}
@@ -46,7 +46,7 @@ package aerys.minko.type.parser.collada.helper
 		{
 			var data		: Array				= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint				= data.length;
-			var result		: Vector.<Vector4>	= new Vector.<Vector4>();
+			var result		: Vector.<Vector4>	= new Vector.<Vector4>(dataLength / 3, true);
 			
 			if (dataLength % 3 != 0)
 				throw new ColladaError('Invalid data length');
@@ -59,7 +59,7 @@ package aerys.minko.type.parser.collada.helper
 				
 				var vector	: Vector4 = new Vector4(float1, float2, float3);
 				
-				result.push(vector);
+				result[i] = vector;
 			}
 			
 			return result;
@@ -69,7 +69,7 @@ package aerys.minko.type.parser.collada.helper
 		{
 			var data		: Array				= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint				= data.length;
-			var result		: Vector.<Vector4>	= new Vector.<Vector4>();
+			var result		: Vector.<Vector4>	= new Vector.<Vector4>(dataLength / 4, true);
 			
 			if (dataLength % 4 != 0)
 				throw new ColladaError('Invalid data length');
@@ -83,7 +83,7 @@ package aerys.minko.type.parser.collada.helper
 				
 				var vector	: Vector4 = new Vector4(float1, float2, float3, float4);
 				
-				result.push(vector);
+				result[i] = vector;
 			}
 			
 			return result;

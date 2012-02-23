@@ -1,107 +1,110 @@
 package aerys.minko.type.parser.collada
 {
-	import aerys.minko.scene.node.IScene;
-	import aerys.minko.scene.node.group.Group;
-	import aerys.minko.scene.node.group.IGroup;
-	import aerys.minko.scene.node.group.LoaderGroup;
-	import aerys.minko.type.parser.IParser;
-	import aerys.minko.type.parser.ParserOptions;
+	import aerys.minko.type.Signal;
+	import aerys.minko.type.loader.ILoader;
+	import aerys.minko.type.loader.TextureLoader;
+	import aerys.minko.type.loader.parser.IParser;
+	import aerys.minko.type.loader.parser.ParserOptions;
+	import aerys.minko.type.parser.collada.resource.image.Image;
 	
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
+	import flash.display.Bitmap;
+	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	
-	public class ColladaParser extends EventDispatcher implements IParser
+	public class ColladaParser implements IParser
 	{
-		public static const DROP_EMPTY_GROUPS	: uint = 1;
-		public static const DROP_SKINNING		: uint = 2;
+		private var _document			: ColladaDocument;
+		private var _options			: ParserOptions;
 		
-		private var _flags				: uint				= 0;
-		private var _data				: Vector.<IScene>	= null;
+		private var _error				: Signal;
+		private var _progress			: Signal;
+		private var _complete			: Signal;
+		private var _loaderToDependency	: Dictionary;
 		
-		private var _numTextureToLoad	: uint				= 0;
-		private var _numLoadedTextures	: uint				= 0;
-		
-		public function get data() : Vector.<IScene> { return _data; }
-		
-		public function ColladaParser(flags		: uint		= 0)
+		public function get error() : Signal
 		{
-			_flags		= flags;
-			_data		= new Vector.<IScene>();
+			return _error;
 		}
 		
-		public function parse(data : ByteArray, options : ParserOptions) : Boolean
+		public function get progress()	: Signal
 		{
-			var xmlDocument	: XML		= null;
-			var localName	: String	= null;
+			return _progress;
+		}
+		
+		public function get complete() : Signal
+		{
+			return _complete;
+		}
+		
+		public function ColladaParser(options : ParserOptions)
+		{
+			_options			= options || new ParserOptions();
+			_progress			= new Signal();
+			_complete			= new Signal();
+			_error				= new Signal();
+			_loaderToDependency	= new Dictionary();
+		}
+		
+		public function isParsable(data : ByteArray) : Boolean
+		{
+			// optimize this!!!!
 			
 			try
 			{
 				data.position = 0;
 				
-				xmlDocument = new XML(data.readUTFBytes(data.length));
+				var xmlDocument	: XML = new XML(data.readUTFBytes(data.length));
 				if (!xmlDocument)
 					return false;
 				
-				localName = xmlDocument.localName();
-				
-				if (localName.toLowerCase() != 'collada')
-					return false;
+				return xmlDocument.localName().toLowerCase() != 'collada';
 			}
 			catch (e : Error)
 			{
-				return false;
 			}
 			
-			var dropEmptyGroups : Boolean			= (_flags & DROP_EMPTY_GROUPS) != 0;
-			var dropSkinning	: Boolean			= (_flags & DROP_SKINNING) != 0;
-			var document		: ColladaDocument	= new ColladaDocument(options);
-			
-			document.loadXML(xmlDocument);
-			
-			var group 	: Group				= document.toGroup(dropEmptyGroups, dropSkinning);
-			var loaders : Vector.<IScene> 	= group.getDescendantsByType(LoaderGroup);
-			var marked	: Dictionary		= new Dictionary(true);
-			
-			_data.push(group);
-			
-			// handle asynchronous loaders
-			_numTextureToLoad = loaders.length;
-			if (_numTextureToLoad != 0)
-			{
-				var numItems : int = _numTextureToLoad;
-				
-				for (var loaderIndex : int = 0; loaderIndex < numItems; ++loaderIndex)
-				{
-					var loader : LoaderGroup	= loaders[loaderIndex] as LoaderGroup;
-					
-					// do not listen if the loader is already
-					// complete or already being listened
-					if (marked[loader] || loader.numChildren != 0)
-					{
-						--_numTextureToLoad;
-					}
-					else
-					{
-						marked[loader] = true;
-						loader.addEventListener(Event.COMPLETE, loaderCompleteHandler);
-					}
-				}
-			}
-			
-			if (_numTextureToLoad == 0)
-				dispatchEvent(new Event(Event.COMPLETE));
-			
-			return true;
+			return false;
 		}
 		
-		public function loaderCompleteHandler(event : Event) : void
+		public function getDependencies(data : ByteArray) : Vector.<ILoader>
 		{
-			++_numLoadedTextures;
+			data.position = 0;
 			
-			if (_numLoadedTextures == _numTextureToLoad)
-				dispatchEvent(new Event(Event.COMPLETE));
+			var xmlDocument : XML = new XML(data.readUTFBytes(data.length));
+			
+			_document = new ColladaDocument();
+			_document.loadFromXML(xmlDocument);
+			
+			var dependencies : Vector.<ILoader> = new Vector.<ILoader>();
+			for each (var image : Image in _document.images)
+			{
+				var imageURL : String;
+				imageURL = image.imageData.path;
+				imageURL = _options.dependencyURLRewriter(imageURL);
+				
+				var loader : ILoader = new TextureLoader(_options.mipmapTextures);
+				loader.load(new URLRequest(imageURL));
+				
+				dependencies.push(loader);
+				_loaderToDependency[loader] = image;
+			}
+			
+			return dependencies;
 		}
+		
+		public function parse() : void
+		{
+			for (var l : Object in _loaderToDependency)
+			{
+				var loader	: TextureLoader	= TextureLoader(l);
+				var image	: Image			= _loaderToDependency[loader];
+				
+				image.imageData.textureResource = loader.textureResource;
+			}
+			
+			_complete.execute(this, _document.generateScene(_options));
+		}
+		
 	}
 }

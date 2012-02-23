@@ -1,22 +1,25 @@
 package aerys.minko.type.parser.collada.instance
 {
+	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.scene.node.IScene;
-	import aerys.minko.scene.node.group.IGroup;
-	import aerys.minko.scene.node.group.Joint;
-	import aerys.minko.scene.node.group.MaterialGroup;
-	import aerys.minko.scene.node.group.StyleGroup;
-	import aerys.minko.scene.node.mesh.IMesh;
+	import aerys.minko.render.effect.Effect;
+	import aerys.minko.scene.controller.AbstractController;
+	import aerys.minko.scene.controller.SkinningController;
+	import aerys.minko.scene.node.Group;
+	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.mesh.Mesh;
-	import aerys.minko.scene.node.mesh.SkinnedMesh;
+	import aerys.minko.type.animation.SkinningMethod;
+	import aerys.minko.type.loader.parser.ParserOptions;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
-	import aerys.minko.type.parser.ParserOptions;
+	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
+	import aerys.minko.type.parser.collada.helper.MeshTemplate;
+	import aerys.minko.type.parser.collada.helper.Triangles;
+	import aerys.minko.type.parser.collada.resource.Geometry;
 	import aerys.minko.type.parser.collada.resource.IResource;
-	import aerys.minko.type.parser.collada.resource.Node;
 	import aerys.minko.type.parser.collada.resource.controller.Controller;
-	import aerys.minko.type.parser.collada.resource.geometry.Geometry;
-	import aerys.minko.type.parser.collada.resource.geometry.Triangles;
+	import aerys.minko.type.parser.collada.resource.controller.Skin;
 	import aerys.minko.type.stream.VertexStream;
 	
 	public class InstanceController implements IInstance
@@ -29,25 +32,13 @@ package aerys.minko.type.parser.collada.instance
 		
 		private var _sourceId			: String;
 		private var _name				: String;
-		private var _sid				: String;
+		private var _scopedId			: String;
 		private var _bindedSkeletonId	: String;
 		private var _bindMaterial		: Object;
 		
-		private var _mesh				: IMesh;
-		
-		public function InstanceController(document			: ColladaDocument,
-										   sourceId			: String,
-										   name				: String = null,
-										   sid				: String = null,
-										   bindMaterial		: Object = null,
-										   bindedSkeletonId	: String = null)
+		public function get resource() : IResource
 		{
-			_document			= document;
-			_sourceId			= sourceId;
-			_name				= name;
-			_sid				= sid;
-			_bindedSkeletonId	= bindedSkeletonId;
-			_bindMaterial		= bindMaterial;
+			return _document.getControllerById(_sourceId);
 		}
 		
 		public static function createFromXML(document	: ColladaDocument, 
@@ -61,83 +52,100 @@ package aerys.minko.type.parser.collada.instance
 			var bindedSkeletonId	: String	= xmlSkeletonId != null ? String(xmlSkeletonId).substr(1) : null;
 			
 			var bindMaterial : Object = new Object();
+			
 			for each (var xmlIm : XML in xml..NS::instance_material)
 			{
 				var instanceMaterial : InstanceMaterial = InstanceMaterial.createFromXML(xmlIm, document);
-				
 				bindMaterial[instanceMaterial.symbol] = instanceMaterial;
 			}
 			
 			return new InstanceController(document, sourceId, name, sid, bindMaterial, bindedSkeletonId);
 		}
 		
-		public function toScene() : IScene
+		public function InstanceController(document			: ColladaDocument,
+										   sourceId			: String,
+										   name				: String = null,
+										   scopedId			: String = null,
+										   bindMaterial		: Object = null,
+										   bindedSkeletonId	: String = null)
 		{
-			var mg 			: MaterialGroup 	= new MaterialGroup();
-			var options		: ParserOptions		= _document.parserOptions;
-			var controller	: Controller		= Controller(resource);
-			
-			if (!options || options.loadTextures)
-			{
-				var geometry			: Geometry			= _document.getGeometryById(controller.skinId);			
-				var triangleStore		: Triangles 		= geometry.triangleStores[0];
-				var subMeshMatSymbol	: String			= triangleStore.material;
-				var instanceMaterial	: InstanceMaterial	= _bindMaterial[subMeshMatSymbol];
-				var texture				: IScene			= instanceMaterial.toScene();
-				
-				mg.textures.addChild(texture);
-			}
-			
-			if (!options || options.loadMeshes)
-				mg.addChild(getMesh());
-			
-			return mg;
+			_document			= document;
+			_sourceId			= sourceId;
+			_name				= name;
+			_scopedId			= scopedId;
+			_bindedSkeletonId	= bindedSkeletonId;
+			_bindMaterial		= bindMaterial;
 		}
 		
-		private function getMesh() : IMesh
+		public function createSceneNode(options				: ParserOptions,
+										sourceIdToSceneNode	: Object,
+										scopedIdToSceneNode	: Object) : ISceneNode
 		{
-			if (!_mesh)
+			var skin			: Skin					= Controller(resource).skin;
+			skin.computeMeshTemplates(options);
+			
+			var meshTemplateId	: uint;
+			var effect			: Effect				= options.effect;
+			var meshTemplates	: Vector.<MeshTemplate>	= skin.meshTemplates;
+			var numMeshes		: uint					= meshTemplates != null ? meshTemplates.length : 0;
+			var group			: Group					= new Group();
+			
+			for (meshTemplateId = 0; meshTemplateId < numMeshes; ++meshTemplateId)
 			{
-				var controller			: Controller		= Controller(resource);
+				var meshTemplate	: MeshTemplate	= meshTemplates[meshTemplateId];
 				
-				_mesh = controller.toMesh();
-				if (_mesh == null)
-					return null;
+				var diffuseValue	: Object		= 
+					getDiffuseValueFromMaterialName(meshTemplate.materialName);
 				
-				var options	: ParserOptions	= _document.parserOptions;
+				var localMeshes 	: Vector.<Mesh> = 
+					meshTemplate.generateMeshes(effect, options.vertexStreamUsage, options.indexStreamUsage);
 				
-				if (!options || options.loadSkins)
+				var i : uint = 0;
+				for each (var localMesh : Mesh in localMeshes)
 				{
-					var skeletonReference	: IGroup				= null;
-					var skeletonRootName	: String				= _bindedSkeletonId;
-					
-					var bindShapeMatrix		: Matrix4x4				= controller.bindShapeMatrix;
-					var jointNames			: Vector.<String>		= controller.jointNames;
-					var invBindMatrices		: Vector.<Matrix4x4>	= controller.invBindMatrices;
-					
-					_mesh = new SkinnedMesh(
-						_mesh,
-						skeletonReference,
-						skeletonRootName,
-						bindShapeMatrix,
-						jointNames,
-						invBindMatrices
-					);
-					
+					localMesh.effectData.setProperty('diffuse', diffuseValue);
+					localMesh.name = _name + i++;
+					group.addChild(localMesh);
 				}
-				
-				_mesh.name = _sourceId;
-				VertexStream(_mesh.vertexStream).name = _mesh.name;
-				_mesh = _document.parserOptions.replaceNodeFunction(_mesh);
 			}
 			
-			return _mesh;
+			var result : ISceneNode;
+			if (group.numChildren == 0)
+				return null;
+			
+			if (group.numChildren == 1)
+				result = group[0];
+			else
+				result = group;
+			
+			result.name = _name;
+			
+			if (_sourceId != null)
+				sourceIdToSceneNode[_sourceId] = result;
+			
+			if (_scopedId != null)
+				scopedIdToSceneNode[_scopedId] = result;
+			
+			return result;
 		}
 		
-		public function get resource() : IResource
+		private function getDiffuseValueFromMaterialName(materialName : String) : Object
 		{
-			return _document.getControllerById(_sourceId);
+			var diffuseValue	 : Object;
+			var materialInstance : InstanceMaterial = 
+				materialName != null && materialName != '' ? _bindMaterial[materialName] : null;
+			
+			if (materialInstance == null)
+			{
+				Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: "' + materialName + '" is ' +
+					'not a valid material name. Fallbacking to pure green');
+				
+				diffuseValue = new Vector4(0, 1, 0, 1);
+			}
+			else
+				diffuseValue = materialInstance.computeDiffuse();
+			
+			return diffuseValue;
 		}
-		
 	}
 }

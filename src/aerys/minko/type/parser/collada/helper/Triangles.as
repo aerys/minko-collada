@@ -1,8 +1,15 @@
-package aerys.minko.type.parser.collada.resource.geometry
+package aerys.minko.type.parser.collada.helper
 {
+	import aerys.minko.ns.minko_collada;
 	import aerys.minko.type.error.collada.ColladaError;
-	import aerys.minko.type.parser.collada.helper.NumberListParser;
-	import aerys.minko.type.parser.collada.helper.Source;
+	import aerys.minko.type.parser.collada.enum.InputType;
+	import aerys.minko.type.stream.IVertexStream;
+	import aerys.minko.type.stream.IndexStream;
+	import aerys.minko.type.stream.StreamUsage;
+	import aerys.minko.type.stream.VertexStream;
+	import aerys.minko.type.stream.VertexStreamList;
+	import aerys.minko.type.stream.format.VertexComponent;
+	import aerys.minko.type.stream.format.VertexFormat;
 
 	public class Triangles
 	{
@@ -107,11 +114,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 				_offsets[semantic] = offset;
 				
 				if (semantic != 'VERTEX')
-				{
-					var source : Source = Source.createFromXML(sources.(@id == sourceId)[0]);
-					source.semantic = semantic;
-					_sources[semantic] = source;
-				}
+					_sources[semantic] = Source.createFromXML(sources.(@id == sourceId)[0]);
 			}
 			
 			// will triangulate the data in here and push ids to _triangleVertices
@@ -173,7 +176,6 @@ package aerys.minko.type.parser.collada.resource.geometry
 		{
 			_triangleVertices	= new Vector.<uint>();
 			
-			
 			for each (var xmlP : XML in xmlPrimitive.NS::p)
 			{
 				var indexList		: Vector.<uint> = NumberListParser.parseUintList(xmlP);
@@ -182,6 +184,7 @@ package aerys.minko.type.parser.collada.resource.geometry
 				for (var j : uint = 1; j < numVertices - 1; ++j)
 				{
 					var k : uint;
+					
 					// triangle 0
 					for (k = 0; k < _indicesPerVertex; ++k)
 						_triangleVertices.push(indexList[k]);
@@ -197,27 +200,154 @@ package aerys.minko.type.parser.collada.resource.geometry
 			}
 		}
 		
-		public function getVertexId(storeVertexId : uint) : uint
+		public function computeIndexStream() : IndexStream
 		{
-			return _triangleVertices[storeVertexId * indicesPerVertex + _offsets['VERTEX']];
-		}
-		
-		public function pushVertexComponents(storeVertexId	: uint, 
-											 semantics		: Vector.<String>,
-											 out			: Vector.<Number>) : void
-		{
-			var semanticsLength : uint = semantics.length;
+			var numVertices	: uint			= _triangleVertices.length / _indicesPerVertex;
+			var indexBuffer : Vector.<uint> = new Vector.<uint>(numVertices, true);
 			
-			for (var semanticId : uint = 0; semanticId < semanticsLength; ++semanticId)
-			{
-				var semantic 		: String	= semantics[semanticId];
-				
-				var source			: Source	= _sources[semantic];
-				var sourceVertexId	: uint		= _triangleVertices[_indicesPerVertex * storeVertexId + _offsets[semantic]];
-				
-				source.pushVertexComponent(sourceVertexId, out);
-			}
+			for (var i : uint = 0; i < numVertices; ++i)
+				indexBuffer[i] = i;
+			
+			return new IndexStream(StreamUsage.DYNAMIC, indexBuffer);
 		}
 		
+		public function computeVertexStream(verticesSemantics	: Vector.<String>,
+											verticesDataSources	: Object) : VertexStream
+		{
+			var streamList : VertexStreamList = computeVertexStreamList(verticesSemantics, verticesDataSources);
+			return VertexStream.extractSubStream(streamList, StreamUsage.DYNAMIC);
+		}
+		
+		private function computeVertexStreamList(verticesSemantics		: Vector.<String>,
+									   			 verticesDataSources	: Object) : VertexStreamList
+		{
+			var numSemantics		: uint;
+			var semantic			: String;
+			var componentId			: uint;
+			var vertexStreamList	: VertexStreamList = new VertexStreamList();
+			
+			// handle vertexId (to be able to resplit buffers later, and load skins,
+			// PC2 files or anything that need to change the vertices).
+			vertexStreamList.pushVertexStream(computeIdVertexStream());
+			
+			// handle vertex semantics (usually, only position, sometimes with UV)
+			numSemantics = verticesSemantics.length;
+			
+			for (componentId = 0; componentId < numSemantics; ++componentId)
+			{
+				semantic = verticesSemantics[componentId];
+				vertexStreamList.pushVertexStream(
+					computeVertexStreamFromSource(semantic, verticesDataSources[semantic], true)
+				);
+			}
+			
+			// handle triangle semantics (usually normals, uvs, colors...)
+			numSemantics = _semantics.length;
+			for (componentId = 0; componentId < numSemantics; ++componentId)
+			{
+				semantic = _semantics[componentId];
+				if (semantic == 'VERTEX')
+					continue;
+				
+				vertexStreamList.pushVertexStream(
+					computeVertexStreamFromSource(semantic, _sources[semantic], false)
+				);
+			}
+			
+			return vertexStreamList;
+		}
+		
+		private function computeVertexStreamFromSource(semantic			: String,
+													   source			: Source, 
+													   isVertexSource	: Boolean) : VertexStream
+		{
+			var buffer : Vector.<Number>;
+			
+			buffer = createVertexBuffer(semantic, source, isVertexSource);
+			return createVertexStream(semantic, buffer);
+		}
+		
+		private function createVertexBuffer(semantic		: String,
+											source			: Source,
+											isVertexSource	: Boolean) : Vector.<Number>
+		{
+			var numTriangleVertices	: uint				= _triangleVertices.length;
+			var numVertices			: uint				= numTriangleVertices / _indicesPerVertex;
+			var sourceData			: Array				= source.data;
+			var sourceStride		: uint				= source.stride
+			
+			var vertexBuffer		: Vector.<Number>	= new Vector.<Number>(numVertices * sourceStride);
+			var vertexBufferPos 	: uint				= 0;
+			
+			for (var indexOffset : uint = _offsets[isVertexSource ? 'VERTEX' : semantic]; 
+				indexOffset < numTriangleVertices; 
+				indexOffset += _indicesPerVertex)
+			{
+				var sourceIndex			: uint = _triangleVertices[indexOffset] * sourceStride;
+				var sourceIndexLimit	: uint = sourceIndex + sourceStride;
+				
+				for (; sourceIndex < sourceIndexLimit; ++sourceIndex)
+					vertexBuffer[vertexBufferPos++] = sourceData[sourceIndex]; 
+			}
+			
+			return vertexBuffer;
+		}
+		
+		/**
+		 * This method is mainly here to manage collada's texture coords: invert the v coordinate, and
+		 * if uvw was present in the feed, strip the w component.
+		 */		
+		private function createVertexStream(semantic	: String,
+											buffer		: Vector.<Number>) : VertexStream
+		{
+			var component	: VertexComponent	= InputType.minko_collada::TO_COMPONENT[semantic];
+			var format		: VertexFormat		= new VertexFormat(component);
+			
+			if (semantic == InputType.TEXCOORD)
+			{
+				var bufferLength	: uint = buffer.length;
+				var numVertices		: uint = _triangleVertices.length / _indicesPerVertex;
+				
+				// sometimes, collada feed 3 numbers for texcoords (event for 2 dimensional images).
+				if (bufferLength == 3 * numVertices)
+				{
+					for (var vertexId : uint = 0; vertexId < numVertices; ++vertexId)
+					{
+						buffer[2 * vertexId] = buffer[3 * vertexId];
+						buffer[2 * vertexId + 1] = buffer[3 * vertexId + 1];
+					}
+					
+					buffer			= buffer;
+					bufferLength	= buffer.length	= 2 * numVertices;
+				}
+				
+				if (bufferLength != 2 * numVertices)
+					throw new Error("Failed importing UV stream.");
+				
+				// collada invert the v coordinate.
+				for (var i : uint = 1; i < bufferLength; i += 2)
+					buffer[i] = 1 - buffer[i];
+			}
+			
+			return new VertexStream(StreamUsage.DYNAMIC, format, buffer);
+		}
+		
+		public function computeIdVertexStream() : VertexStream
+		{
+			var numTriangleVertices	: uint				= _triangleVertices.length;
+			var numVertices			: uint				= numTriangleVertices / _indicesPerVertex;
+			
+			var vertexBuffer		: Vector.<Number>	= new Vector.<Number>(numVertices);
+			var vertexBufferPos 	: uint				= 0;
+			
+			for (var indexOffset : uint = _offsets['VERTEX']; 
+				indexOffset < numTriangleVertices; 
+				indexOffset += _indicesPerVertex)
+			{
+				vertexBuffer[vertexBufferPos++] = _triangleVertices[indexOffset];
+			}
+			
+			return new VertexStream(StreamUsage.DYNAMIC, new VertexFormat(VertexComponent.ID), vertexBuffer);
+		}
 	}
 }

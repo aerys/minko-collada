@@ -3,6 +3,7 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceEffect;
+	import aerys.minko.type.parser.collada.instance.InstanceMaterial;
 	
 	public class Material implements IResource
 	{
@@ -25,7 +26,7 @@ package aerys.minko.type.parser.collada.resource
 			if (!xmlMaterialLibrary)
 				return;
 			
-			var xmlMaterials 			: XMLList	= xmlMaterialLibrary.NS::material;
+			var xmlMaterials 		: XMLList	= xmlMaterialLibrary.NS::material;
 			
 			for each (var xmlMaterial : XML in xmlMaterials)
 			{
@@ -36,19 +37,30 @@ package aerys.minko.type.parser.collada.resource
 		
 		public static function createFromXML(xmlMaterial : XML, document : ColladaDocument) : Material
 		{
-			var xmlInstanceEffect	: XML		= xmlMaterial.NS::instance_effect[0]
-			var material			: Material	= new Material();
+			var id					: String			= xmlMaterial.@id;
+			var name				: String			= xmlMaterial.@name;
+			var instanceEffect		: InstanceEffect	= InstanceEffect.createFromXML(
+				xmlMaterial.NS::instance_effect[0], 
+				document
+			);
 			
-			material._id				= xmlMaterial.@id;
-			material._name				= xmlMaterial.@name;
-			material._instanceEffect	= InstanceEffect.createFromXML(xmlInstanceEffect, document);
-			
-			return material;
+			return new Material(id, name, instanceEffect, document);
 		}
 		
-		public function createInstance():IInstance
+		public function Material(id				: String,
+								 name			: String, 
+								 instanceEffect	: InstanceEffect,
+								 document		: ColladaDocument)
 		{
-			return InstanceEffect.createFromSourceId(_id, _document);
+			_id				= id;
+			_name			= name;
+			_instanceEffect	= instanceEffect;
+			_document		= document;
+		}
+		
+		public function createInstance() : IInstance
+		{
+			return new InstanceMaterial(_id, null, _document); 
 		}
 	}
 }

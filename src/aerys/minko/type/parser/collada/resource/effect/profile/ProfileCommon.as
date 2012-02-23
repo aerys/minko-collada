@@ -22,19 +22,27 @@ package aerys.minko.type.parser.collada.resource.effect.profile
 		
 		public static function createFromXML(xml : XML) : ProfileCommon
 		{
-			var profileCommon : ProfileCommon = new ProfileCommon();
-			profileCommon._id			= xml.@id;
-			profileCommon._technique	= TechniqueFactory.createTechnique(xml.NS::technique[0]);
-			profileCommon._params		= new Object();
+			var id			: String		= xml.@id;
+			var technique	: ITechnique	= TechniqueFactory.createTechnique(xml.NS::technique[0]);
 			
+			var params		: Object		= new Object();
 			for each (var newparam : XML in xml.NS::newparam)
 			{
 				var paramName	: String	= newparam.@sid;
 				var paramValue	: *			= ParamParser.parseParam(newparam);
-				profileCommon._params[paramName] = paramValue;
+				params[paramName] = paramValue;
 			}
 			
-			return profileCommon;
+			return new ProfileCommon(id, params, technique);
+		}
+		
+		public function ProfileCommon(id		: String,
+									  params	: Object,
+									  technique	: ITechnique)
+		{
+			_id			= id;
+			_params		= params;
+			_technique	= technique;
 		}
 	}
 }

@@ -1,7 +1,8 @@
 package aerys.minko.type.parser.collada.instance
 {
-	import aerys.minko.scene.node.IScene;
-	import aerys.minko.scene.node.group.Group;
+	import aerys.minko.scene.node.Group;
+	import aerys.minko.scene.node.ISceneNode;
+	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.VisualScene;
@@ -14,7 +15,10 @@ package aerys.minko.type.parser.collada.instance
 		private var _name		: String;
 		private var _sid		: String;
 		
-		private var _minkoGroup	: Group;
+		public function get resource() : IResource
+		{
+			return _document.getVisualSceneById(_sourceId);
+		}
 		
 		public function InstanceVisualScene(document	: ColladaDocument, 
 											sourceId	: String,
@@ -27,22 +31,28 @@ package aerys.minko.type.parser.collada.instance
 			_sid		= sid;
 		}
 		
-		public function toScene() : IScene
-		{
-			return toGroup();
-		}
 		
-		public function toGroup() : Group
+		public function createSceneNode(options			: ParserOptions,
+										idToSceneNode	: Object,
+										sidToSceneNode	: Object) : ISceneNode
 		{
-			if (!_minkoGroup)
-				_minkoGroup = VisualScene(resource).toGroup();
+			var visualScene	: VisualScene	= VisualScene(resource);
+			var group		: Group			= new Group();
 			
-			return _minkoGroup;
-		}
-		
-		public function get resource() : IResource
-		{
-			return _document.getVisualSceneById(_sourceId);
+			group.name = _name;
+			for each (var childInstance : IInstance in visualScene.childs)
+			{
+				var child : ISceneNode = childInstance.createSceneNode(options, idToSceneNode, sidToSceneNode);
+				if (child)
+					group.addChild(child);
+				else
+					throw new Error();
+			}
+			
+			_sid != '' && (sidToSceneNode[_sid] = group);
+			_sourceId != ''	&& (idToSceneNode[_sourceId] = group);
+			
+			return group;
 		}
 	}
 }

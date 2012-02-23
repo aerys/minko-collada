@@ -1,18 +1,13 @@
 package aerys.minko.type.parser.collada.resource.animation
 {
 	import aerys.minko.Minko;
-	import aerys.minko.scene.node.IScene;
 	import aerys.minko.type.animation.timeline.ITimeline;
-	import aerys.minko.type.animation.timeline.MatrixLinearRegularTimeline;
-	import aerys.minko.type.animation.timeline.MatrixLinearTimeline;
-	import aerys.minko.type.animation.timeline.MatrixSegmentTimeline;
+	import aerys.minko.type.animation.timeline.MatrixTimeline;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.resource.IResource;
-	
-	import flash.utils.getTimer;
 	
 	public class Animation implements IResource
 	{
@@ -78,20 +73,14 @@ package aerys.minko.type.parser.collada.resource.animation
 		public function getTimelines(timelines 		: Vector.<ITimeline>,
 									 targetNames	: Vector.<String>) : void
 		{
-			var times			: Vector.<Number>;
-			var timesCollection	: Object				= new Object();
-			var vector			: Vector.<Number>		= new Vector.<Number>(16);
-			
-			retrieveTimes(timesCollection);
-			for each (times in timesCollection)
-				times.sort(cmp);
-			removeDuplicateTimes(timesCollection);
+			var vector			: Vector.<Number>	= new Vector.<Number>(16);
+			var timesCollection	: Object			= retrieveTimes();
 			
 			for (var targetName : String in timesCollection)
 			{
 				try
 				{
-					times = timesCollection[targetName];
+					var times : Vector.<Number> = timesCollection[targetName];
 					
 					if (times.length == 1 && isNaN(times[0]))
 						continue;
@@ -128,7 +117,7 @@ package aerys.minko.type.parser.collada.resource.animation
 	//						break;
 					
 	//				if (i != timesLength)
-						timelines.push(new MatrixLinearTimeline('transform', minkoTimes, minkoMatrices));
+						timelines.push(new MatrixTimeline('transform', minkoTimes, minkoMatrices));
 	//				else
 	//					timelines.push(new MatrixLinearRegularTimeline('transform', deltaTime, minkoMatrices));
 					
@@ -136,7 +125,7 @@ package aerys.minko.type.parser.collada.resource.animation
 				}
 				catch (e : Error)
 				{
-					Minko.log(DebugLevel.PLUGIN_WARNING, 'Droping animation for \'' + targetName + '\' (' + e.message + ')');
+					Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: Droping animation for \'' + targetName + '\' (' + e.message + ')', this);
 					continue;
 				}
 			}
@@ -157,25 +146,31 @@ package aerys.minko.type.parser.collada.resource.animation
 			return 100000 * (v1 - v2);
 		}
 		
-		public function retrieveTimes(out : Object) : void
+		public function retrieveTimes(timeCollections : Object = null) : Object
 		{
+			timeCollections ||= new Object();
+			
+			var i : uint;
+			
+			// retrieve times
 			var channelCount	: uint	= _channels.length;
-			for (var i : uint = 0; i < channelCount; ++i)
-				_channels[i].retrieveTimes(out);
+			for (i = 0; i < channelCount; ++i)
+				_channels[i].retrieveTimes(timeCollections);
 			
 			var animationCount : uint	= _animations.length;
 			for (i = 0; i < animationCount; ++i)
-				_animations[i].retrieveTimes(out);
-		}
-		
-		private function removeDuplicateTimes(timesContainer : Object) : void
-		{
-			for each (var times : Vector.<Number> in timesContainer)
+				_animations[i].retrieveTimes(timeCollections);
+			
+			for each (var times : Vector.<Number> in timeCollections)
 			{
+				// sort
+				times.sort(cmp);
+				
+				// remove duplicates
 				var timeCount	: uint		= times.length;
 				var lastTime	: Number	= times[0];
 				
-				for (var i : uint = 1; i < timeCount; ++i)
+				for (i = 1; i < timeCount; ++i)
 				{
 					if (times[i] == lastTime)
 					{
@@ -186,6 +181,8 @@ package aerys.minko.type.parser.collada.resource.animation
 						lastTime = times[i];
 				}
 			}
+			
+			return timeCollections;
 		}
 		
 		public function createInstance() : IInstance

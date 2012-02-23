@@ -1,6 +1,8 @@
 package aerys.minko.type.parser.collada.resource.effect
 {
+	import aerys.minko.Minko;
 	import aerys.minko.type.error.collada.ColladaError;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
 
@@ -16,40 +18,51 @@ package aerys.minko.type.parser.collada.resource.effect
 		
 		public static function createFromXML(xml : XML) : CommonColorOrTexture
 		{
-			var firstChild	: XML					= xml.children()[0];
-			var element		: CommonColorOrTexture	= new CommonColorOrTexture();
+			var firstChild		: XML					= xml.children()[0];
+			
+			var color			: uint					= 0;
+			var textureName		: String				= null;
+			var textureCoord	: String				= null;
 			
 			switch (firstChild.localName())
 			{
 				case 'color':
-					var color : Vector4 = NumberListParser.parseVector4(firstChild);
-					element._color = ((color.x * 255) << 0) 
-						| ((color.y * 255) << 8) 
-						| ((color.z * 255) << 16) 
-						| ((color.w * 255) << 24)
+					var xmlColor : Vector4 = NumberListParser.parseVector4(firstChild);
+					color = ((xmlColor.x * 255) << 0) 
+						| ((xmlColor.y * 255) << 8) 
+						| ((xmlColor.z * 255) << 16) 
+						| ((xmlColor.w * 255) << 24)
 					
 					break;
 				
 				case 'texture':
-					element._textureName	= firstChild.@texture;
-					element._textureCoord	= firstChild.@texcoord;
+					textureName	= firstChild.@texture;
+					textureCoord	= firstChild.@texcoord;
 					break;
 				
-				default: throw new ColladaError('parse error');
+				default:
+					Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: CommonColorOrTexture' +
+						'is neither a color or a texture in XML feed. Fallbacking to pure green');
+					
+					color = 0xff00ff00;
+					break;
 			}
 			
-			return element;
+			return new CommonColorOrTexture(color, textureName, textureCoord);
 		}
 		
 		public static function createFromColor(color : uint) : CommonColorOrTexture
 		{
-			var element : CommonColorOrTexture = new CommonColorOrTexture();
-			element._color = color;
-			return element;
+			return new CommonColorOrTexture(color, null, null);
 		}
 		
-		public function CommonColorOrTexture()
+		public function CommonColorOrTexture(color			: uint, 
+											 textureName	: String, 
+											 textureCoord	: String)
 		{
+			_color			= color;
+			_textureName	= textureName;
+			_textureCoord	= textureCoord;
 		}
 	}
 }

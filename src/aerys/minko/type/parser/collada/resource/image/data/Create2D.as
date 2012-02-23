@@ -3,23 +3,19 @@ package aerys.minko.type.parser.collada.resource.image.data
 	import flash.display.BitmapData;
 	import flash.events.EventDispatcher;
 
-	public class Create2D/* extends EventDispatcher*/ implements IImageData
+	public class Create2D extends AbstractImageData
 	{
-		/*private var _bitmapData	: BitmapData;
-		
-		public function get isLoaded()		: Boolean		{ return _bitmapData != null;	}
-		public function get bitmapData()	: BitmapData	{ return _bitmapData;			}*/
-		
-		public function get path() : String		{ return null; }
+		public static function createFromXML(xml : XML) : Create2D
+		{
+			return new Create2D();
+		}
 		
 		public function Create2D()
 		{
+			super(null);
 			
-		}
-		
-		public function load() : void
-		{
-			
+			throw new Error('The \'create_2d\' collada token is not yet ' +
+				'supported. Minko is open-source! Feel free to improve it.');
 		}
 	}
 }

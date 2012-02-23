@@ -1,6 +1,5 @@
 package aerys.minko.type.parser.collada.resource.animation
 {
-	import aerys.minko.type.math.ConstVector4;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.enum.TransformType;
 	import aerys.minko.type.parser.collada.helper.Source;
