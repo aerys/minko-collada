@@ -243,7 +243,7 @@ package aerys.minko.type.parser.collada
 				}
 				
 				var skin		 		: Skin			= controller.skin;
-				var scene		 		: ISceneNode	= sourceIdToScene[skin.sourceId];
+				var scene		 		: ISceneNode	= sourceIdToScene[controllerInstance.sourceId];
 				if (scene == null)
 				{
 					trace('fail2');
@@ -264,7 +264,13 @@ package aerys.minko.type.parser.collada
 				for each (var jointName : String in skin.jointNames)
 				{
 					var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName]; // handle collada 1.4 "ID_REF"
+					if (joint == null)
+					{
+						trace('fail4');
+						continue;
+					}
 					
+					joints.push(joint);
 				}
 				
 				var skinController	: AbstractController = new SkinningController(
@@ -276,6 +282,7 @@ package aerys.minko.type.parser.collada
 				
 				for each (var mesh : ISceneNode in meshes)
 					Mesh(mesh).addController(skinController);
+					
 			}
 			
 			return wrapper;
@@ -284,9 +291,10 @@ package aerys.minko.type.parser.collada
 		private function findInstanceById(sourceId : String, parent : IInstance = null) : IInstance
 		{
 			if (parent == null)
-			{
 				parent = getVisualSceneById(_mainSceneId).createInstance();
-			}
+			
+			if (parent.sourceId == sourceId)
+				return parent;
 			
 			var resource	: IResource = parent.resource;
 			var childs		: Vector.<IInstance>;
@@ -295,12 +303,15 @@ package aerys.minko.type.parser.collada
 				childs = Node(resource).childs
 			else if (resource is VisualScene)
 				childs = VisualScene(resource).childs;
+			else return null;
 			
 			for each (var child : IInstance in childs)
-				if (child.sourceId == sourceId)
-					return child;
-				else if (child is InstanceNode || childs is InstanceVisualScene)
-					return findInstanceById(sourceId, child);
+			{
+				var result : IInstance = findInstanceById(sourceId, child);
+				
+				if (result != null)
+					return result;
+			}
 			
 			return null;
 		}
