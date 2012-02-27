@@ -1,21 +1,14 @@
 package aerys.minko.type.parser.collada
 {
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.scene.controller.AbstractController;
 	import aerys.minko.scene.controller.AnimationController;
-	import aerys.minko.scene.controller.IControllerTarget;
-	import aerys.minko.scene.controller.SkinningController;
-	import aerys.minko.scene.node.AbstractSceneNode;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
-	import aerys.minko.scene.node.mesh.Mesh;
-	import aerys.minko.type.animation.SkinningMethod;
 	import aerys.minko.type.animation.timeline.ITimeline;
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
-	import aerys.minko.type.parser.collada.instance.InstanceVisualScene;
 	import aerys.minko.type.parser.collada.resource.Geometry;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.Material;
@@ -23,7 +16,6 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.parser.collada.resource.VisualScene;
 	import aerys.minko.type.parser.collada.resource.animation.Animation;
 	import aerys.minko.type.parser.collada.resource.controller.Controller;
-	import aerys.minko.type.parser.collada.resource.controller.Skin;
 	import aerys.minko.type.parser.collada.resource.effect.Effect;
 	import aerys.minko.type.parser.collada.resource.image.Image;
 	
@@ -227,8 +219,9 @@ package aerys.minko.type.parser.collada
 				}
 				
 				for (var targetName_ : String in timeLinesByNodeName)
-					sourceIdToScene[targetName_].controller =
-						new AnimationController(timeLinesByNodeName[targetName_]);
+					(sourceIdToScene[targetName_] as ISceneNode).addController(
+						new AnimationController(timeLinesByNodeName[targetName_])
+					);
 			}
 			
 //			// add skinning controllers

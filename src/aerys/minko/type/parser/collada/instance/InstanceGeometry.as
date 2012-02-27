@@ -94,7 +94,11 @@ package aerys.minko.type.parser.collada.instance
 				var i : uint = 0;
 				for each (var localMesh : Mesh in localMeshes)
 				{
-					localMesh.effectData.setProperty('diffuse', diffuseValue);
+					if (diffuseValue is Vector4)
+						localMesh.bindings.setProperty('diffuse color', diffuseValue);
+					else
+						localMesh.bindings.setProperty('diffuse map', diffuseValue);
+					
 					localMesh.name = _name + i++;
 					group.addChild(localMesh);
 				}
