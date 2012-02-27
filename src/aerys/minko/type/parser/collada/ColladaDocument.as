@@ -3,9 +3,7 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.controller.AbstractController;
 	import aerys.minko.scene.controller.AnimationController;
-	import aerys.minko.scene.controller.IControllerTarget;
 	import aerys.minko.scene.controller.SkinningController;
-	import aerys.minko.scene.node.AbstractSceneNode;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.mesh.Mesh;
@@ -15,6 +13,8 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
+	import aerys.minko.type.parser.collada.instance.InstanceController;
+	import aerys.minko.type.parser.collada.instance.InstanceNode;
 	import aerys.minko.type.parser.collada.instance.InstanceVisualScene;
 	import aerys.minko.type.parser.collada.resource.Geometry;
 	import aerys.minko.type.parser.collada.resource.IResource;
@@ -231,36 +231,77 @@ package aerys.minko.type.parser.collada
 						new AnimationController(timeLinesByNodeName[targetName_]);
 			}
 			
-//			// add skinning controllers
-//			for each (var controller : Controller in _controllers)
-//			{
-//				var skin		 : Skin			= controller.skin;
-//				var scene		 : ISceneNode	= sourceIdToScene[skin.sourceId];
-//				if (scene == null)
-//					continue;
-//				
-//				var meshes : Vector.<ISceneNode> = 
-//					scene is Group ? Group(scene).getDescendantsByType(Mesh) : new <ISceneNode>[scene];
-//				
-//				var skeletonRoot : Group			= null;
-//				var joints		 : Vector.<Group>	= new Vector.<Group>();
-//				for each (var jointName : String in skin.jointNames)
-//				{
-//					
-//				}
-//				
-//				var skinController	: AbstractController = new SkinningController(
-//					SkinningMethod.DUAL_QUATERNION,
-//					skeletonRoot,
-//					joints,
-//					skin.invBindMatrices
-//				);
-//				
-//				for each (var mesh : ISceneNode in meshes)
-//					Mesh(mesh).controller = skinController;
-//			}
+			// add skinning controllers
+			for each (var controller : Controller in _controllers)
+			{
+				var controllerInstance	: InstanceController = findInstanceById(controller.id) as InstanceController;
+				if (!controllerInstance)
+				{
+					trace('fail1');
+					continue;
+				}
+				
+				var skin		 		: Skin			= controller.skin;
+				var scene		 		: ISceneNode	= sourceIdToScene[skin.sourceId];
+				if (scene == null)
+				{
+					trace('fail2');
+					continue;
+				}
+				
+				var meshes : Vector.<ISceneNode> = 
+					scene is Group ? Group(scene).getDescendantsByType(Mesh) : new <ISceneNode>[scene];
+				
+				var skeletonRoot : Group = sourceIdToScene[controllerInstance.bindedSkeletonId];
+				if (skeletonRoot == null)
+				{
+					trace('fail3');
+					continue;
+				}
+				
+				var joints : Vector.<Group>	= new Vector.<Group>();
+				for each (var jointName : String in skin.jointNames)
+				{
+					var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName]; // handle collada 1.4 "ID_REF"
+					
+				}
+				
+				var skinController	: AbstractController = new SkinningController(
+					SkinningMethod.DUAL_QUATERNION,
+					skeletonRoot,
+					joints,
+					skin.invBindMatrices
+				);
+				
+				for each (var mesh : ISceneNode in meshes)
+					Mesh(mesh).addController(skinController);
+			}
 			
 			return wrapper;
+		}
+		
+		private function findInstanceById(sourceId : String, parent : IInstance = null) : IInstance
+		{
+			if (parent == null)
+			{
+				parent = getVisualSceneById(_mainSceneId).createInstance();
+			}
+			
+			var resource	: IResource = parent.resource;
+			var childs		: Vector.<IInstance>;
+			
+			if (resource is Node)
+				childs = Node(resource).childs
+			else if (resource is VisualScene)
+				childs = VisualScene(resource).childs;
+			
+			for each (var child : IInstance in childs)
+				if (child.sourceId == sourceId)
+					return child;
+				else if (child is InstanceNode || childs is InstanceVisualScene)
+					return findInstanceById(sourceId, child);
+			
+			return null;
 		}
 	}
 }

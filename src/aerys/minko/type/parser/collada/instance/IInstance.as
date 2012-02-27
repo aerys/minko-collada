@@ -6,6 +6,7 @@ package aerys.minko.type.parser.collada.instance
 
 	public interface IInstance
 	{
+		function get sourceId() : String;
 		function get resource() : IResource;
 		function createSceneNode(options	 			: ParserOptions,
 								 sourceIdToSceneNode	: Object,

@@ -36,6 +36,16 @@ package aerys.minko.type.parser.collada.instance
 		private var _bindedSkeletonId	: String;
 		private var _bindMaterial		: Object;
 		
+		public function get bindedSkeletonId() : String
+		{
+			return _bindedSkeletonId;
+		}
+		
+		public function get sourceId() : String
+		{
+			return _sourceId;
+		}
+		
 		public function get resource() : IResource
 		{
 			return _document.getControllerById(_sourceId);
@@ -103,7 +113,7 @@ package aerys.minko.type.parser.collada.instance
 				var i : uint = 0;
 				for each (var localMesh : Mesh in localMeshes)
 				{
-					localMesh.effectData.setProperty('diffuse', diffuseValue);
+					localMesh.bindings.setProperty('diffuse', diffuseValue);
 					localMesh.name = _name + i++;
 					group.addChild(localMesh);
 				}

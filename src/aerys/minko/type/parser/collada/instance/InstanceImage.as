@@ -11,6 +11,11 @@ package aerys.minko.type.parser.collada.instance
 		private var _document	: ColladaDocument;
 		private var _sourceId	: String;
 		
+		public function get sourceId() : String
+		{
+			return _sourceId;
+		}
+		
 		public function get resource() : IResource
 		{
 			return _document.getImageById(_sourceId);

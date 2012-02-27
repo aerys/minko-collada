@@ -15,6 +15,11 @@ package aerys.minko.type.parser.collada.instance
 		private var _name		: String;
 		private var _sid		: String;
 		
+		public function get sourceId() : String
+		{
+			return _sourceId;
+		}
+		
 		public function get resource() : IResource
 		{
 			return _document.getVisualSceneById(_sourceId);
