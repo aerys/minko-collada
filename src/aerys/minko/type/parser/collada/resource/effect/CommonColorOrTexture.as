@@ -1,7 +1,6 @@
 package aerys.minko.type.parser.collada.resource.effect
 {
 	import aerys.minko.Minko;
-	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.helper.NumberListParser;

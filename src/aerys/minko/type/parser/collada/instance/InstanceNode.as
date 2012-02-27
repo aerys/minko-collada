@@ -1,10 +1,8 @@
 package aerys.minko.type.parser.collada.instance
 {
-	import aerys.minko.Minko;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.type.loader.parser.ParserOptions;
-	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;

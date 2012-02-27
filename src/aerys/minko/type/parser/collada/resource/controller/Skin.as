@@ -1,18 +1,13 @@
 package aerys.minko.type.parser.collada.resource.controller
 {
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.ns.minko_stream;
-	import aerys.minko.type.loader.parser.GeometrySanitizer;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
 	import aerys.minko.type.parser.collada.helper.Source;
-	import aerys.minko.type.parser.collada.helper.Triangles;
 	import aerys.minko.type.parser.collada.resource.Geometry;
-	import aerys.minko.type.stream.IndexStream;
-	import aerys.minko.type.stream.VertexStream;
 	import aerys.minko.type.stream.format.VertexComponent;
 	import aerys.minko.type.stream.format.VertexFormat;
 

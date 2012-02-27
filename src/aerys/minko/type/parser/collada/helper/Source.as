@@ -2,7 +2,6 @@ package aerys.minko.type.parser.collada.helper
 {
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.math.Matrix4x4;
-	import aerys.minko.type.parser.collada.enum.InputType;
 	
 	import flash.utils.getTimer;
 	

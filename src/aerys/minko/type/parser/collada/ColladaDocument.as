@@ -227,8 +227,9 @@ package aerys.minko.type.parser.collada
 				}
 				
 				for (var targetName_ : String in timeLinesByNodeName)
-					sourceIdToScene[targetName_].controller =
-						new AnimationController(timeLinesByNodeName[targetName_]);
+					(sourceIdToScene[targetName_] as ISceneNode).addController(
+						new AnimationController(timeLinesByNodeName[targetName_])
+					);
 			}
 			
 			// add skinning controllers

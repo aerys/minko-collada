@@ -2,7 +2,6 @@ package aerys.minko.type.parser.collada.instance
 {
 	import aerys.minko.Minko;
 	import aerys.minko.scene.node.ISceneNode;
-	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Vector4;
@@ -19,7 +18,6 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.type.parser.collada.resource.image.data.AbstractImageData;
 	
 	import flash.events.EventDispatcher;
-	import flash.net.URLRequest;
 	
 	public class InstanceMaterial extends EventDispatcher implements IInstance
 	{

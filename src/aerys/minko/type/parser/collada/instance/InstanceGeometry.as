@@ -3,11 +3,9 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.render.effect.Effect;
-	import aerys.minko.scene.node.AbstractSceneNode;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.mesh.Mesh;
-	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Vector4;
@@ -15,9 +13,6 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;
 	import aerys.minko.type.parser.collada.resource.Geometry;
 	import aerys.minko.type.parser.collada.resource.IResource;
-	import aerys.minko.type.parser.collada.resource.Material;
-	import aerys.minko.type.stream.IVertexStream;
-	import aerys.minko.type.stream.IndexStream;
 	
 	public class InstanceGeometry implements IInstance
 	{
@@ -99,7 +94,11 @@ package aerys.minko.type.parser.collada.instance
 				var i : uint = 0;
 				for each (var localMesh : Mesh in localMeshes)
 				{
-					localMesh.bindings.setProperty('diffuse', diffuseValue);
+					if (diffuseValue is Vector4)
+						localMesh.bindings.setProperty('diffuse color', diffuseValue);
+					else
+						localMesh.bindings.setProperty('diffuse map', diffuseValue);
+					
 					localMesh.name = _name + i++;
 					group.addChild(localMesh);
 				}

@@ -1,7 +1,5 @@
 package aerys.minko.type.parser.collada.resource.effect.profile
 {
-	import aerys.minko.type.parser.collada.resource.effect.technique.ITechnique;
-
 	public class ProfileFactory
 	{
 		private static const NAME_TO_PROFILE : Object = {

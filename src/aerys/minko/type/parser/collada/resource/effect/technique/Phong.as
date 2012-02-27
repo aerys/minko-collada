@@ -1,6 +1,5 @@
 package aerys.minko.type.parser.collada.resource.effect.technique
 {
-	import aerys.minko.type.parser.collada.helper.NumberListParser;
 	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTexture;
 
 	public class Phong implements ILightedTechnique

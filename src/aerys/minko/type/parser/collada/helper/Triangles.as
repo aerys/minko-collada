@@ -3,7 +3,6 @@ package aerys.minko.type.parser.collada.helper
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.enum.InputType;
-	import aerys.minko.type.stream.IVertexStream;
 	import aerys.minko.type.stream.IndexStream;
 	import aerys.minko.type.stream.StreamUsage;
 	import aerys.minko.type.stream.VertexStream;

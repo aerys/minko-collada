@@ -7,7 +7,6 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.resource.image.Image;
 	
-	import flash.display.Bitmap;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;

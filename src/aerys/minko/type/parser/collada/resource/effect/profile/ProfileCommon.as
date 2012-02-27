@@ -1,11 +1,7 @@
 package aerys.minko.type.parser.collada.resource.effect.profile
 {
 	import aerys.minko.type.parser.collada.helper.ParamParser;
-	import aerys.minko.type.parser.collada.resource.effect.technique.Blinn;
-	import aerys.minko.type.parser.collada.resource.effect.technique.Constant;
 	import aerys.minko.type.parser.collada.resource.effect.technique.ITechnique;
-	import aerys.minko.type.parser.collada.resource.effect.technique.Lambert;
-	import aerys.minko.type.parser.collada.resource.effect.technique.Phong;
 	import aerys.minko.type.parser.collada.resource.effect.technique.TechniqueFactory;
 
 	public class ProfileCommon implements IProfile

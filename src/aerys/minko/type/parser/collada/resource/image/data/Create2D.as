@@ -1,8 +1,5 @@
 package aerys.minko.type.parser.collada.resource.image.data
 {
-	import flash.display.BitmapData;
-	import flash.events.EventDispatcher;
-
 	public class Create2D extends AbstractImageData
 	{
 		public static function createFromXML(xml : XML) : Create2D

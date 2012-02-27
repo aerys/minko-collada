@@ -2,7 +2,6 @@ package aerys.minko.type.parser.collada.resource
 {
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.ColladaDocument;

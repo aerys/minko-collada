@@ -3,23 +3,16 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.ns.minko_stream;
-	import aerys.minko.scene.node.AbstractSceneNode;
-	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.type.loader.parser.GeometrySanitizer;
 	import aerys.minko.type.loader.parser.ParserOptions;
-	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
-	import aerys.minko.type.parser.collada.enum.InputType;
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;
 	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.parser.collada.helper.Triangles;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceGeometry;
-	import aerys.minko.type.stream.IVertexStream;
 	import aerys.minko.type.stream.IndexStream;
 	import aerys.minko.type.stream.VertexStream;
-	import aerys.minko.type.stream.format.VertexComponent;
-	import aerys.minko.type.stream.format.VertexFormat;
 	
 	public class Geometry implements IResource
 	{
