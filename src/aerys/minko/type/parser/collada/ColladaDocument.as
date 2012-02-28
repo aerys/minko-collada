@@ -1,5 +1,6 @@
 package aerys.minko.type.parser.collada
 {
+	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.controller.AbstractController;
 	import aerys.minko.scene.controller.AnimationController;
@@ -11,11 +12,10 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.animation.timeline.ITimeline;
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.loader.parser.ParserOptions;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceController;
-	import aerys.minko.type.parser.collada.instance.InstanceNode;
-	import aerys.minko.type.parser.collada.instance.InstanceVisualScene;
 	import aerys.minko.type.parser.collada.resource.Geometry;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.Material;
@@ -70,15 +70,15 @@ package aerys.minko.type.parser.collada
 		private var _nodes			: Object;
 		private var _visualScenes	: Object;
 		
-		public function get mainSceneId()	: String { return _mainSceneId;	}
+		public function get mainSceneId()	: String { return _mainSceneId;		}
 		
-		public function get animations()	: Object { return _animations;	}
-		public function get controllers()	: Object { return _controllers;	}
-		public function get effects()		: Object { return _effects;		}
-		public function get geometries()	: Object { return _geometries;	}
-		public function get images()		: Object { return _images;		}
-		public function get materials()		: Object { return _materials;	}
-		public function get nodes()			: Object { return _nodes;		}
+		public function get animations()	: Object { return _animations;		}
+		public function get controllers()	: Object { return _controllers;		}
+		public function get effects()		: Object { return _effects;			}
+		public function get geometries()	: Object { return _geometries;		}
+		public function get images()		: Object { return _images;			}
+		public function get materials()		: Object { return _materials;		}
+		public function get nodes()			: Object { return _nodes;			}
 		public function get visualScenes()	: Object { return _visualScenes;	}
 		
 		public function getAnimationById	(id : String) : Animation	{ return _animations[id];	}
@@ -122,6 +122,7 @@ package aerys.minko.type.parser.collada
 		private function createMetaDataFromXML(xmlMetaData : XML) : Object
 		{
 			var metaData : Object = new Object();
+			
 			metaData.contributor	= new Vector.<Object>();
 			metaData.unit			= new Object();
 			
@@ -175,9 +176,9 @@ package aerys.minko.type.parser.collada
 			if (!NODENAME_TO_LIBRARY.hasOwnProperty(nodeType))
 				throw new ColladaError('No such handled resource type');
 			
-			var library			: Object		= this[NODENAME_TO_LIBRARY[nodeType]];
-			var resourceClass	: Class			= NODENAME_TO_CLASS[nodeType];
-			var resource		: IResource		= resourceClass['createFromXML'](xmlNode, this);
+			var library			: Object	= this[NODENAME_TO_LIBRARY[nodeType]];
+			var resourceClass	: Class		= NODENAME_TO_CLASS[nodeType];
+			var resource		: IResource	= resourceClass['createFromXML'](xmlNode, this);
 			
 			library[resource.id] = resource;
 			
@@ -186,11 +187,11 @@ package aerys.minko.type.parser.collada
 		
 		public function generateScene(options : ParserOptions) : ISceneNode
 		{
-			var instance		: IInstance	 = getVisualSceneById(_mainSceneId).createInstance();
-			var sourceIdToScene	: Object	 = new Object();
-			var scopedIdToScene	: Object	 = new Object();
-			var mainScene		: ISceneNode = instance.createSceneNode(options, sourceIdToScene, scopedIdToScene);
-			var wrapper			: Group		 = new Group(mainScene);
+			var instance		: IInstance		= getVisualSceneById(_mainSceneId).createInstance();
+			var sourceIdToScene	: Object		= new Object();
+			var scopedIdToScene	: Object		= new Object();
+			var mainScene		: Group			= Group(instance.createSceneNode(options, sourceIdToScene, scopedIdToScene));
+			var wrapper			: Group			= new Group(mainScene);
 			
 			// scale depending on collada unit, and switch from right to left handed
 			var unit : Number = _metaData.unit.meter;
@@ -232,41 +233,38 @@ package aerys.minko.type.parser.collada
 					);
 			}
 			
-			// add skinning controllers
+			// add skinning controllers. 
+			
+			// @fixme 
+			// We iterate on controllers, because we have no easy way to find instances without performing a depth search.
+			// This is a kludge and will break if multiple instances of the same controller are present in the scene.
 			for each (var controller : Controller in _controllers)
 			{
 				var controllerInstance	: InstanceController = findInstanceById(controller.id) as InstanceController;
 				if (!controllerInstance)
-				{
-					trace('fail1');
 					continue;
-				}
 				
-				var skin		 		: Skin			= controller.skin;
-				var scene		 		: ISceneNode	= sourceIdToScene[controllerInstance.sourceId];
+				var skin	: Skin			= controller.skin;
+				var scene	: ISceneNode	= sourceIdToScene[controllerInstance.sourceId];
 				if (scene == null)
 				{
-					trace('fail2');
+					Minko.log(DebugLevel.PLUGIN_WARNING, 'Unable to find instance linked to controller ' +
+						'named "' + controllerInstance.sourceId + '". Dropping skin.');
 					continue;
 				}
-				
+
 				var meshes : Vector.<ISceneNode> = 
 					scene is Group ? Group(scene).getDescendantsByType(Mesh) : new <ISceneNode>[scene];
-				
-				var skeletonRoot : Group = sourceIdToScene[controllerInstance.bindedSkeletonId];
-				if (skeletonRoot == null)
-				{
-					trace('fail3');
-					continue;
-				}
 				
 				var joints : Vector.<Group>	= new Vector.<Group>();
 				for each (var jointName : String in skin.jointNames)
 				{
+					// we should search only under the "skeleton" node instance (if defined in the instance controller)
 					var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName]; // handle collada 1.4 "ID_REF"
 					if (joint == null)
 					{
-						trace('fail4');
+						Minko.log(DebugLevel.PLUGIN_WARNING, 'Unable to find bone named "' 
+							+ jointName + '". Dropping skin for mesh named "' + scene.name + '".');
 						continue;
 					}
 					
@@ -275,14 +273,14 @@ package aerys.minko.type.parser.collada
 				
 				var skinController	: AbstractController = new SkinningController(
 					SkinningMethod.DUAL_QUATERNION,
-					skeletonRoot,
+					mainScene,
 					joints,
+					skin.bindShapeMatrix,
 					skin.invBindMatrices
 				);
 				
 				for each (var mesh : ISceneNode in meshes)
 					Mesh(mesh).addController(skinController);
-					
 			}
 			
 			return wrapper;

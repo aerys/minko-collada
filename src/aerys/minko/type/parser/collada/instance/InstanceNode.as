@@ -31,9 +31,13 @@ package aerys.minko.type.parser.collada.instance
 		{
 			var sourceId	: String = String(xml.@url).substr(1);
 			var name		: String = xml.@name;
-			var sid			: String = xml.@sid;
+			var scopedId	: String = xml.@sid;
 			
-			return new InstanceNode(document, sourceId, name, sid);
+			if (sourceId.length == 0) sourceId = null;
+			if (scopedId.length == 0) scopedId = null;
+			if (name.length == 0) name = null;
+			
+			return new InstanceNode(document, sourceId, name, scopedId);
 		}
 		
 		public function InstanceNode(document	: ColladaDocument,

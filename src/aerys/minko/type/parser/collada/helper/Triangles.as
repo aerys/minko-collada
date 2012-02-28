@@ -245,7 +245,7 @@ package aerys.minko.type.parser.collada.helper
 			for (componentId = 0; componentId < numSemantics; ++componentId)
 			{
 				semantic = _semantics[componentId];
-				if (semantic == 'VERTEX')
+				if (InputType.minko_collada::TO_COMPONENT[semantic] == undefined)
 					continue;
 				
 				vertexStreamList.pushVertexStream(

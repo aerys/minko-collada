@@ -17,13 +17,14 @@ package aerys.minko.type.parser.collada.resource.controller
 		
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
+		private var _document			: ColladaDocument;
 		private var _sourceId			: String;
 		private var _bindShapeMatrix	: Matrix4x4;
 		private var _jointNames			: Vector.<String>;
 		private var _invBindMatrices	: Vector.<Matrix4x4>;
+		
 		private var _boneWeights		: Vector.<Number>
 		private var _numBonesPerVertex	: uint;
-		private var _document			: ColladaDocument;
 		
 		private var _meshTemplates		: Vector.<MeshTemplate>;
 		
@@ -282,7 +283,7 @@ package aerys.minko.type.parser.collada.resource.controller
 					newBuffer[newWriteOffset++] = oldBuffer[oldReadOffset];
 				
 				// read from old buffer where to read the new bone
-				var boneReadOffset	: uint = 2 * oldBuffer[oldVertexIdOffset];
+				var boneReadOffset	: uint = boneDwordPerVertex * oldBuffer[oldVertexIdOffset];
 				var boneReadLimit	: uint = boneReadOffset + boneDwordPerVertex;
 				
 				for (; boneReadOffset < boneReadLimit; ++boneReadOffset)

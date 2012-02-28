@@ -59,6 +59,15 @@ package aerys.minko.type.parser.collada.resource
 			var name		: String	= xmlNode.@name;
 			var transform	: Matrix4x4	= TransformParser.parseTransform(xmlNode);
 			
+			if (id != null && id.length == 0)
+				id = null;
+			
+			if (sid != null && sid.length == 0)
+				sid = null;
+			
+			if (name != null && name.length == 0)
+				name = null;
+			
 			var type : String = String(xmlNode.@type).toUpperCase();
 			if (type.length == 0)
 				type = NodeType.NODE;
