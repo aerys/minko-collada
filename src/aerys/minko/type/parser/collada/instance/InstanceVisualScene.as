@@ -44,7 +44,7 @@ package aerys.minko.type.parser.collada.instance
 			var visualScene	: VisualScene	= VisualScene(resource);
 			var group		: Group			= new Group();
 			
-			group.name = _name;
+			group.name = _sourceId;
 			for each (var childInstance : IInstance in visualScene.childs)
 			{
 				var child : ISceneNode = childInstance.createSceneNode(options, idToSceneNode, sidToSceneNode);

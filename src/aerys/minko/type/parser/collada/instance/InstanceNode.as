@@ -62,7 +62,7 @@ package aerys.minko.type.parser.collada.instance
 			
 			var group : Group = new Group();
 			group.transform.copyFrom(transform);
-			group.name = _name;
+			group.name = _sourceId;
 			
 			for (var childId : uint = 0; childId < numChilds; ++childId)
 			{

@@ -99,7 +99,7 @@ package aerys.minko.type.parser.collada.instance
 					else
 						localMesh.bindings.setProperty('diffuse map', diffuseValue);
 					
-					localMesh.name = _name + i++;
+					localMesh.name = _sourceId + '_' + i++;
 					group.addChild(localMesh);
 				}
 			}
@@ -113,7 +113,7 @@ package aerys.minko.type.parser.collada.instance
 			else
 				result = group;
 			
-			result.name = _name;
+			result.name = _sourceId;
 			
 			if (_scopedId != null)
 				scopedIdToSceneNode[_scopedId] = result;
