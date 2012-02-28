@@ -57,7 +57,7 @@ package aerys.minko.type.parser.collada
 				if (!xmlDocument)
 					return false;
 				
-				return xmlDocument.localName().toLowerCase() != 'collada';
+				return xmlDocument.localName().toLowerCase() == 'collada';
 			}
 			catch (e : Error)
 			{
