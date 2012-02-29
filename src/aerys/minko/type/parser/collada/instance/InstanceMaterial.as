@@ -93,9 +93,9 @@ package aerys.minko.type.parser.collada.instance
 				Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: The profile ' 
 					+ profile.id + ' uses an invalid, or not supported technique. ' +
 					'Its diffuse value cannot be read, and will be replaced by ' +
-					'pure green.');
+					'a random color.');
 				
-				return new Vector4(0, 1, 0, 1);
+				return new Vector4(Math.random(), Math.random(), Math.random(), 1);
 			}
 			
 			var textureName : String = diffuse.textureName;
@@ -123,9 +123,9 @@ package aerys.minko.type.parser.collada.instance
 				{
 					Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: The texture '
 						+ image.name + ' could not be loaded. It has beed replaced' +
-						' by pure green.');
+						' by a random color.');
 					
-					return new Vector4(0, 1, 0, 1);
+					return new Vector4(Math.random(), Math.random(), Math.random(), 1);
 				}
 			}
 			else

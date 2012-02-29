@@ -192,6 +192,7 @@ package aerys.minko.type.parser.collada
 			var scopedIdToScene	: Object		= new Object();
 			var mainScene		: Group			= Group(instance.createSceneNode(options, sourceIdToScene, scopedIdToScene));
 			var wrapper			: Group			= new Group(mainScene);
+			wrapper.name = 'colladaWrapper' + uint(Math.random() * 1000);
 			
 			// scale depending on collada unit, and switch from right to left handed
 			var unit : Number = _metaData.unit.meter;

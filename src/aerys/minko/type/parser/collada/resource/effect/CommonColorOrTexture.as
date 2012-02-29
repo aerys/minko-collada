@@ -41,9 +41,13 @@ package aerys.minko.type.parser.collada.resource.effect
 				
 				default:
 					Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: CommonColorOrTexture' +
-						'is neither a color or a texture in XML feed. Fallbacking to pure green');
+						'is neither a color or a texture in XML feed. Fallbacking to a random color.');
 					
-					color = 0xff00ff00;
+					color = 0xff000000
+						| (uint(Math.random() * 255) << 16)
+						| (uint(Math.random() * 255) << 8)
+						| uint(Math.random() * 255);
+						
 					break;
 			}
 			

@@ -99,8 +99,11 @@ package aerys.minko.type.parser.collada.instance
 					else
 						localMesh.bindings.setProperty('diffuse map', diffuseValue);
 					
-					localMesh.name = _sourceId + '_' + i++;
+					localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
+					
 					group.addChild(localMesh);
+					
+					++i;
 				}
 			}
 			
@@ -133,9 +136,9 @@ package aerys.minko.type.parser.collada.instance
 			if (materialInstance == null)
 			{
 				Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: "' + materialName + '" is ' +
-					'not a valid material name. Fallbacking to pure green');
+					'not a valid material name. Fallbacking to random color');
 				
-				diffuseValue = new Vector4(0, 1, 0, 1);
+				diffuseValue = new Vector4(Math.random(), Math.random(), Math.random(), 1);
 			}
 			else
 				diffuseValue = materialInstance.computeDiffuse();

@@ -21,6 +21,9 @@ package aerys.minko.type.parser.collada
 		private var _complete			: Signal;
 		private var _loaderToDependency	: Dictionary;
 		
+		private var _lastData			: ByteArray;
+		private var _lastXML			: XML;
+		
 		public function get error() : Signal
 		{
 			return _error;
@@ -47,33 +50,41 @@ package aerys.minko.type.parser.collada
 		
 		public function isParsable(data : ByteArray) : Boolean
 		{
-			// optimize this!!!!
+			var isCollada : Boolean;
 			
 			try
 			{
-				data.position = 0;
+				_lastData			= data;
+				_lastData.position	= 0;
+				_lastXML			= new XML(data.readUTFBytes(data.length));
 				
-				var xmlDocument	: XML = new XML(data.readUTFBytes(data.length));
-				if (!xmlDocument)
-					return false;
-				
-				return xmlDocument.localName().toLowerCase() == 'collada';
+				isCollada = _lastXML != null && _lastXML.localName().toLowerCase() == 'collada';
 			}
 			catch (e : Error)
 			{
+				isCollada = false;
 			}
 			
-			return false;
+			if (!isCollada)
+			{
+				_lastData	= null;
+				_lastXML	= null;
+			}
+			
+			return isCollada;
 		}
 		
 		public function getDependencies(data : ByteArray) : Vector.<ILoader>
 		{
-			data.position = 0;
-			
-			var xmlDocument : XML = new XML(data.readUTFBytes(data.length));
+			if (_lastData !== data)
+			{
+				_lastData			= data;
+				_lastData.position	= 0;
+				_lastXML			= new XML(data.readUTFBytes(data.length));
+			}
 			
 			_document = new ColladaDocument();
-			_document.loadFromXML(xmlDocument);
+			_document.loadFromXML(_lastXML);
 			
 			var dependencies : Vector.<ILoader> = new Vector.<ILoader>();
 			for each (var image : Image in _document.images)
