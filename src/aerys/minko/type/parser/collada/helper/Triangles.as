@@ -51,7 +51,7 @@ package aerys.minko.type.parser.collada.helper
 		 * as ids can be shared, this tells really how many ids are they
 		 * per vertex.
 		 */		
-		private var _indicesPerVertex	: uint;
+		private var _indicesPerVertex	: int;
 		
 		/**
 		 * Contains all ids (triangulated).
@@ -132,7 +132,8 @@ package aerys.minko.type.parser.collada.helper
 		 */		
 		private function fillVerticesFromTriangles(xmlPrimitive : XML) : void
 		{
-			_triangleVertices = NumberListParser.parseUintList(xmlPrimitive.NS::p[0]);
+			_triangleVertices = new Vector.<uint>();
+			NumberListParser.parseUintList(xmlPrimitive.NS::p[0], _triangleVertices);
 		}
 		
 		/**
@@ -142,61 +143,212 @@ package aerys.minko.type.parser.collada.helper
 		{
 			_triangleVertices	= new Vector.<uint>();
 			
-			var indexList 			: Vector.<uint> = NumberListParser.parseUintList(xmlPrimitive.NS::p[0]);
-			var polyCountList		: Vector.<uint> = NumberListParser.parseUintList(xmlPrimitive.NS::vcount[0]);
-			var polyCountListLength	: uint			= polyCountList.length;
-			var currentIndex		: uint			= 0;
+			var writeIndex : int = 0;
+			
+			var xmlP : XML = xmlPrimitive.NS::p[0];
+			var xmlVCount : XML = xmlPrimitive.NS::vcount[0];
+			
+			var indexList 			: Vector.<uint> = new Vector.<uint>();
+			var polyCountList		: Vector.<uint> = new Vector.<uint>();
+			
+			NumberListParser.parseUintList(xmlP, indexList);
+			
+			var polyCountListLength	: uint = NumberListParser.parseUintList(xmlVCount, polyCountList);
+			var currentIndex		: uint = 0;
+			var length		: uint			= 0;
 			
 			for (var polygonId : uint = 0; polygonId < polyCountListLength; ++polygonId)
 			{
 				var numVertices : uint = polyCountList[polygonId];
 				
+				if (length < writeIndex)
+					_triangleVertices.length = length = 2 * writeIndex;
+				
 				for (var j : uint = 1; j < numVertices - 1; ++j)
 				{
 					var k : uint;
 					// triangle 0
 					for (k = 0; k < _indicesPerVertex; ++k)
-						_triangleVertices.push(indexList[currentIndex * _indicesPerVertex + k]);
+						_triangleVertices[writeIndex++] = indexList[int(int(currentIndex * _indicesPerVertex) + k)];
 					
 					// triangle j 
 					for (k = 0; k < _indicesPerVertex; ++k)
-						_triangleVertices.push(indexList[(currentIndex + j) * _indicesPerVertex + k]);
+						_triangleVertices[writeIndex++] = indexList[(currentIndex + j) * _indicesPerVertex + k];
 					
 					// triangle j + 1
 					for (k = 0; k < _indicesPerVertex; ++k)
-						_triangleVertices.push(indexList[(currentIndex + j + 1) * _indicesPerVertex + k]);
+						_triangleVertices[writeIndex++] = indexList[(currentIndex + j + 1) * _indicesPerVertex + k];
 				}
 				
 				currentIndex += numVertices;
 			}
+			
+			_triangleVertices.length = writeIndex;
 		}
 		
 		private function fillVerticesFromPolygons(xmlPrimitive : XML) : void
 		{
 			_triangleVertices	= new Vector.<uint>();
+			var writeIndex : int = 0;
+			
+			var indexList	: Vector.<uint> = new Vector.<uint>();
+			var length		: uint			= 0;
 			
 			for each (var xmlP : XML in xmlPrimitive.NS::p)
 			{
-				var indexList		: Vector.<uint> = NumberListParser.parseUintList(xmlP);
-				var numVertices 	: uint			= indexList.length / _indicesPerVertex;
+				var indexListLength	: uint = NumberListParser.parseUintList(xmlP, indexList);
+				var numVerticesM1	: uint = indexListLength / _indicesPerVertex - 1;
 				
-				for (var j : uint = 1; j < numVertices - 1; ++j)
+				if (length < writeIndex)
+					_triangleVertices.length = length = 2 * writeIndex;
+				
+				for (var j : uint = 1; j < numVerticesM1; ++j)
 				{
-					var k : uint;
+					var k : int;
 					
 					// triangle 0
 					for (k = 0; k < _indicesPerVertex; ++k)
-						_triangleVertices.push(indexList[k]);
+						_triangleVertices[writeIndex++] = indexList[k];
 					
 					// triangle j 
 					for (k = 0; k < _indicesPerVertex; ++k)
-						_triangleVertices.push(indexList[j * _indicesPerVertex + k]);
+						_triangleVertices[writeIndex++] = indexList[int(int(j * _indicesPerVertex) + k)];
 					
 					// triangle j + 1
 					for (k = 0; k < _indicesPerVertex; ++k)
-						_triangleVertices.push(indexList[(j + 1) * _indicesPerVertex + k]);
+						_triangleVertices[writeIndex++] = indexList[int(int(int(j + 1) * _indicesPerVertex) + k)];
 				}
 			}
+			
+			_triangleVertices.length = writeIndex;
+		}
+		
+		public function fastComputeIndexStream(verticesSemantics	: Vector.<String>,
+											   verticesDataSources	: Object) : IndexStream
+		{
+			var numTriangleVertices	: uint				= _triangleVertices.length;
+			var numVertices			: uint				= numTriangleVertices / _indicesPerVertex;
+			
+			var indexBuffer			: Vector.<uint>		= new Vector.<uint>(numVertices);
+			var vertexBufferPos 	: uint				= 0;
+			
+			for (var indexOffset : uint = _offsets['VERTEX']; 
+				indexOffset < numTriangleVertices; 
+				indexOffset += _indicesPerVertex)
+			{
+				indexBuffer[vertexBufferPos++] = _triangleVertices[indexOffset];
+			}
+			
+			return new IndexStream(StreamUsage.DYNAMIC, indexBuffer);
+		}
+		
+		public function fastComputeVertexStream(verticesSemantics	: Vector.<String>,
+												verticesDataSources	: Object) : VertexStream
+		{
+			var numSemantics		: uint;
+			var semantic			: String;
+			var componentId			: uint;
+			var vertexStreamList	: VertexStreamList = new VertexStreamList();
+			
+			var numVertices			: uint = Source(verticesDataSources['POSITION']).data.length / 3;
+			
+			var format				: VertexFormat = new VertexFormat(VertexComponent.ID);
+			
+			numSemantics = verticesSemantics.length;
+			for (componentId = 0; componentId < numSemantics; ++componentId)
+				if (InputType.minko_collada::TO_COMPONENT[verticesSemantics[componentId]])
+					format.addComponent(InputType.minko_collada::TO_COMPONENT[verticesSemantics[componentId]]);
+			
+			numSemantics = _semantics.length;
+			for (componentId = 0; componentId < numSemantics; ++componentId)
+				if (InputType.minko_collada::TO_COMPONENT[_semantics[componentId]])
+					format.addComponent(InputType.minko_collada::TO_COMPONENT[_semantics[componentId]]);
+			
+			
+			var dwordsPerVertex		: uint				= format.dwordsPerVertex;
+			var bufferSize			: uint 				= numVertices * dwordsPerVertex;
+			var vertexBuffer		: Vector.<Number>	= new Vector.<Number>(bufferSize, true);
+			var numTriangleVertices	: uint				= _triangleVertices.length;
+			var component		: VertexComponent
+			
+			numSemantics = verticesSemantics.length;
+			for (componentId = 0; componentId < numSemantics; ++componentId)
+			{
+				semantic = verticesSemantics[componentId];
+				component = InputType.minko_collada::TO_COMPONENT[semantic];
+				if (!component)
+					continue;
+				
+				var source			: Source	= verticesDataSources[semantic];
+				var sourceData		: Array		= source.data;
+				var componentDwords	: uint		= component.dwords;
+				var sourceStride	: uint		= source.stride;
+				
+				var innerOffset		: uint		= format.getOffsetForComponent(component);
+				
+				for (var indexOffset : uint = _offsets['VERTEX']; 
+					 indexOffset < numTriangleVertices; 
+					 indexOffset += _indicesPerVertex)
+				{
+					var vertexId			: uint = _triangleVertices[indexOffset];
+					var sourceIndex			: uint = vertexId * sourceStride;
+					var sourceIndexLimit	: uint = sourceIndex + componentDwords;
+					
+					var destIndex			: uint = vertexId * dwordsPerVertex + innerOffset;
+					
+					for (; sourceIndex < sourceIndexLimit; ++sourceIndex)
+						vertexBuffer[destIndex++] = sourceData[sourceIndex];
+				}
+			}
+			
+			var index2Offset : uint;
+			numSemantics = _semantics.length;
+			for (componentId = 0; componentId < numSemantics; ++componentId)
+			{
+				semantic = _semantics[componentId];
+				component = InputType.minko_collada::TO_COMPONENT[semantic];
+				if (!component)
+					continue;
+				
+				source	= _sources[_semantics[componentId]];
+				sourceData	= source.data;
+				componentDwords	= component.dwords;
+				sourceStride	= source.stride;
+				innerOffset		= format.getOffsetForComponent(component);
+					
+				for (indexOffset = _offsets['VERTEX'], index2Offset = _offsets[semantic]; 
+					indexOffset < numTriangleVertices; 
+					indexOffset += _indicesPerVertex,
+					index2Offset += _indicesPerVertex)
+				{
+					vertexId			= _triangleVertices[indexOffset];
+					
+					var dataId		: uint = _triangleVertices[index2Offset];
+					sourceIndex			= dataId * sourceStride;
+					sourceIndexLimit	= sourceIndex + componentDwords;
+					
+					destIndex			= vertexId * dwordsPerVertex + innerOffset;
+					
+					for (; sourceIndex < sourceIndexLimit; ++sourceIndex)
+						vertexBuffer[destIndex++] = sourceData[sourceIndex];
+				}
+			}
+			
+			var j : Number = 0;
+			for (var i : uint = format.getOffsetForComponent(VertexComponent.ID);
+				i < bufferSize;
+				i += dwordsPerVertex)
+				vertexBuffer[i] = j++;
+			
+			if (format.hasComponent(VertexComponent.UV))
+			{
+				for (i = format.getOffsetForField('v');
+					 i < bufferSize;
+					 i += dwordsPerVertex)
+					vertexBuffer[i] = 1 - vertexBuffer[i];
+			}
+			
+			return new VertexStream(StreamUsage.DYNAMIC, format, vertexBuffer);
 		}
 		
 		public function computeIndexStream() : IndexStream
@@ -286,7 +438,7 @@ package aerys.minko.type.parser.collada.helper
 				var sourceIndexLimit	: uint = sourceIndex + sourceStride;
 				
 				for (; sourceIndex < sourceIndexLimit; ++sourceIndex)
-					vertexBuffer[vertexBufferPos++] = sourceData[sourceIndex]; 
+					vertexBuffer[vertexBufferPos++] = sourceData[sourceIndex];
 			}
 			
 			return vertexBuffer;

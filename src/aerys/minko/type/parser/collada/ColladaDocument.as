@@ -28,6 +28,7 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.parser.collada.resource.image.Image;
 	
 	import flash.events.EventDispatcher;
+	import flash.utils.getTimer;
 
 	use namespace minko_collada;
 	

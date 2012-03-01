@@ -4,6 +4,10 @@ package aerys.minko.type.parser.collada.helper
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.math.Vector4;
 	
+	import flash.utils.ByteArray;
+	import flash.utils.Endian;
+	import flash.utils.getTimer;
+	
 	public class NumberListParser
 	{
 		public static function parseIntList(xml : XML) : Vector.<int>
@@ -18,16 +22,37 @@ package aerys.minko.type.parser.collada.helper
 			return result;
 		}
 		
-		public static function parseUintList(xml : XML) : Vector.<uint>
+		public static function parseUintList(xml : XML, out : Vector.<uint>) : uint
 		{
-			var data		: Array			= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
-			var dataLength	: uint			= data.length;
-			var result		: Vector.<uint>	= new Vector.<uint>(dataLength, true);
+			var feed			: String		= String(xml);
+			var feedLength		: uint			= feed.length;
 			
-			for (var i : uint = 0; i < dataLength; ++i)
-				result[i] = parseInt(data[i]);
+			var currentNumber	: uint			= 0;
+			var lastWasSpace	: Boolean		= false;
+			var numId			: uint			= 0;
 			
-			return result;
+			for (var charId : uint = 0; charId < feedLength; ++charId)
+			{
+				var charCode : uint = feed.charCodeAt(charId) - 48;
+				
+				if (charCode < 10)
+				{
+					currentNumber	*= 10;
+					currentNumber	+= charCode;
+					lastWasSpace	= false;
+				}
+				else if (!lastWasSpace)
+				{
+					out[numId++]	= currentNumber;
+					currentNumber	= 0;
+					lastWasSpace	= true;
+				}
+			}
+			
+			if (!lastWasSpace)
+				out[numId++] = currentNumber;
+			
+			return numId;
 		}
 		
 		public static function parseNumberList(xml : XML) : Vector.<Number>

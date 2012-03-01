@@ -14,6 +14,8 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.type.stream.IndexStream;
 	import aerys.minko.type.stream.VertexStream;
 	
+	import flash.utils.getTimer;
+	
 	public class Geometry implements IResource
 	{
 		use namespace minko_collada;
@@ -122,7 +124,7 @@ package aerys.minko.type.parser.collada.resource
 						newGeometry._triangleStores.push(new Triangles(child, xmlMesh));
 						break;
 				}
-				
+			
 			return newGeometry;
 		}
 		
@@ -147,24 +149,32 @@ package aerys.minko.type.parser.collada.resource
 			for each (var triangleStore : Triangles in _triangleStores)
 			{
 				var materialName	: String		= triangleStore.material;
-				var indexStream		: IndexStream	= triangleStore.computeIndexStream();
-				var vertexStream	: VertexStream	= 
-					triangleStore.computeVertexStream(_verticesDataSemantics, _verticesDataSources);
 				
-				var vertexData		: Vector.<Number>	= new Vector.<Number>();
-				var indexData		: Vector.<uint>		= new Vector.<uint>();
+				var indexStream		: IndexStream;
+				var vertexStream	: VertexStream;
+				var vertexData		: Vector.<Number>;
 				
-				GeometrySanitizer.sanitizeBuffers(
-					vertexStream.minko_stream::_data,
-					indexStream.minko_stream::_data,
-					vertexData,
-					indexData,
-					vertexStream.format.dwordsPerVertex);
+				if (true)
+				{
+					indexStream		= triangleStore.computeIndexStream();
+					vertexStream	= triangleStore.computeVertexStream(_verticesDataSemantics, _verticesDataSources);
+					
+					vertexData = GeometrySanitizer.sanitizeBuffers(
+						vertexStream.minko_stream::_data,
+						indexStream.minko_stream::_data,
+						vertexStream.format.dwordsPerVertex);
+				}
+				else
+				{
+					indexStream		= triangleStore.fastComputeIndexStream(_verticesDataSemantics, _verticesDataSources);
+					vertexStream	= triangleStore.fastComputeVertexStream(_verticesDataSemantics, _verticesDataSources);
+					vertexData		= vertexStream.minko_stream::_data;
+				}
 				
 				var meshTemplate	: MeshTemplate	= new MeshTemplate(
 					_name, 
 					vertexData,
-					indexData,
+					indexStream.minko_stream::_data,
 					materialName,
 					vertexStream.format);
 				

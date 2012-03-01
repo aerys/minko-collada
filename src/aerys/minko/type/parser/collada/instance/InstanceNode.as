@@ -71,8 +71,8 @@ package aerys.minko.type.parser.collada.instance
 				
 				if (child)
 					group.addChild(child);
-				else
-					throw new Error();
+//				else
+//					throw new Error();
 			}
 			
 			if (_sourceId != null)

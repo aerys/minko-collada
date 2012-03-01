@@ -54,9 +54,11 @@ package aerys.minko.type.parser.collada
 			
 			try
 			{
+				XML.prettyPrinting = false;
+				
 				_lastData			= data;
 				_lastData.position	= 0;
-				_lastXML			= new XML(data.readUTFBytes(data.length));
+				_lastXML			= new XML(_lastData);
 				
 				isCollada = _lastXML != null && _lastXML.localName().toLowerCase() == 'collada';
 			}
@@ -78,9 +80,11 @@ package aerys.minko.type.parser.collada
 		{
 			if (_lastData !== data)
 			{
+				XML.prettyPrinting = false;
+				
 				_lastData			= data;
 				_lastData.position	= 0;
-				_lastXML			= new XML(data.readUTFBytes(data.length));
+				_lastXML			= new XML(_lastData);
 			}
 			
 			_document = new ColladaDocument();
