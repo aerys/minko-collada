@@ -93,15 +93,14 @@ package aerys.minko.type.parser.collada
 			var dependencies : Vector.<ILoader> = new Vector.<ILoader>();
 			for each (var image : Image in _document.images)
 			{
-				var imageURL : String;
-				imageURL = image.imageData.path;
-				imageURL = _options.dependencyURLRewriter(imageURL);
+				var imageURL	: String	= image.imageData.path;
+				var loader		: ILoader	= _options.dependencyLoaderClosure(imageURL, true, _options);
 				
-				var loader : ILoader = new TextureLoader(_options.mipmapTextures);
-				loader.load(new URLRequest(imageURL));
-				
-				dependencies.push(loader);
-				_loaderToDependency[loader] = image;
+				if (loader)
+				{
+					dependencies.push(loader);
+					_loaderToDependency[loader] = image;
+				}
 			}
 			
 			return dependencies;
