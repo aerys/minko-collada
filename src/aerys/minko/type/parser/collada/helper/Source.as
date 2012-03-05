@@ -9,7 +9,7 @@ package aerys.minko.type.parser.collada.helper
 	 * This represent a <source> node in a collada document, and provides
 	 * methods to easily access the contained data.
 	 * 
-	 * @author Romain Gilliotte <romain.gilliotte@aerys.in>
+	 * @author Romain Gilliotte
 	 * 
 	 */	
 	public final class Source

@@ -2,7 +2,8 @@ package aerys.minko.type.parser.collada.helper
 {
 	import aerys.minko.render.effect.Effect;
 	import aerys.minko.scene.node.mesh.Mesh;
-	import aerys.minko.type.loader.parser.GeometrySanitizer;
+	import aerys.minko.scene.node.mesh.geometry.Geometry;
+	import aerys.minko.scene.node.mesh.geometry.GeometrySanitizer;
 	import aerys.minko.type.stream.IVertexStream;
 	import aerys.minko.type.stream.IndexStream;
 	import aerys.minko.type.stream.VertexStream;
@@ -85,7 +86,12 @@ package aerys.minko.type.parser.collada.helper
 					indexDatas[bufferId]
 				);
 				
-				var subMesh : Mesh = new Mesh(effect, new <IVertexStream>[vertexStream], indexStream);
+				var subMesh : Mesh = new Mesh(
+					new Geometry(new <IVertexStream>[vertexStream], indexStream),
+					null,
+					effect
+				);
+				
 				subMesh.name = _meshName + bufferId;
 				
 				meshes[bufferId] = subMesh;

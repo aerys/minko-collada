@@ -7,7 +7,7 @@ package aerys.minko.type.parser.collada.enum
 	/**
 	 * All types of input nodes.
 	 * 
-	 * @author Romain Gilliotte <romain.gilliotte@aerys.in>
+	 * @author Romain Gilliotte
 	 * @see Collada 1.5 specs, page 5-48
 	 */	
 	public class InputType

@@ -116,6 +116,8 @@ package aerys.minko.type.parser.collada
 				image.imageData.textureResource = loader.textureResource;
 			}
 			
+			
+			
 			_complete.execute(this, _document.generateScene(_options));
 		}
 		

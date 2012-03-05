@@ -3,7 +3,7 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.ns.minko_stream;
-	import aerys.minko.type.loader.parser.GeometrySanitizer;
+	import aerys.minko.scene.node.mesh.geometry.GeometrySanitizer;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;
