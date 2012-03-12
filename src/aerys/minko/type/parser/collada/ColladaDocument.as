@@ -4,7 +4,7 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.controller.AbstractController;
 	import aerys.minko.scene.controller.AnimationController;
-	import aerys.minko.scene.controller.SkinningController;
+	import aerys.minko.scene.controller.mesh.SkinningController;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.mesh.Mesh;
@@ -28,7 +28,6 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.parser.collada.resource.image.Image;
 	
 	import flash.events.EventDispatcher;
-	import flash.utils.getTimer;
 
 	use namespace minko_collada;
 	
