@@ -152,28 +152,26 @@ package aerys.minko.type.parser.collada.resource
 				
 				var indexStream		: IndexStream;
 				var vertexStream	: VertexStream;
-				var vertexData		: Vector.<Number>;
 				
-				if (true)
-				{
+//				if (true)
+//				{
 					indexStream		= triangleStore.computeIndexStream();
 					vertexStream	= triangleStore.computeVertexStream(_verticesDataSemantics, _verticesDataSources);
 					
-					vertexData = GeometrySanitizer.sanitizeBuffers(
+					GeometrySanitizer.removeDuplicatedVertices(
 						vertexStream.minko_stream::_data,
 						indexStream.minko_stream::_data,
 						vertexStream.format.dwordsPerVertex);
-				}
-				else
-				{
-					indexStream		= triangleStore.fastComputeIndexStream(_verticesDataSemantics, _verticesDataSources);
-					vertexStream	= triangleStore.fastComputeVertexStream(_verticesDataSemantics, _verticesDataSources);
-					vertexData		= vertexStream.minko_stream::_data;
-				}
+//				}
+//				else
+//				{
+//					indexStream		= triangleStore.fastComputeIndexStream(_verticesDataSemantics, _verticesDataSources);
+//					vertexStream	= triangleStore.fastComputeVertexStream(_verticesDataSemantics, _verticesDataSources);
+//				}
 				
 				var meshTemplate	: MeshTemplate	= new MeshTemplate(
 					_name, 
-					vertexData,
+					vertexStream.minko_stream::_data,
 					indexStream.minko_stream::_data,
 					materialName,
 					vertexStream.format);
