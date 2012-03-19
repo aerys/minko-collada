@@ -113,7 +113,8 @@ package aerys.minko.type.parser.collada
 				var loader	: TextureLoader	= TextureLoader(l);
 				var image	: Image			= _loaderToDependency[loader];
 				
-				image.imageData.textureResource = loader.textureResource;
+				if (loader.isComplete)
+					image.imageData.textureResource = loader.textureResource;
 			}
 			
 			
