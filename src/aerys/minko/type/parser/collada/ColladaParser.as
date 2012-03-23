@@ -42,9 +42,9 @@ package aerys.minko.type.parser.collada
 		public function ColladaParser(options : ParserOptions)
 		{
 			_options			= options || new ParserOptions();
-			_progress			= new Signal();
-			_complete			= new Signal();
-			_error				= new Signal();
+			_progress			= new Signal('ColladaParser.progress');
+			_complete			= new Signal('ColladaParser.complete');
+			_error				= new Signal('ColladaParser.error');
 			_loaderToDependency	= new Dictionary();
 		}
 		
