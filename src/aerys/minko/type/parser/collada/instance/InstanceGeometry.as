@@ -112,7 +112,7 @@ package aerys.minko.type.parser.collada.instance
 			
 			var result : ISceneNode;
 			if (group.numChildren == 1)
-				result = group[0];
+				result = group.getChildAt(0);
 			else
 				result = group;
 			
