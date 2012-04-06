@@ -122,7 +122,7 @@ package aerys.minko.type.parser.collada.instance
 				return null;
 			
 			if (group.numChildren == 1)
-				result = group[0];
+				result = group.getChildAt(0);
 			else
 				result = group;
 			
