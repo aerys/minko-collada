@@ -161,7 +161,8 @@ package aerys.minko.type.parser.collada.resource
 					GeometrySanitizer.removeDuplicatedVertices(
 						vertexStream.minko_stream::_data,
 						indexStream.minko_stream::_data,
-						vertexStream.format.dwordsPerVertex);
+						vertexStream.format.dwordsPerVertex
+					);
 //				}
 //				else
 //				{
