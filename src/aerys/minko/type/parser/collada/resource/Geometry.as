@@ -5,6 +5,7 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.ns.minko_stream;
 	import aerys.minko.scene.node.mesh.geometry.GeometrySanitizer;
 	import aerys.minko.type.loader.parser.ParserOptions;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;
 	import aerys.minko.type.parser.collada.helper.Source;
@@ -148,31 +149,21 @@ package aerys.minko.type.parser.collada.resource
 			
 			for each (var triangleStore : Triangles in _triangleStores)
 			{
-				var materialName	: String		= triangleStore.material;
+				var materialName	: String			= triangleStore.material;
 				
-				var indexStream		: IndexStream;
-				var vertexStream	: VertexStream;
+				var indexStream		: IndexStream		= triangleStore.computeIndexStream();
+				var vertexStream	: VertexStream		= triangleStore.computeVertexStream(_verticesDataSemantics, _verticesDataSources);
 				
-//				if (true)
-//				{
-					indexStream		= triangleStore.computeIndexStream();
-					vertexStream	= triangleStore.computeVertexStream(_verticesDataSemantics, _verticesDataSources);
-					
-					GeometrySanitizer.removeDuplicatedVertices(
-						vertexStream.minko_stream::_data,
-						indexStream.minko_stream::_data,
-						vertexStream.format.dwordsPerVertex);
-//				}
-//				else
-//				{
-//					indexStream		= triangleStore.fastComputeIndexStream(_verticesDataSemantics, _verticesDataSources);
-//					vertexStream	= triangleStore.fastComputeVertexStream(_verticesDataSemantics, _verticesDataSources);
-//				}
+				var indexData		: Vector.<uint>		= indexStream.minko_stream::_data;
+				var vertexData		: Vector.<Number>	= vertexStream.minko_stream::_data;
+				var dwordsPerVertex	: uint				= vertexStream.format.dwordsPerVertex;
+				
+				GeometrySanitizer.removeDuplicatedVertices(vertexData, indexData, dwordsPerVertex);
 				
 				var meshTemplate	: MeshTemplate	= new MeshTemplate(
 					_name, 
-					vertexStream.minko_stream::_data,
-					indexStream.minko_stream::_data,
+					vertexData,
+					indexData,
 					materialName,
 					vertexStream.format);
 				
