@@ -159,7 +159,7 @@ package aerys.minko.type.parser.collada.resource
 				var dwordsPerVertex	: uint				= vertexStream.format.dwordsPerVertex;
 				
 				GeometrySanitizer.removeDuplicatedVertices(vertexData, indexData, dwordsPerVertex);
-				
+
 				var meshTemplate	: MeshTemplate	= new MeshTemplate(
 					_name, 
 					vertexData,
