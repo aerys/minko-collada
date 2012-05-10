@@ -23,7 +23,7 @@ package aerys.minko.type.parser.collada.resource.controller
 		private var _jointNames			: Vector.<String>;
 		private var _invBindMatrices	: Vector.<Matrix4x4>;
 		
-		private var _boneWeights		: Vector.<Number>
+		private var _boneWeights		: Vector.<Number>;
 		private var _numBonesPerVertex	: uint;
 		
 		private var _meshTemplates		: Vector.<MeshTemplate>;
@@ -48,7 +48,7 @@ package aerys.minko.type.parser.collada.resource.controller
 			// retrieve bind shape matrix
 			var xmlBindShapeMatrix	: XML		= xmlNode.NS::bind_shape_matrix[0];
 			var bindShapeMatrix		: Matrix4x4 = xmlBindShapeMatrix != null ? 
-				NumberListParser.parseMatrix3D(xmlBindShapeMatrix) : new Matrix4x4();;
+				NumberListParser.parseMatrix3D(xmlBindShapeMatrix) : new Matrix4x4();
 			
 			// retrieve joints
 			var jointSourceId		: String				= xmlNode..NS::joints.NS::input.(@semantic == 'JOINT').@source.substring(1);
@@ -204,7 +204,7 @@ package aerys.minko.type.parser.collada.resource.controller
 				localBoneCount = 0;
 				for (boneIndex = 0; boneIndex < inBoneCountPerVertex; ++boneIndex)
 				{
-					boneIdIndex			= 2 * (vertexIndex * inBoneCountPerVertex + boneIndex)
+					boneIdIndex			= 2 * (vertexIndex * inBoneCountPerVertex + boneIndex);
 					boneInfluenceIndex	= boneIdIndex + 1;
 					
 					boneId				= inBoneWeights[boneIdIndex];
@@ -232,33 +232,47 @@ package aerys.minko.type.parser.collada.resource.controller
 			
 			var geometry			: Geometry				= _document.getGeometryById(_sourceId);
 			geometry.computeMeshTemplates(options);
-			
-			var meshTemplates		: Vector.<MeshTemplate> = geometry.meshTemplates;
-			var numMeshTemplates	: uint					= meshTemplates.length;
-			
-			_meshTemplates = new Vector.<MeshTemplate>(numMeshTemplates, true);
-			for (var meshId : uint = 0; meshId < numMeshTemplates; ++meshId)
-			{
-				var meshTemplate : MeshTemplate = meshTemplates[meshId];
-				
-				var oldVertexData	: Vector.<Number>	= meshTemplate.vertexData;
-				var oldFormat		: VertexFormat		= meshTemplate.vertexFormat;
-				
-				// create vertex format
-				var vertexFormat : VertexFormat = oldFormat.clone();
-				for (var k : uint = 0; k < _numBonesPerVertex; ++k)
-					vertexFormat.addComponent(VertexComponent.BONES[k]);
-				
-				_meshTemplates[meshId] = new MeshTemplate(
-					_sourceId + 'skin',
-					addBoneData(oldVertexData, oldFormat),
-					meshTemplate.indexData, 
-					meshTemplate.materialName, 
-					vertexFormat
-				);
-			}
+
+            var meshTemplates		: Vector.<MeshTemplate> = geometry.meshTemplates;
+            var numMeshTemplates	: uint					= meshTemplates.length;
+
+            _meshTemplates = new Vector.<MeshTemplate>(numMeshTemplates, true);
+            for (var meshId : uint = 0; meshId < numMeshTemplates; ++meshId)
+            {
+                var meshTemplate : MeshTemplate = meshTemplates[meshId];
+
+                var oldVertexData	: Vector.<Number>	= meshTemplate.vertexData;
+                var oldFormat		: VertexFormat		= meshTemplate.vertexFormat;
+
+                // create vertex format
+                var vertexFormat : VertexFormat = oldFormat.clone();
+                if(options.loadSkin) {
+
+                    for (var k : uint = 0; k < _numBonesPerVertex; ++k)
+                    {
+                        vertexFormat.addComponent(VertexComponent.BONES[k]);
+                    }
+                    _meshTemplates[meshId] = new MeshTemplate(
+                        _sourceId + 'skin',
+                        addBoneData(oldVertexData, oldFormat),
+                        meshTemplate.indexData,
+                        meshTemplate.materialName,
+                        vertexFormat
+                    );
+                }
+                else {
+                    _meshTemplates[meshId] = new MeshTemplate(
+                            _sourceId + 'skin',
+                            oldVertexData,
+                            meshTemplate.indexData,
+                            meshTemplate.materialName,
+                            vertexFormat
+                    );
+                }
+
+            }
 		}
-		
+
 		private function addBoneData(oldBuffer	: Vector.<Number>,
 									 oldFormat	: VertexFormat) : Vector.<Number>
 		{
