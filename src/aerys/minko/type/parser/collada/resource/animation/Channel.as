@@ -4,7 +4,7 @@ package aerys.minko.type.parser.collada.resource.animation
 	import aerys.minko.type.parser.collada.enum.TransformType;
 	import aerys.minko.type.parser.collada.helper.Source;
 
-	public class Channel
+	public final class Channel
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
@@ -15,8 +15,14 @@ package aerys.minko.type.parser.collada.resource.animation
 		
 		private var _sources				: Object;
 		
-		public function get targetId()		: String { return _targetId; }
-		public function get transformType()	: String { return _transformType; }
+		public function get targetId() : String
+		{
+			return _targetId;
+		}
+		public function get transformType()	: String
+		{
+			return _transformType;
+		}
 		
 		public function Channel(xmlChannel	: XML, 
 								animation	: XML)
