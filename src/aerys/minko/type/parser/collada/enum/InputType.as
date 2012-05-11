@@ -41,7 +41,7 @@ package aerys.minko.type.parser.collada.enum
 		minko_collada static const TO_COMPONENT : Object = new Object();
 		{
 			TO_COMPONENT[POSITION] = VertexComponent.XYZ;
-			TO_COMPONENT[COLOR] = VertexComponent.RGBA;
+			//TO_COMPONENT[COLOR] = VertexComponent.RGBA;
 			TO_COMPONENT[TEXCOORD] = VertexComponent.UV;
 			TO_COMPONENT[NORMAL] = VertexComponent.NORMAL;
 			TO_COMPONENT[TANGENT] = VertexComponent.TANGENT;

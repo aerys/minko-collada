@@ -173,7 +173,7 @@ package aerys.minko.type.parser.collada.resource.animation
 				var previousValue		: Matrix4x4	= outputSource.getComponentByParamIndex(timeIndex - 1, 0) as Matrix4x4;
 				var nextValue			: Matrix4x4	= outputSource.getComponentByParamIndex(timeIndex, 0) as Matrix4x4;
 				
-				Matrix4x4.copy(previousValue, out);
+				out.copyFrom(previousValue);
 				out.interpolateTo(nextValue, 1 - interpolationRatio);
 			}
 			
