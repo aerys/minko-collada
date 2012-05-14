@@ -233,57 +233,59 @@ package aerys.minko.type.parser.collada
 						new AnimationController(timeLinesByNodeName[targetName_])
 					);
 			}
-			
-			// add skinning controllers. 
-			
-			// @fixme 
-			// We iterate on controllers, because we have no easy way to find instances without performing a depth search.
-			// This is a kludge and will break if multiple instances of the same controller are present in the scene.
-			for each (var controller : Controller in _controllers)
-			{
-				var controllerInstance	: InstanceController = findInstanceById(controller.id) as InstanceController;
-				if (!controllerInstance)
-					continue;
-				
-				var skin	: Skin			= controller.skin;
-				var scene	: ISceneNode	= sourceIdToScene[controllerInstance.sourceId];
-				if (scene == null)
-				{
-					Minko.log(DebugLevel.PLUGIN_WARNING, 'Unable to find instance linked to controller ' +
-						'named "' + controllerInstance.sourceId + '". Dropping skin.');
-					continue;
-				}
 
-				var meshes : Vector.<ISceneNode> = 
-					scene is Group ? Group(scene).getDescendantsByType(Mesh) : new <ISceneNode>[scene];
-				
-				var jointNames : Vector.<String>	= new <String>[];
-				for each (var jointName : String in skin.jointNames)
-				{
-					var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName]; // handle collada 1.4 "ID_REF"
-					
-					if (joint == null)
-					{
-						Minko.log(DebugLevel.PLUGIN_WARNING, 'Unable to find bone named "' 
-							+ jointName + '". Dropping skin for mesh named "' + scene.name + '".');
-						continue;
-					}
-					
-					jointNames.push(joint.name);
-				}
-				
-				var skinController	: AbstractController = new SkinningController(
-					SkinningMethod.DUAL_QUATERNION,
-					mainScene,
-					jointNames,
-					skin.bindShapeMatrix,
-					skin.invBindMatrices
-				);
-				
-				for each (var mesh : ISceneNode in meshes)
-					Mesh(mesh).addController(skinController);
-			}
-			
+            if(options.loadSkin) {
+			    // add skinning controllers.
+
+                // @fixme
+                // We iterate on controllers, because we have no easy way to find instances without performing a depth search.
+                // This is a kludge and will break if multiple instances of the same controller are present in the scene.
+                for each (var controller : Controller in _controllers)
+                {
+                    var controllerInstance	: InstanceController = findInstanceById(controller.id) as InstanceController;
+                    if (!controllerInstance)
+                        continue;
+
+                    var skin	: Skin			= controller.skin;
+                    var scene	: ISceneNode	= sourceIdToScene[controllerInstance.sourceId];
+                    if (scene == null)
+                    {
+                        Minko.log(DebugLevel.PLUGIN_WARNING, 'Unable to find instance linked to controller ' +
+                            'named "' + controllerInstance.sourceId + '". Dropping skin.');
+                        continue;
+                    }
+
+                    var meshes : Vector.<ISceneNode> =
+                        scene is Group ? Group(scene).getDescendantsByType(Mesh) : new <ISceneNode>[scene];
+
+                    var jointNames : Vector.<String>	= new <String>[];
+                    for each (var jointName : String in skin.jointNames)
+                    {
+                        var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName]; // handle collada 1.4 "ID_REF"
+
+                        if (joint == null)
+                        {
+                            Minko.log(DebugLevel.PLUGIN_WARNING, 'Unable to find bone named "'
+                                + jointName + '". Dropping skin for mesh named "' + scene.name + '".');
+                            continue;
+                        }
+
+                        jointNames.push(joint.name);
+                    }
+
+                    var skinController	: AbstractController = new SkinningController(
+                        SkinningMethod.DUAL_QUATERNION,
+                        mainScene,
+                        jointNames,
+                        skin.bindShapeMatrix,
+                        skin.invBindMatrices
+                    );
+
+                    for each (var mesh : ISceneNode in meshes)
+                        Mesh(mesh).addController(skinController);
+                }
+            }
+
 			return wrapper;
 		}
 		
@@ -299,7 +301,7 @@ package aerys.minko.type.parser.collada
 			var childs		: Vector.<IInstance>;
 			
 			if (resource is Node)
-				childs = Node(resource).childs
+				childs = Node(resource).childs;
 			else if (resource is VisualScene)
 				childs = VisualScene(resource).childs;
 			else return null;
