@@ -205,36 +205,36 @@ package aerys.minko.type.parser.collada
 				wrapper.transform.setRotation(Math.PI / 2, 0, 0);
 			else if (upAxis == 'X_UP')
 				wrapper.transform.setRotation(0, 0, Math.PI / 2);
+			
+			// add animation controllers
+			var animationStore : Animation = _animations['mergedAnimations'];
+			if (animationStore)
+			{
+				var timelines			: Vector.<ITimeline>	= new Vector.<ITimeline>();
+				var targetNames			: Vector.<String>		= new Vector.<String>();
+				animationStore.getTimelines(timelines, targetNames);
+				
+				var numTimelines		: uint					= timelines.length;
+				var timeLinesByNodeName	: Object				= new Object();
+				
+				for (var timelineId : uint = 0; timelineId < numTimelines; ++timelineId)
+				{
+					var timeline	: ITimeline	= timelines[timelineId];
+					var targetName	: String	= targetNames[timelineId];
+					
+					if (timeLinesByNodeName[targetName] == undefined)
+						timeLinesByNodeName[targetName] = new Vector.<ITimeline>();
+					
+					timeLinesByNodeName[targetName].push(timeline);
+				}
+				
+				for (var targetName_ : String in timeLinesByNodeName)
+					(sourceIdToScene[targetName_] as ISceneNode).addController(
+						new AnimationController(timeLinesByNodeName[targetName_])
+					);
+			}
 
-            // add animation controllers
-            var animationStore : Animation = _animations['mergedAnimations'];
-            if (animationStore)
-            {
-                var timelines			: Vector.<ITimeline>	= new Vector.<ITimeline>();
-                var targetNames			: Vector.<String>		= new Vector.<String>();
-                animationStore.getTimelines(timelines, targetNames);
-
-                var numTimelines		: uint					= timelines.length;
-                var timeLinesByNodeName	: Object				= new Object();
-
-                for (var timelineId : uint = 0; timelineId < numTimelines; ++timelineId)
-                {
-                    var timeline	: ITimeline	= timelines[timelineId];
-                    var targetName	: String	= targetNames[timelineId];
-
-                    if (timeLinesByNodeName[targetName] == undefined)
-                        timeLinesByNodeName[targetName] = new Vector.<ITimeline>();
-
-                    timeLinesByNodeName[targetName].push(timeline);
-                }
-
-                for (var targetName_ : String in timeLinesByNodeName)
-                    (sourceIdToScene[targetName_] as ISceneNode).addController(
-                        new AnimationController(timeLinesByNodeName[targetName_])
-                    );
-            }
-
-                // add skinning controllers.
+			// add skinning controllers. 
             if(options.loadSkin) {
                 // @fixme
                 // We iterate on controllers, because we have no easy way to find instances without performing a depth search.
@@ -257,11 +257,11 @@ package aerys.minko.type.parser.collada
                     var meshes : Vector.<ISceneNode> =
                         scene is Group ? Group(scene).getDescendantsByType(Mesh) : new <ISceneNode>[scene];
 
-                    var joints : Vector.<Group>	= new Vector.<Group>();
+                    var jointNames : Vector.<String>	= new <String>[];
                     for each (var jointName : String in skin.jointNames)
                     {
-                        // we should search only under the "skeleton" node instance (if defined in the instance controller)
                         var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName]; // handle collada 1.4 "ID_REF"
+
                         if (joint == null)
                         {
                             Minko.log(DebugLevel.PLUGIN_WARNING, 'Unable to find bone named "'
@@ -269,13 +269,13 @@ package aerys.minko.type.parser.collada
                             continue;
                         }
 
-                        joints.push(joint);
+                        jointNames.push(joint.name);
                     }
 
                     var skinController	: AbstractController = new SkinningController(
                         SkinningMethod.DUAL_QUATERNION,
                         mainScene,
-                        joints,
+                        jointNames,
                         skin.bindShapeMatrix,
                         skin.invBindMatrices
                     );
@@ -283,8 +283,8 @@ package aerys.minko.type.parser.collada
                     for each (var mesh : ISceneNode in meshes)
                         Mesh(mesh).addController(skinController);
                 }
-            }
-
+			}
+			
 			return wrapper;
 		}
 		
