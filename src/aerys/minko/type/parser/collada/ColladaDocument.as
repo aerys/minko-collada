@@ -234,8 +234,9 @@ package aerys.minko.type.parser.collada
 					);
 			}
 
-			// add skinning controllers. 
+            // check if loadSkin is available
             if(options.loadSkin) {
+			    // add skinning controllers.
                 // @fixme
                 // We iterate on controllers, because we have no easy way to find instances without performing a depth search.
                 // This is a kludge and will break if multiple instances of the same controller are present in the scene.

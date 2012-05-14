@@ -41,7 +41,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 
             if(xml.NS::index_of_refraction[0])
                 constant._indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);
-			
+
 			return constant;
 		}
 	}
