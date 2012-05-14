@@ -257,11 +257,11 @@ package aerys.minko.type.parser.collada
 				var meshes : Vector.<ISceneNode> = 
 					scene is Group ? Group(scene).getDescendantsByType(Mesh) : new <ISceneNode>[scene];
 				
-				var joints : Vector.<Group>	= new Vector.<Group>();
+				var jointNames : Vector.<String>	= new <String>[];
 				for each (var jointName : String in skin.jointNames)
 				{
-					// we should search only under the "skeleton" node instance (if defined in the instance controller)
 					var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName]; // handle collada 1.4 "ID_REF"
+					
 					if (joint == null)
 					{
 						Minko.log(DebugLevel.PLUGIN_WARNING, 'Unable to find bone named "' 
@@ -269,13 +269,13 @@ package aerys.minko.type.parser.collada
 						continue;
 					}
 					
-					joints.push(joint);
+					jointNames.push(joint.name);
 				}
 				
 				var skinController	: AbstractController = new SkinningController(
 					SkinningMethod.DUAL_QUATERNION,
 					mainScene,
-					joints,
+					jointNames,
 					skin.bindShapeMatrix,
 					skin.invBindMatrices
 				);
