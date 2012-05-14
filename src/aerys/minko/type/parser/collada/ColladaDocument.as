@@ -234,6 +234,7 @@ package aerys.minko.type.parser.collada
 					);
 			}
 
+            if(options.loadSkin) {
 			    // add skinning controllers.
 
                 // @fixme
@@ -283,6 +284,7 @@ package aerys.minko.type.parser.collada
                     for each (var mesh : ISceneNode in meshes)
                         Mesh(mesh).addController(skinController);
                 }
+            }
 
 			return wrapper;
 		}
@@ -299,7 +301,7 @@ package aerys.minko.type.parser.collada
 			var childs		: Vector.<IInstance>;
 			
 			if (resource is Node)
-				childs = Node(resource).childs
+				childs = Node(resource).childs;
 			else if (resource is VisualScene)
 				childs = VisualScene(resource).childs;
 			else return null;
