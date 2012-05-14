@@ -234,9 +234,8 @@ package aerys.minko.type.parser.collada
 					);
 			}
 
-            // check if loadSkin is available
-            if(options.loadSkin) {
 			    // add skinning controllers.
+
                 // @fixme
                 // We iterate on controllers, because we have no easy way to find instances without performing a depth search.
                 // This is a kludge and will break if multiple instances of the same controller are present in the scene.
@@ -284,8 +283,7 @@ package aerys.minko.type.parser.collada
                     for each (var mesh : ISceneNode in meshes)
                         Mesh(mesh).addController(skinController);
                 }
-			}
-			
+
 			return wrapper;
 		}
 		
@@ -301,7 +299,7 @@ package aerys.minko.type.parser.collada
 			var childs		: Vector.<IInstance>;
 			
 			if (resource is Node)
-				childs = Node(resource).childs;
+				childs = Node(resource).childs
 			else if (resource is VisualScene)
 				childs = VisualScene(resource).childs;
 			else return null;
