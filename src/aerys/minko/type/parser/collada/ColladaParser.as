@@ -90,7 +90,10 @@ package aerys.minko.type.parser.collada
 			_document = new ColladaDocument();
 			_document.loadFromXML(_lastXML);
 			
-			var dependencies : Vector.<ILoader> = new Vector.<ILoader>();
+			if (!_options.loadDependencies)
+				return null;
+			
+			var dependencies : Vector.<ILoader> = new <ILoader>[];
 			for each (var image : Image in _document.images)
 			{
 				var imageURL	: String	= image.imageData.path;
@@ -116,8 +119,6 @@ package aerys.minko.type.parser.collada
 				if (loader.isComplete)
 					image.imageData.textureResource = loader.textureResource;
 			}
-			
-			
 			
 			_complete.execute(this, _document.generateScene(_options));
 		}
