@@ -74,6 +74,7 @@ package aerys.minko.type.parser.collada.instance
 										scopedIdToSceneNode	: Object) : ISceneNode
 		{
 			var geometry			: Geometry				= Geometry(resource);
+			
 			geometry.computeMeshTemplates(options);
 			
 			var effect				: Effect				= options.effect;
@@ -84,6 +85,9 @@ package aerys.minko.type.parser.collada.instance
 			for (var meshTemplateId : uint = 0; meshTemplateId < numMeshes; ++meshTemplateId)
 			{
 				var meshTemplate : MeshTemplate = subMeshTemplates[meshTemplateId];
+				
+				if (meshTemplate.indexData.length == 0)
+					continue;
 				
 				var diffuseValue : Object = 
 					getDiffuseValueFromMaterialName(meshTemplate.materialName);
