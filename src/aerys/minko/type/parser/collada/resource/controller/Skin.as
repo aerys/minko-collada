@@ -246,16 +246,32 @@ package aerys.minko.type.parser.collada.resource.controller
 				
 				// create vertex format
 				var vertexFormat : VertexFormat = oldFormat.clone();
-				for (var k : uint = 0; k < _numBonesPerVertex; ++k)
-					vertexFormat.addComponent(VertexComponent.BONES[k]);
-				
-				_meshTemplates[meshId] = new MeshTemplate(
-					_sourceId + 'skin',
-					addBoneData(oldVertexData, oldFormat),
-					meshTemplate.indexData, 
-					meshTemplate.materialName, 
-					vertexFormat
-				);
+
+                // check if loadSkin option is available
+                if(options.loadSkin)
+                {
+                    for (var k : uint = 0; k < _numBonesPerVertex; ++k)
+                        vertexFormat.addComponent(VertexComponent.BONES[k]);
+
+                    _meshTemplates[meshId] = new MeshTemplate(
+                        _sourceId + 'skin',
+                        addBoneData(oldVertexData, oldFormat),
+                        meshTemplate.indexData,
+                        meshTemplate.materialName,
+                        vertexFormat
+                    );
+                }
+                // otherwise, we use the old vertex data instead of the bone vertex data
+                else {
+                    _meshTemplates[meshId] = new MeshTemplate(
+                        _sourceId + 'skin',
+                        oldVertexData,
+                        meshTemplate.indexData,
+                        meshTemplate.materialName,
+                        vertexFormat
+                    );
+                }
+
 			}
 		}
 		
