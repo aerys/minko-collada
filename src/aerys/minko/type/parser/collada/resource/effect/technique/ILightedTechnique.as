@@ -1,5 +1,6 @@
 package aerys.minko.type.parser.collada.resource.effect.technique
 {
+	import aerys.minko.type.data.DataProvider;
 	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTexture;
 
 	public interface ILightedTechnique extends ITechnique

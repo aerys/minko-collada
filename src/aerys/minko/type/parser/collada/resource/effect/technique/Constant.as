@@ -1,5 +1,6 @@
 package aerys.minko.type.parser.collada.resource.effect.technique
 {
+	import aerys.minko.type.data.DataProvider;
 	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTexture;
 
 	public class Constant implements ITechnique
@@ -33,5 +34,11 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			
 			return constant;
 		}
+		
+		public function createDataProvider(params : Object) : DataProvider
+		{
+			throw new Error();
+		}
+
 	}
 }

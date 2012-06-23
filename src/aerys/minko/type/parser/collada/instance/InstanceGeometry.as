@@ -6,6 +6,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.mesh.Mesh;
+	import aerys.minko.type.data.DataProvider;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Vector4;
@@ -13,6 +14,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;
 	import aerys.minko.type.parser.collada.resource.Geometry;
 	import aerys.minko.type.parser.collada.resource.IResource;
+	import aerys.minko.type.parser.collada.resource.Material;
 	
 	public class InstanceGeometry implements IInstance
 	{
@@ -86,69 +88,61 @@ package aerys.minko.type.parser.collada.instance
 			{
 				var meshTemplate : MeshTemplate = subMeshTemplates[meshTemplateId];
 				
-				if (meshTemplate.indexData.length == 0)
-					continue;
-				
-				var diffuseValue : Object = 
-					getDiffuseValueFromMaterialName(meshTemplate.materialName);
-				
-				var localMeshes : Vector.<Mesh> = 
-					meshTemplate.generateMeshes(effect, options.vertexStreamUsage, options.indexStreamUsage);
-				
-				var i : uint = 0;
-				for each (var localMesh : Mesh in localMeshes)
+				if (meshTemplate.indexData.length != 0)
 				{
+					var localMeshes : Vector.<Mesh> = 
+						meshTemplate.generateMeshes(effect, options.vertexStreamUsage, options.indexStreamUsage);
 					
-					if (diffuseValue is Vector4)
-						localMesh.properties.setProperty('diffuseColor', diffuseValue);
-					else
-						localMesh.properties.setProperty('diffuseMap', diffuseValue);
-					
-					localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
-					
-					group.addChild(localMesh);
-					
-					++i;
+					var i : uint = 0;
+					for each (var localMesh : Mesh in localMeshes)
+					{
+						localMesh.bindings.addProvider(getMaterialProvider(meshTemplate.materialName));
+						localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
+						
+						group.addChild(localMesh);
+						
+						++i;
+					}
 				}
 			}
 			
-			if (group.numChildren == 0)
-				return null;
+			var result : ISceneNode = sanitize(group);
 			
-			var result : ISceneNode;
-			if (group.numChildren == 1)
-				result = group.getChildAt(0);
-			else
-				result = group;
-			
-			result.name = _sourceId;
-			
-			if (_scopedId != null)
-				scopedIdToSceneNode[_scopedId] = result;
-			
-			if (_sourceId != null)
-				sourceIdToSceneNode[_sourceId] = result;
+			if (_scopedId != null)	scopedIdToSceneNode[_scopedId] = result;
+			if (_sourceId != null)	sourceIdToSceneNode[_sourceId] = result;
 			
 			return result;
 		}
 		
-		private function getDiffuseValueFromMaterialName(materialName : String) : Object
+		private function sanitize(group : Group) : ISceneNode
 		{
-			var diffuseValue	 : Object;
-			var materialInstance : InstanceMaterial = 
-				materialName != null && materialName != '' ? _bindMaterial[materialName] : null;
+			var result : ISceneNode;
 			
-			if (materialInstance == null)
-			{
-				Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: "' + materialName + '" is ' +
-					'not a valid material name. Fallbacking to random color');
-				
-				diffuseValue = new Vector4(Math.random(), Math.random(), Math.random(), 1);
-			}
+			if (group.numChildren == 0)
+				return null;
+			else if (group.numChildren == 1)
+				result = group.getChildAt(0);
 			else
-				diffuseValue = materialInstance.computeDiffuse();
+				result = group;
 			
-			return diffuseValue;
+			if (_sourceId != null && _sourceId.length != 0)
+				result.name = _sourceId;
+			
+			return result;
+		}
+		
+		private function getMaterialProvider(materialName : String) : DataProvider
+		{
+			if (materialName == null || materialName == '')
+				return Material.defaultProvider;
+			else
+			{
+				var materialInstance : InstanceMaterial = _bindMaterial[materialName];
+				
+				return materialInstance != null ? 
+					Material(materialInstance.resource).dataProvider :
+					Material.defaultProvider;
+			}
 		}
 	}
 }

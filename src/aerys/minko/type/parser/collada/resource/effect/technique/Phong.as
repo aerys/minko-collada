@@ -1,6 +1,9 @@
 package aerys.minko.type.parser.collada.resource.effect.technique
 {
+	import aerys.minko.type.data.DataProvider;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTexture;
+	import aerys.minko.type.parser.collada.resource.image.Image;
 
 	public class Phong implements ILightedTechnique
 	{
@@ -28,7 +31,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 		public function get transparency()		: Number				{ return _transparency;			}
 		public function get indexOfRefraction()	: Number				{ return _indexOfRefraction;	}
 		
-		public static function createFromXML(xml : XML) : Phong
+		public static function createFromXML(xml : XML, document : ColladaDocument) : Phong
 		{
 			var phong : Phong = new Phong();
 			
@@ -80,6 +83,70 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			}
 			
 			return phong;
+		}
+		
+		public function Phong(emission			: CommonColorOrTexture,
+							  ambient			: CommonColorOrTexture,
+							  diffuse			: CommonColorOrTexture,
+							  specular			: CommonColorOrTexture,
+							  shininess			: Number,
+							  reflective		: CommonColorOrTexture,
+							  reflectivity		: Number,
+							  transparent		: CommonColorOrTexture,
+							  transparency		: Number,
+							  indexOfRefraction	: Number,
+							  document			: ColladaDocument)
+		{
+			_emission			= emission;
+			_ambient			= ambient;
+			_diffuse			= diffuse;
+			_specular			= specular;
+			_shininess			= shininess;
+			_reflective			= reflective;
+			_reflectivity		= reflectivity;
+			_transparent		= transparent;
+			_transparency		= transparency;
+			_indexOfRefraction	= indexOfRefraction;
+		}
+		
+		public function createDataProvider(params : Object) : DataProvider
+		{
+			var provider : DataProvider = new DataProvider();
+			
+			if (_diffuse.textureName != null)
+			{
+				var image : Image = _document.getImageById(_diffuse.textureName);
+//				
+//				// try to find the texture name in the (effect) parameters
+//				while (!image && finalParameters.hasOwnProperty(textureName))
+//				{
+//					var parameterValue : Object = finalParameters[textureName];
+//					
+//					if (parameterValue is AbstractImageData)
+//						textureName = (parameterValue as AbstractImageData).path;
+//					else
+//						textureName = parameterValue as String;
+//					
+//					image = _document.getImageById(textureName);
+//				}
+//				
+//				if (image && image.imageData.textureResource)
+//					return image.imageData.textureResource;
+//				else
+//				{
+//					Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: The texture '
+//						+ image.name + ' could not be loaded. It has beed replaced' +
+//						' by a random color.');
+//					
+//					return new Vector4(Math.random(), Math.random(), Math.random(), 1);
+//				}
+			}
+			else
+			{
+				provider.diffuseColor = _diffuse.color;
+			}
+			
+			return provider;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package aerys.minko.type.parser.collada.instance
 {
 	import aerys.minko.scene.node.ISceneNode;
+	import aerys.minko.type.data.DataProvider;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.ParamParser;
@@ -10,9 +11,11 @@ package aerys.minko.type.parser.collada.instance
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _sourceId	: String;
-		private var _params		: Object;
-		private var _document	: ColladaDocument;
+		private var _sourceId		: String;
+		private var _params			: Object;
+		private var _document		: ColladaDocument;
+		
+		private var _dataProvider	: DataProvider;
 		
 		public function get sourceId () : String
 		{
@@ -22,6 +25,14 @@ package aerys.minko.type.parser.collada.instance
 		public function get resource() : IResource
 		{
 			return _document.getEffectById(_sourceId);
+		}
+		
+		public function get dataProvider() : DataProvider
+		{
+			if (!_dataProvider)
+				_dataProvider = _document.getEffectById(_sourceId).createDataProvider(_params);
+			
+			return _dataProvider;
 		}
 		
 		public static function createFromXML(xml		: XML, 

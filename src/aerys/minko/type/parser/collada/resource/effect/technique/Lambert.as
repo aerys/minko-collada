@@ -1,5 +1,6 @@
-package aerys.minko.type.parser.collada.resource.effect.technique
+ package aerys.minko.type.parser.collada.resource.effect.technique
 {
+	import aerys.minko.type.data.DataProvider;
 	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTexture;
 
 	public class Lambert implements ILightedTechnique
@@ -66,6 +67,11 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 				}
 			}
 			return lambert;
+		}
+		
+		public function createDataProvider(params : Object) : DataProvider
+		{
+			throw new Error();
 		}
 	}
 }
