@@ -52,11 +52,9 @@ package aerys.minko.type.parser.collada.instance
 			var sourceId			: String	= String(xml.@url).substr(1);
 			var name				: String	= xml.@name;
 			var sid					: String	= xml.@sid;
-			
 			var xmlSkeletonId		: XML		= xml.NS::skeleton[0];
 			var bindedSkeletonId	: String	= xmlSkeletonId != null ? String(xmlSkeletonId).substr(1) : null;
-			
-			var bindMaterial : Object = new Object();
+			var bindMaterial		: Object	= new Object();
 			
 			for each (var xmlIm : XML in xml..NS::instance_material)
 			{
@@ -115,11 +113,8 @@ package aerys.minko.type.parser.collada.instance
 			
 			var result : ISceneNode = sanitize(group);
 			
-			if (_sourceId != null)
-				sourceIdToSceneNode[_sourceId] = result;
-			
-			if (_scopedId != null)
-				scopedIdToSceneNode[_scopedId] = result;
+			if (_sourceId != null) sourceIdToSceneNode[_sourceId] = result;
+			if (_scopedId != null) scopedIdToSceneNode[_scopedId] = result;
 			
 			return result;
 		}
@@ -148,7 +143,8 @@ package aerys.minko.type.parser.collada.instance
 				null;
 			
 			var materialProvider	: DataProvider = materialInstance != null ? 
-				Material(materialInstance.resource).dataProvider : Material.defaultProvider;
+				Material(materialInstance.resource).dataProvider : 
+				Material.DEFAULT_PROVIDER;
 			
 			return materialProvider;
 		}

@@ -1,11 +1,11 @@
 package aerys.minko.type.parser.collada.resource.effect.technique
 {
 	import aerys.minko.type.data.DataProvider;
-	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTexture;
+	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTextureOrParam;
 
 	public interface ILightedTechnique extends ITechnique
 	{
-		function get ambient()	: CommonColorOrTexture;
-		function get diffuse()	: CommonColorOrTexture;
+		function get ambient()	: CommonColorOrTextureOrParam;
+		function get diffuse()	: CommonColorOrTextureOrParam;
 	}
 }

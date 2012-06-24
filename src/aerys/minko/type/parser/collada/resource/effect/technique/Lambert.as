@@ -1,31 +1,37 @@
  package aerys.minko.type.parser.collada.resource.effect.technique
 {
+	import aerys.minko.Minko;
+	import aerys.minko.render.effect.basic.BasicProperties;
+	import aerys.minko.render.resource.texture.TextureResource;
 	import aerys.minko.type.data.DataProvider;
-	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTexture;
+	import aerys.minko.type.log.DebugLevel;
+	import aerys.minko.type.math.Vector4;
+	import aerys.minko.type.parser.collada.ColladaDocument;
+	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTextureOrParam;
 
 	public class Lambert implements ILightedTechnique
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _emission			: CommonColorOrTexture;
-		private var _ambient			: CommonColorOrTexture;
-		private var _diffuse			: CommonColorOrTexture;
-		private var _reflective			: CommonColorOrTexture;
+		private var _emission			: CommonColorOrTextureOrParam;
+		private var _ambient			: CommonColorOrTextureOrParam;
+		private var _diffuse			: CommonColorOrTextureOrParam;
+		private var _reflective			: CommonColorOrTextureOrParam;
 		private var _reflectivity		: Number;
-		private var _transparent		: CommonColorOrTexture;
+		private var _transparent		: CommonColorOrTextureOrParam;
 		private var _transparency		: Number;
 		private var _indexOfRefraction	: Number;
 		
-		public function get emission()			: CommonColorOrTexture	{ return _emission;				}
-		public function get ambient()			: CommonColorOrTexture	{ return _ambient;				}
-		public function get diffuse()			: CommonColorOrTexture	{ return _diffuse;				}
-		public function get reflective()		: CommonColorOrTexture	{ return _reflective;			}
-		public function get reflectivity()		: Number				{ return _reflectivity;			}
-		public function get transparent()		: CommonColorOrTexture	{ return _transparent;			}
-		public function get transparency()		: Number				{ return _transparency;			}
-		public function get indexOfRefraction()	: Number				{ return _indexOfRefraction;	}
+		public function get emission()			: CommonColorOrTextureOrParam	{ return _emission;				}
+		public function get ambient()			: CommonColorOrTextureOrParam	{ return _ambient;				}
+		public function get diffuse()			: CommonColorOrTextureOrParam	{ return _diffuse;				}
+		public function get reflective()		: CommonColorOrTextureOrParam	{ return _reflective;			}
+		public function get reflectivity()		: Number						{ return _reflectivity;			}
+		public function get transparent()		: CommonColorOrTextureOrParam	{ return _transparent;			}
+		public function get transparency()		: Number						{ return _transparency;			}
+		public function get indexOfRefraction()	: Number						{ return _indexOfRefraction;	}
 		
-		public static function createFromXML(xml : XML) : Lambert
+		public static function createFromXML(xml : XML, document : ColladaDocument) : Lambert
 		{
 			var lambert : Lambert = new Lambert();
 			for each (var child : XML in xml.children())
@@ -34,19 +40,19 @@
 				switch (child.localName())
 				{
 					case 'emission':
-						lambert._emission		= CommonColorOrTexture.createFromXML(xml.NS::emission[0]);
+						lambert._emission		= CommonColorOrTextureOrParam.createFromXML(xml.NS::emission[0], document);
 						break;
 					
 					case 'ambient':
-						lambert._ambient		= CommonColorOrTexture.createFromXML(xml.NS::ambient[0]);
+						lambert._ambient		= CommonColorOrTextureOrParam.createFromXML(xml.NS::ambient[0], document);
 						break;
 					
 					case 'diffuse':
-						lambert._diffuse		= CommonColorOrTexture.createFromXML(xml.NS::diffuse[0]);
+						lambert._diffuse		= CommonColorOrTextureOrParam.createFromXML(xml.NS::diffuse[0], document);
 						break;
 					
 					case 'reflective':
-						lambert._reflective	= CommonColorOrTexture.createFromXML(xml.NS::reflective[0]);
+						lambert._reflective		= CommonColorOrTextureOrParam.createFromXML(xml.NS::reflective[0], document);
 						break;
 					
 					case 'reflectivity':
@@ -54,7 +60,7 @@
 						break;
 					
 					case 'transparent':
-						lambert._transparent	= CommonColorOrTexture.createFromXML(xml.NS::transparent[0]);
+						lambert._transparent	= CommonColorOrTextureOrParam.createFromXML(xml.NS::transparent[0], document);
 						break;
 					
 					case 'transparency':
@@ -69,9 +75,31 @@
 			return lambert;
 		}
 		
-		public function createDataProvider(params : Object) : DataProvider
+		public function createDataProvider(params : Object, setParams : Object) : DataProvider
 		{
-			throw new Error();
+			var provider		: DataProvider	= new DataProvider();
+			var diffuseValue	: Object		= _diffuse.getValue(params, setParams);
+			
+			if (diffuseValue is Vector4)
+			{
+				provider.setProperty(BasicProperties.DIFFUSE_COLOR, diffuseValue);
+			}
+			else if (diffuseValue is TextureResource)
+			{
+				provider.setProperty(BasicProperties.DIFFUSE_MAP, diffuseValue);
+			}
+			else
+			{
+				Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: Could not evaluate Phong in profile_COMMON. ' +
+					'It has been replaced by a random color.');
+				
+				provider.setProperty(
+					BasicProperties.DIFFUSE_COLOR, 
+					new Vector4(Math.random(), Math.random(), Math.random(), 1)
+				);
+			}
+			
+			return provider;
 		}
 	}
 }

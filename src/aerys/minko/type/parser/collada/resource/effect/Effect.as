@@ -4,7 +4,6 @@ package aerys.minko.type.parser.collada.resource.effect
 	import aerys.minko.type.data.DataProvider;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
-	import aerys.minko.type.parser.collada.helper.ParamParser;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceEffect;
 	import aerys.minko.type.parser.collada.resource.IResource;
@@ -56,7 +55,7 @@ package aerys.minko.type.parser.collada.resource.effect
 				switch (child.localName())
 				{
 					case 'profile_COMMON':
-						profiles.push(ProfileCommon.createFromXML(child));
+						profiles.push(ProfileCommon.createFromXML(child, document));
 						break;
 					
 					case 'profile_BRIDGE':
@@ -71,10 +70,7 @@ package aerys.minko.type.parser.collada.resource.effect
 						break;
 					
 					case 'newparam':
-						var paramName	: String	= child.@sid;
-						var paramValue	: *			= ParamParser.parseParam(child);
-						
-						params[paramName]	= paramValue;
+						params[child.@sid] = NewParam.createFromXML(child, document);
 						break;
 				}
 			}
@@ -95,7 +91,7 @@ package aerys.minko.type.parser.collada.resource.effect
 			_document	= document;
 		}
 		
-		public function createDataProvider(params : Object) : DataProvider
+		public function createDataProvider(setParams : Object) : DataProvider
 		{
 			var profileCommon : ProfileCommon = null;
 			
@@ -110,7 +106,7 @@ package aerys.minko.type.parser.collada.resource.effect
 			}
 			else
 			{
-				return profile.createDataProvider(params);
+				return profile.createDataProvider(params, setParams);
 			}
 		}
 		

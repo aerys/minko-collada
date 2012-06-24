@@ -98,7 +98,13 @@ package aerys.minko.type.parser.collada.resource
 							child.localName() + ' declaration in node ' + [id, sid, name].join());
 						break;
 					
+					// ignore transformation, it's parsed in a helper function
+					case 'lookat':
 					case 'matrix':
+					case 'rotate':
+					case 'scale':
+					case 'skew':
+					case 'translate':
 					case 'extra':
 						break;
 					

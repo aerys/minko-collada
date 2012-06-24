@@ -1,98 +1,66 @@
 package aerys.minko.type.parser.collada.resource.effect.technique
 {
+	import aerys.minko.Minko;
+	import aerys.minko.render.effect.basic.BasicProperties;
+	import aerys.minko.render.resource.texture.TextureResource;
 	import aerys.minko.type.data.DataProvider;
+	import aerys.minko.type.log.DebugLevel;
+	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
-	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTexture;
-	import aerys.minko.type.parser.collada.resource.image.Image;
+	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTextureOrParam;
 
 	public class Phong implements ILightedTechnique
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _emission			: CommonColorOrTexture;
-		private var _ambient			: CommonColorOrTexture;
-		private var _diffuse			: CommonColorOrTexture;
-		private var _specular			: CommonColorOrTexture;
+		private var _document			: ColladaDocument;
+		
+		private var _emission			: CommonColorOrTextureOrParam;
+		private var _ambient			: CommonColorOrTextureOrParam;
+		private var _diffuse			: CommonColorOrTextureOrParam;
+		private var _specular			: CommonColorOrTextureOrParam;
 		private var _shininess			: Number;
-		private var _reflective			: CommonColorOrTexture;
+		private var _reflective			: CommonColorOrTextureOrParam;
 		private var _reflectivity		: Number;
-		private var _transparent		: CommonColorOrTexture;
+		private var _transparent		: CommonColorOrTextureOrParam;
 		private var _transparency		: Number;
 		private var _indexOfRefraction	: Number;
 		
-		public function get emission()			: CommonColorOrTexture	{ return _emission;				}
-		public function get ambient()			: CommonColorOrTexture	{ return _ambient;				}
-		public function get diffuse()			: CommonColorOrTexture	{ return _diffuse;				}
-		public function get specular()			: CommonColorOrTexture	{ return _specular;				}
+		public function get emission()			: CommonColorOrTextureOrParam	{ return _emission;				}
+		public function get ambient()			: CommonColorOrTextureOrParam	{ return _ambient;				}
+		public function get diffuse()			: CommonColorOrTextureOrParam	{ return _diffuse;				}
+		public function get specular()			: CommonColorOrTextureOrParam	{ return _specular;				}
 		public function get shininess()			: Number				{ return _shininess;			}
-		public function get reflective()		: CommonColorOrTexture	{ return _reflective;			}
+		public function get reflective()		: CommonColorOrTextureOrParam	{ return _reflective;			}
 		public function get reflectivity()		: Number				{ return _reflectivity;			}
-		public function get transparent()		: CommonColorOrTexture	{ return _transparent;			}
+		public function get transparent()		: CommonColorOrTextureOrParam	{ return _transparent;			}
 		public function get transparency()		: Number				{ return _transparency;			}
 		public function get indexOfRefraction()	: Number				{ return _indexOfRefraction;	}
 		
 		public static function createFromXML(xml : XML, document : ColladaDocument) : Phong
 		{
-			var phong : Phong = new Phong();
+			var emission			: CommonColorOrTextureOrParam	= CommonColorOrTextureOrParam.createFromXML(xml.NS::emission[0], document);
+			var ambient				: CommonColorOrTextureOrParam	= CommonColorOrTextureOrParam.createFromXML(xml.NS::ambient[0], document);
+			var diffuse				: CommonColorOrTextureOrParam	= CommonColorOrTextureOrParam.createFromXML(xml.NS::diffuse[0], document);
+			var specular			: CommonColorOrTextureOrParam	= CommonColorOrTextureOrParam.createFromXML(xml.NS::specular[0], document);
+			var shininess			: Number						= parseFloat(xml.NS::shininess[0].NS::float[0]);
+			var reflective			: CommonColorOrTextureOrParam	= CommonColorOrTextureOrParam.createFromXML(xml.NS::reflective[0], document);
+			var reflectivity		: Number						= parseFloat(xml.NS::reflectivity[0].NS::float[0]);
+			var transparent			: CommonColorOrTextureOrParam	= CommonColorOrTextureOrParam.createFromXML(xml.NS::transparent[0], document);
+			var transparency		: Number						= parseFloat(xml.NS::transparency[0].NS::float[0]);;
+			var indexOfRefraction	: Number						= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);
 			
-			for each (var child : XML in xml.children())
-			{
-				var localName : String = child.localName();
-				switch (child.localName())
-				{
-					case 'emission':
-						phong._emission		= CommonColorOrTexture.createFromXML(xml.NS::emission[0]);
-						break;
-					
-					case 'ambient':
-						phong._ambient		= CommonColorOrTexture.createFromXML(xml.NS::ambient[0]);
-						break;
-					
-					case 'diffuse':
-						phong._diffuse		= CommonColorOrTexture.createFromXML(xml.NS::diffuse[0]);
-						break;
-					
-					case 'specular':
-						phong._specular		= CommonColorOrTexture.createFromXML(xml.NS::specular[0]);
-						break;
-					
-					case 'shininess':
-						phong._shininess	= parseFloat(xml.NS::shininess[0].NS::float[0]);
-						break;
-					
-					case 'reflective':
-						phong._reflective	= CommonColorOrTexture.createFromXML(xml.NS::reflective[0]);
-						break;
-					
-					case 'reflectivity':
-						phong._reflectivity	= parseFloat(xml.NS::reflectivity[0].NS::float[0]);
-						break;
-					
-					case 'transparent':
-						phong._transparent	= CommonColorOrTexture.createFromXML(xml.NS::transparent[0]);
-						break;
-					
-					case 'transparency':
-						phong._transparency	= parseFloat(xml.NS::transparency[0].NS::float[0]);
-						break;
-					
-					case 'index_of_refraction':
-						phong._indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);
-						break;
-				}
-			}
-			
-			return phong;
+			return new Phong(emission, ambient, diffuse, specular, shininess, reflective, reflectivity, transparent, transparency, indexOfRefraction, document);
 		}
 		
-		public function Phong(emission			: CommonColorOrTexture,
-							  ambient			: CommonColorOrTexture,
-							  diffuse			: CommonColorOrTexture,
-							  specular			: CommonColorOrTexture,
+		public function Phong(emission			: CommonColorOrTextureOrParam,
+							  ambient			: CommonColorOrTextureOrParam,
+							  diffuse			: CommonColorOrTextureOrParam,
+							  specular			: CommonColorOrTextureOrParam,
 							  shininess			: Number,
-							  reflective		: CommonColorOrTexture,
+							  reflective		: CommonColorOrTextureOrParam,
 							  reflectivity		: Number,
-							  transparent		: CommonColorOrTexture,
+							  transparent		: CommonColorOrTextureOrParam,
 							  transparency		: Number,
 							  indexOfRefraction	: Number,
 							  document			: ColladaDocument)
@@ -107,43 +75,32 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			_transparent		= transparent;
 			_transparency		= transparency;
 			_indexOfRefraction	= indexOfRefraction;
+			
+			_document			= document;
 		}
 		
-		public function createDataProvider(params : Object) : DataProvider
+		public function createDataProvider(params : Object, setParams : Object) : DataProvider
 		{
-			var provider : DataProvider = new DataProvider();
+			var provider		: DataProvider	= new DataProvider();
+			var diffuseValue	: Object		= _diffuse.getValue(params, setParams);
 			
-			if (_diffuse.textureName != null)
+			if (diffuseValue is Vector4)
 			{
-				var image : Image = _document.getImageById(_diffuse.textureName);
-//				
-//				// try to find the texture name in the (effect) parameters
-//				while (!image && finalParameters.hasOwnProperty(textureName))
-//				{
-//					var parameterValue : Object = finalParameters[textureName];
-//					
-//					if (parameterValue is AbstractImageData)
-//						textureName = (parameterValue as AbstractImageData).path;
-//					else
-//						textureName = parameterValue as String;
-//					
-//					image = _document.getImageById(textureName);
-//				}
-//				
-//				if (image && image.imageData.textureResource)
-//					return image.imageData.textureResource;
-//				else
-//				{
-//					Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: The texture '
-//						+ image.name + ' could not be loaded. It has beed replaced' +
-//						' by a random color.');
-//					
-//					return new Vector4(Math.random(), Math.random(), Math.random(), 1);
-//				}
+				provider.setProperty(BasicProperties.DIFFUSE_COLOR, diffuseValue);
+			}
+			else if (diffuseValue is TextureResource)
+			{
+				provider.setProperty(BasicProperties.DIFFUSE_MAP, diffuseValue);
 			}
 			else
 			{
-				provider.diffuseColor = _diffuse.color;
+				Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: Could not evaluate Phong in profile_COMMON. ' +
+					'It has been replaced by a random color.');
+				
+				provider.setProperty(
+					BasicProperties.DIFFUSE_COLOR, 
+					new Vector4(Math.random(), Math.random(), Math.random(), 1)
+				);
 			}
 			
 			return provider;

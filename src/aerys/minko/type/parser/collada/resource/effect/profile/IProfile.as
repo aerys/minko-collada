@@ -4,6 +4,6 @@ package aerys.minko.type.parser.collada.resource.effect.profile
 
 	public interface IProfile
 	{
-		function createDataProvider(params : Object) : DataProvider;
+		function createDataProvider(params : Object, setParams : Object) : DataProvider;
 	}
 }

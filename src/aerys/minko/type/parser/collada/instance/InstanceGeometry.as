@@ -134,14 +134,14 @@ package aerys.minko.type.parser.collada.instance
 		private function getMaterialProvider(materialName : String) : DataProvider
 		{
 			if (materialName == null || materialName == '')
-				return Material.defaultProvider;
+				return Material.DEFAULT_PROVIDER;
 			else
 			{
 				var materialInstance : InstanceMaterial = _bindMaterial[materialName];
 				
 				return materialInstance != null ? 
 					Material(materialInstance.resource).dataProvider :
-					Material.defaultProvider;
+					Material.DEFAULT_PROVIDER;
 			}
 		}
 	}

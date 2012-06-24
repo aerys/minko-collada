@@ -9,7 +9,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.Material;
-	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTexture;
+	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTextureOrParam;
 	import aerys.minko.type.parser.collada.resource.effect.Effect;
 	import aerys.minko.type.parser.collada.resource.effect.profile.ProfileCommon;
 	import aerys.minko.type.parser.collada.resource.effect.technique.Constant;

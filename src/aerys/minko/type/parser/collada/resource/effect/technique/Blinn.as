@@ -1,46 +1,50 @@
 package aerys.minko.type.parser.collada.resource.effect.technique
 {
+	import aerys.minko.Minko;
+	import aerys.minko.render.effect.basic.BasicProperties;
+	import aerys.minko.render.resource.texture.TextureResource;
 	import aerys.minko.type.data.DataProvider;
-	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTexture;
+	import aerys.minko.type.log.DebugLevel;
+	import aerys.minko.type.math.Vector4;
+	import aerys.minko.type.parser.collada.ColladaDocument;
+	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTextureOrParam;
 
 	public class Blinn implements ILightedTechnique
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private var _defaultProvider	: DataProvider;
-		
-		private var _emission			: CommonColorOrTexture;
-		private var _ambient			: CommonColorOrTexture;
-		private var _diffuse			: CommonColorOrTexture;
-		private var _specular			: CommonColorOrTexture;
+		private var _emission			: CommonColorOrTextureOrParam;
+		private var _ambient			: CommonColorOrTextureOrParam;
+		private var _diffuse			: CommonColorOrTextureOrParam;
+		private var _specular			: CommonColorOrTextureOrParam;
 		private var _shininess			: Number;
-		private var _reflective			: CommonColorOrTexture;
+		private var _reflective			: CommonColorOrTextureOrParam;
 		private var _reflectivity		: Number;
-		private var _transparent		: CommonColorOrTexture;
+		private var _transparent		: CommonColorOrTextureOrParam;
 		private var _transparency		: Number;
 		private var _indexOfRefraction	: Number;
 		
-		public function get emission()			: CommonColorOrTexture	{ return _emission;				}
-		public function get ambient()			: CommonColorOrTexture	{ return _ambient;				}
-		public function get diffuse()			: CommonColorOrTexture	{ return _diffuse;				}
-		public function get specular()			: CommonColorOrTexture	{ return _specular;				}
+		public function get emission()			: CommonColorOrTextureOrParam	{ return _emission;				}
+		public function get ambient()			: CommonColorOrTextureOrParam	{ return _ambient;				}
+		public function get diffuse()			: CommonColorOrTextureOrParam	{ return _diffuse;				}
+		public function get specular()			: CommonColorOrTextureOrParam	{ return _specular;				}
 		public function get shininess()			: Number				{ return _shininess;			}
-		public function get reflective()		: CommonColorOrTexture	{ return _reflective;			}
+		public function get reflective()		: CommonColorOrTextureOrParam	{ return _reflective;			}
 		public function get reflectivity()		: Number				{ return _reflectivity;			}
-		public function get transparent()		: CommonColorOrTexture	{ return _transparent;			}
+		public function get transparent()		: CommonColorOrTextureOrParam	{ return _transparent;			}
 		public function get transparency()		: Number				{ return _transparency;			}
 		public function get indexOfRefraction()	: Number				{ return _indexOfRefraction;	}
 		
-		public static function createFromXML(xml : XML) : Blinn
+		public static function createFromXML(xml : XML, document : ColladaDocument) : Blinn
 		{
-			var emission			: CommonColorOrTexture;
-			var ambient				: CommonColorOrTexture;
-			var diffuse				: CommonColorOrTexture;
-			var specular			: CommonColorOrTexture;
+			var emission			: CommonColorOrTextureOrParam;
+			var ambient				: CommonColorOrTextureOrParam;
+			var diffuse				: CommonColorOrTextureOrParam;
+			var specular			: CommonColorOrTextureOrParam;
 			var shininess			: Number;
-			var reflective			: CommonColorOrTexture;
+			var reflective			: CommonColorOrTextureOrParam;
 			var reflectivity		: Number;
-			var transparent			: CommonColorOrTexture;
+			var transparent			: CommonColorOrTextureOrParam;
 			var transparency		: Number;
 			var indexOfRefraction	: Number;
 			
@@ -49,30 +53,30 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 				var localName : String = child.localName();
 				switch (child.localName())
 				{
-					case 'emission':			emission			= CommonColorOrTexture.createFromXML(xml.NS::emission[0]);		break;
-					case 'ambient':				ambient				= CommonColorOrTexture.createFromXML(xml.NS::ambient[0]);		break;
-					case 'diffuse':				diffuse				= CommonColorOrTexture.createFromXML(xml.NS::diffuse[0]);		break;
-					case 'specular':			specular			= CommonColorOrTexture.createFromXML(xml.NS::specular[0]);		break;
-					case 'shininess':			shininess			= parseFloat(xml.NS::shininess[0].NS::float[0]);				break;
-					case 'reflective':			reflective			= CommonColorOrTexture.createFromXML(xml.NS::reflective[0]);	break;
-					case 'reflectivity':		reflectivity		= parseFloat(xml.NS::reflectivity[0].NS::float[0]);				break;
-					case 'transparent':			transparent			= CommonColorOrTexture.createFromXML(xml.NS::transparent[0]);	break;
-					case 'transparency':		transparency		= parseFloat(xml.NS::transparency[0].NS::float[0]);				break;
-					case 'index_of_refraction':	indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);		break;
+					case 'emission':			emission			= CommonColorOrTextureOrParam.createFromXML(xml.NS::emission[0], document);		break;
+					case 'ambient':				ambient				= CommonColorOrTextureOrParam.createFromXML(xml.NS::ambient[0], document);		break;
+					case 'diffuse':				diffuse				= CommonColorOrTextureOrParam.createFromXML(xml.NS::diffuse[0], document);		break;
+					case 'specular':			specular			= CommonColorOrTextureOrParam.createFromXML(xml.NS::specular[0], document);		break;
+					case 'shininess':			shininess			= parseFloat(xml.NS::shininess[0].NS::float[0]);								break;
+					case 'reflective':			reflective			= CommonColorOrTextureOrParam.createFromXML(xml.NS::reflective[0], document);	break;
+					case 'reflectivity':		reflectivity		= parseFloat(xml.NS::reflectivity[0].NS::float[0]);								break;
+					case 'transparent':			transparent			= CommonColorOrTextureOrParam.createFromXML(xml.NS::transparent[0], document);	break;
+					case 'transparency':		transparency		= parseFloat(xml.NS::transparency[0].NS::float[0]);								break;
+					case 'index_of_refraction':	indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);						break;
 				}
 			}
 			
 			return new Blinn(emission, ambient, diffuse, specular, shininess, reflective, reflectivity, transparent, transparency, indexOfRefraction);
 		}
 		
-		public function Blinn(emission			: CommonColorOrTexture,
-							  ambient			: CommonColorOrTexture,
-							  diffuse			: CommonColorOrTexture,
-							  specular			: CommonColorOrTexture,
+		public function Blinn(emission			: CommonColorOrTextureOrParam,
+							  ambient			: CommonColorOrTextureOrParam,
+							  diffuse			: CommonColorOrTextureOrParam,
+							  specular			: CommonColorOrTextureOrParam,
 							  shininess			: Number,
-							  reflective		: CommonColorOrTexture,
+							  reflective		: CommonColorOrTextureOrParam,
 							  reflectivity		: Number,
-							  transparent		: CommonColorOrTexture,
+							  transparent		: CommonColorOrTextureOrParam,
 							  transparency		: Number,
 							  indexOfRefraction	: Number)
 		{
@@ -88,22 +92,31 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			_indexOfRefraction	= indexOfRefraction;
 		}
 	
-		public function createDataProvider(params : Object) : DataProvider
+		public function createDataProvider(params : Object, setParams : Object) : DataProvider
 		{
-			// ugly, please read: if (params.numElements > 0)
-			for each (var _ : String in params) 
+			var provider		: DataProvider	= new DataProvider();
+			var diffuseValue	: Object		= _diffuse.getValue(params, setParams);
+			
+			if (diffuseValue is Vector4)
 			{
-				var provider : DataProvider = DataProvider(_defaultProvider.clone());
+				provider.setProperty(BasicProperties.DIFFUSE_COLOR, diffuseValue);
+			}
+			else if (diffuseValue is TextureResource)
+			{
+				provider.setProperty(BasicProperties.DIFFUSE_MAP, diffuseValue);
+			}
+			else
+			{
+				Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: Could not evaluate Phong in profile_COMMON. ' +
+					'It has been replaced by a random color.');
 				
-				for each (var paramName : String in params)
-				{
-					trace(paramName, params[paramName])
-				}
-				
-				return provider;
+				provider.setProperty(
+					BasicProperties.DIFFUSE_COLOR, 
+					new Vector4(Math.random(), Math.random(), Math.random(), 1)
+				);
 			}
 			
-			return _defaultProvider;
+			return provider;
 		}
 
 	}
