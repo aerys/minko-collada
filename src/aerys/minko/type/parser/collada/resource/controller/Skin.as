@@ -312,8 +312,11 @@ package aerys.minko.type.parser.collada.resource.controller
 				// check if loadSkin option is available
 				if (options.loadSkin)
 				{
-					for (var k : uint = 0; k < _numBonesPerVertex; ++k)
+					for (var k : uint = 0; k < (_numBonesPerVertex >> 1); ++k)
 						vertexFormat.addComponent(VertexComponent.BONES[k]);
+					
+					if (_numBonesPerVertex % 2 == 1)
+						vertexFormat.addComponent(VertexComponent.BONE_S);
 
 					_meshTemplates[meshId] = new MeshTemplate(
 						_sourceId + 'skin',

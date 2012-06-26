@@ -140,7 +140,7 @@ package aerys.minko.type.parser.collada.resource
 		 * 
 		 * @param options
 		 */
-		public function computeMeshTemplates(options : ParserOptions) : void
+		public function computeMeshTemplates(options : ParserOptions, fast : Boolean = false) : void
 		{
 			if (_meshTemplates != null)
 				return;
@@ -149,17 +149,28 @@ package aerys.minko.type.parser.collada.resource
 			
 			for each (var triangleStore : Triangles in _triangleStores)
 			{
-				var materialName	: String			= triangleStore.material;
+				var materialName	: String = triangleStore.material;
+				var indexStream		: IndexStream;
+				var vertexStream	: VertexStream;
 				
-				var indexStream		: IndexStream		= triangleStore.computeIndexStream();
-				var vertexStream	: VertexStream		= triangleStore.computeVertexStream(_verticesDataSemantics, _verticesDataSources);
+				if (fast)
+				{
+					indexStream		= triangleStore.fastComputeIndexStream(_verticesDataSemantics, _verticesDataSources);
+					vertexStream	= triangleStore.fastComputeVertexStream(_verticesDataSemantics, _verticesDataSources);
+				}
+				else
+				{
+					indexStream		= triangleStore.computeIndexStream();
+					vertexStream	= triangleStore.computeVertexStream(_verticesDataSemantics, _verticesDataSources);
+				}
 				
 				var indexData		: Vector.<uint>		= indexStream.minko_stream::_data;
 				var vertexData		: Vector.<Number>	= vertexStream.minko_stream::_data;
 				var dwordsPerVertex	: uint				= vertexStream.format.size;
 				
-				GeometrySanitizer.removeDuplicatedVertices(vertexData, indexData, dwordsPerVertex);
-
+				if (!fast)
+					GeometrySanitizer.removeDuplicatedVertices(vertexData, indexData, dwordsPerVertex);
+				
 				var meshTemplate	: MeshTemplate	= new MeshTemplate(
 					_name, 
 					vertexData,
