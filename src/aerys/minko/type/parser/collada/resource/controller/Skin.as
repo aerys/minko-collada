@@ -74,8 +74,8 @@ package aerys.minko.type.parser.collada.resource.controller
 				boneWeights			= optimizedBoneWeights;
 				numBonesPerVertex	= optimizedNumBonesPerVertex;
 			}
-			
-			reduceNumBones(boneWeights, jointNames, invBindMatrices);
+			// @fixme creates errors in shader compiler
+			//reduceNumBones(boneWeights, jointNames, invBindMatrices);
 			
 			return new Skin(
 				sourceId,
@@ -239,7 +239,7 @@ package aerys.minko.type.parser.collada.resource.controller
 			var numBones	: uint				= jointsNames.length;
 			var boneIsUsed 	: Vector.<Boolean>	= new Vector.<Boolean>(numBones, true);
 			
-			var weightId	: uint;
+			var weightId	: int;
 			var numWeights	: uint				= bonesWeights.length;
 			for (weightId = 0; weightId < numWeights; weightId += 2)
 			{
@@ -250,8 +250,8 @@ package aerys.minko.type.parser.collada.resource.controller
 			
 			// map old to new bone ids
 			var oldBoneIdToNew	: Vector.<Number> = new Vector.<Number>(numBones, true);
-			var oldBoneId		: uint = 0;
-			var newBoneId		: uint = 0;
+			var oldBoneId		: int = 0;
+			var newBoneId		: int = 0;
 			
 			for (oldBoneId = 0; oldBoneId < numBones; ++oldBoneId)
 				if (boneIsUsed[oldBoneId])
@@ -275,8 +275,8 @@ package aerys.minko.type.parser.collada.resource.controller
 				
 				if (newBoneId != -1)
 				{
-					jointsNames[newBoneId] = jointsNames[oldBoneId];
-					invBindMatrices[newBoneId] = invBindMatrices[oldBoneId];
+					jointsNames[newBoneId] 		= jointsNames[oldBoneId];
+					invBindMatrices[newBoneId] 	= invBindMatrices[oldBoneId];
 				}
 			}
 			

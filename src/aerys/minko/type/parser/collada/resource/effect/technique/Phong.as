@@ -39,16 +39,34 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 		
 		public static function createFromXML(xml : XML, document : ColladaDocument) : Phong
 		{
-			var emission			: CommonColorOrTextureOrParam	= CommonColorOrTextureOrParam.createFromXML(xml.NS::emission[0], document);
-			var ambient				: CommonColorOrTextureOrParam	= CommonColorOrTextureOrParam.createFromXML(xml.NS::ambient[0], document);
-			var diffuse				: CommonColorOrTextureOrParam	= CommonColorOrTextureOrParam.createFromXML(xml.NS::diffuse[0], document);
-			var specular			: CommonColorOrTextureOrParam	= CommonColorOrTextureOrParam.createFromXML(xml.NS::specular[0], document);
-			var shininess			: Number						= parseFloat(xml.NS::shininess[0].NS::float[0]);
-			var reflective			: CommonColorOrTextureOrParam	= CommonColorOrTextureOrParam.createFromXML(xml.NS::reflective[0], document);
-			var reflectivity		: Number						= parseFloat(xml.NS::reflectivity[0].NS::float[0]);
-			var transparent			: CommonColorOrTextureOrParam	= CommonColorOrTextureOrParam.createFromXML(xml.NS::transparent[0], document);
-			var transparency		: Number						= parseFloat(xml.NS::transparency[0].NS::float[0]);;
-			var indexOfRefraction	: Number						= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);
+			var emission			: CommonColorOrTextureOrParam;
+			var ambient				: CommonColorOrTextureOrParam;
+			var diffuse				: CommonColorOrTextureOrParam;
+			var specular			: CommonColorOrTextureOrParam;
+			var shininess			: Number;
+			var reflective			: CommonColorOrTextureOrParam;
+			var reflectivity		: Number;
+			var transparent			: CommonColorOrTextureOrParam;
+			var transparency		: Number;
+			var indexOfRefraction	: Number;
+			
+			for each (var child : XML in xml.children())
+			{
+				var localName : String = child.localName();
+				switch (child.localName())
+				{
+					case 'emission':			emission			= CommonColorOrTextureOrParam.createFromXML(xml.NS::emission[0], document);		break;
+					case 'ambient':				ambient				= CommonColorOrTextureOrParam.createFromXML(xml.NS::ambient[0], document);		break;
+					case 'diffuse':				diffuse				= CommonColorOrTextureOrParam.createFromXML(xml.NS::diffuse[0], document);		break;
+					case 'specular':			specular			= CommonColorOrTextureOrParam.createFromXML(xml.NS::specular[0], document);		break;
+					case 'shininess':			shininess			= parseFloat(xml.NS::shininess[0].NS::float[0]);								break;
+					case 'reflective':			reflective			= CommonColorOrTextureOrParam.createFromXML(xml.NS::reflective[0], document);	break;
+					case 'reflectivity':		reflectivity		= parseFloat(xml.NS::reflectivity[0].NS::float[0]);								break;
+					case 'transparent':			transparent			= CommonColorOrTextureOrParam.createFromXML(xml.NS::transparent[0], document);	break;
+					case 'transparency':		transparency		= parseFloat(xml.NS::transparency[0].NS::float[0]);								break;
+					case 'index_of_refraction':	indexOfRefraction	= parseFloat(xml.NS::index_of_refraction[0].NS::float[0]);						break;
+				}
+			}
 			
 			return new Phong(emission, ambient, diffuse, specular, shininess, reflective, reflectivity, transparent, transparency, indexOfRefraction, document);
 		}
