@@ -265,7 +265,7 @@ package aerys.minko.type.parser.collada.helper
 					format.addComponent(InputType.minko_collada::TO_COMPONENT[_semantics[componentId]]);
 			
 			
-			var dwordsPerVertex		: uint				= format.dwordsPerVertex;
+			var dwordsPerVertex		: uint				= format.size;
 			var bufferSize			: uint 				= numVertices * dwordsPerVertex;
 			var vertexBuffer		: Vector.<Number>	= new Vector.<Number>(bufferSize, true);
 			var numTriangleVertices	: uint				= _triangleVertices.length;
@@ -281,7 +281,7 @@ package aerys.minko.type.parser.collada.helper
 				
 				var source			: Source	= verticesDataSources[semantic];
 				var sourceData		: Array		= source.data;
-				var componentDwords	: uint		= component.dwords;
+				var componentDwords	: uint		= component.size;
 				var sourceStride	: uint		= source.stride;
 				
 				var innerOffset		: uint		= format.getOffsetForComponent(component);
@@ -312,7 +312,7 @@ package aerys.minko.type.parser.collada.helper
 				
 				source	= _sources[_semantics[componentId]];
 				sourceData	= source.data;
-				componentDwords	= component.dwords;
+				componentDwords	= component.size;
 				sourceStride	= source.stride;
 				innerOffset		= format.getOffsetForComponent(component);
 					

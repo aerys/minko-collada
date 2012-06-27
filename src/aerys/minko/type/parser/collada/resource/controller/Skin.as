@@ -69,13 +69,23 @@ package aerys.minko.type.parser.collada.resource.controller
 			if (optimizedNumBonesPerVertex != numBonesPerVertex)
 			{
 				var optimizedBoneWeights : Vector.<Number> = new Vector.<Number>();
-				optimizeBonesWeights(boneWeights, numBonesPerVertex, optimizedNumBonesPerVertex, optimizedBoneWeights);
+				reduceNumInfluences(boneWeights, numBonesPerVertex, optimizedNumBonesPerVertex, optimizedBoneWeights);
 				
 				boneWeights			= optimizedBoneWeights;
 				numBonesPerVertex	= optimizedNumBonesPerVertex;
 			}
 			
-			return new Skin(sourceId, bindShapeMatrix, jointNames, invBindMatrices, boneWeights, numBonesPerVertex, document);
+			reduceNumBones(boneWeights, jointNames, invBindMatrices);
+			
+			return new Skin(
+				sourceId,
+				bindShapeMatrix,
+				jointNames,
+				invBindMatrices,
+				boneWeights,
+				numBonesPerVertex,
+				document
+			);
 		}
 		
 		public function Skin(sourceId			: String,
@@ -186,10 +196,10 @@ package aerys.minko.type.parser.collada.resource.controller
 		 * When the computeMinBonesPerVertex method indicates that it is possible to
 		 * optimize the bone weights vector, this method does the work. 
 		 */		
-		private static function optimizeBonesWeights(inBoneWeights 			: Vector.<Number>,
-												     inBoneCountPerVertex	: uint,
-												     newBoneCountPerVertex	: uint,
-												     outBoneWeights			: Vector.<Number>) : void
+		private static function reduceNumInfluences(inBoneWeights 			: Vector.<Number>,
+													inBoneCountPerVertex	: uint,
+													newBoneCountPerVertex	: uint,
+													outBoneWeights			: Vector.<Number>) : void
 		{
 			var vertexCount		: uint = inBoneWeights.length / inBoneCountPerVertex / 2;
 			
@@ -220,6 +230,58 @@ package aerys.minko.type.parser.collada.resource.controller
 				for (; localBoneCount < newBoneCountPerVertex; ++localBoneCount)
 					outBoneWeights.push(0, 0);
 			}
+		}
+		
+		private static function reduceNumBones(bonesWeights		: Vector.<Number>,
+											   jointsNames		: Vector.<String>,
+											   invBindMatrices	: Vector.<Matrix4x4>) : void
+		{
+			var numBones	: uint				= jointsNames.length;
+			var boneIsUsed 	: Vector.<Boolean>	= new Vector.<Boolean>(numBones, true);
+			
+			var weightId	: uint;
+			var numWeights	: uint				= bonesWeights.length;
+			for (weightId = 0; weightId < numWeights; weightId += 2)
+			{
+				// if the influence is != 0. (if the bone is used for skinning)
+				if (bonesWeights[uint(weightId + 1)] != 0.)
+					boneIsUsed[bonesWeights[weightId]] = true;
+			}
+			
+			// map old to new bone ids
+			var oldBoneIdToNew	: Vector.<Number> = new Vector.<Number>(numBones, true);
+			var oldBoneId		: uint = 0;
+			var newBoneId		: uint = 0;
+			
+			for (oldBoneId = 0; oldBoneId < numBones; ++oldBoneId)
+				if (boneIsUsed[oldBoneId])
+					oldBoneIdToNew[oldBoneId] = newBoneId++;
+				else
+					oldBoneIdToNew[oldBoneId] = -1;
+			
+			// update vertexdata
+			for (weightId = 0; weightId < numWeights; weightId += 2)
+			{
+				newBoneId = oldBoneIdToNew[bonesWeights[weightId]];
+				
+				if (newBoneId != -1)
+					bonesWeights[weightId] = newBoneId;
+			}
+			
+			// update joints list and bind matrices
+			for (oldBoneId = 0; oldBoneId < numBones; ++oldBoneId)
+			{
+				newBoneId = oldBoneIdToNew[oldBoneId];
+				
+				if (newBoneId != -1)
+				{
+					jointsNames[newBoneId] = jointsNames[oldBoneId];
+					invBindMatrices[newBoneId] = invBindMatrices[oldBoneId];
+				}
+			}
+			
+			jointsNames.length = newBoneId + 1;
+			invBindMatrices.length = newBoneId + 1;
 		}
 		
 		/**
@@ -280,7 +342,7 @@ package aerys.minko.type.parser.collada.resource.controller
 		private function addBoneData(oldBuffer	: Vector.<Number>,
 									 oldFormat	: VertexFormat) : Vector.<Number>
 		{
-			var oldDwordPerVertex	: uint = oldFormat.dwordsPerVertex;
+			var oldDwordPerVertex	: uint = oldFormat.size;
 			var boneDwordPerVertex	: uint = 2 * _numBonesPerVertex;
 			
 			var newDwordPerVertex	: uint = oldDwordPerVertex + boneDwordPerVertex;

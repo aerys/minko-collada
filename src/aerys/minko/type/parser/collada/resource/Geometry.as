@@ -166,7 +166,7 @@ package aerys.minko.type.parser.collada.resource
 				
 				var indexData		: Vector.<uint>		= indexStream.minko_stream::_data;
 				var vertexData		: Vector.<Number>	= vertexStream.minko_stream::_data;
-				var dwordsPerVertex	: uint				= vertexStream.format.dwordsPerVertex;
+				var dwordsPerVertex	: uint				= vertexStream.format.size;
 				
 				if (!fast)
 					GeometrySanitizer.removeDuplicatedVertices(vertexData, indexData, dwordsPerVertex);
