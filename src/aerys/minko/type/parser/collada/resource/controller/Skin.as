@@ -250,8 +250,8 @@ package aerys.minko.type.parser.collada.resource.controller
 			
 			// map old to new bone ids
 			var oldBoneIdToNew	: Vector.<Number> = new Vector.<Number>(numBones, true);
-			var oldBoneId		: uint = 0;
-			var newBoneId		: uint = 0;
+			var oldBoneId		: int = 0;
+			var newBoneId		: int = 0;
 			
 			for (oldBoneId = 0; oldBoneId < numBones; ++oldBoneId)
 				if (boneIsUsed[oldBoneId])
