@@ -1,8 +1,8 @@
 package aerys.minko.type.parser.collada.resource.effect.technique
 {
-	import aerys.minko.render.effect.basic.BasicProperties;
+	import aerys.minko.render.material.Material;
+	import aerys.minko.render.material.basic.BasicProperties;
 	import aerys.minko.render.resource.texture.TextureResource;
-	import aerys.minko.type.data.DataProvider;
 	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTextureOrParam;
@@ -39,11 +39,13 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			return constant;
 		}
 		
-		public function createDataProvider(params : Object, setParams : Object) : DataProvider
+		public function createMaterial(params : Object, setParams : Object) : Material
 		{
-			var provider : DataProvider	= new DataProvider();
-			provider.setProperty(BasicProperties.DIFFUSE_COLOR, new Vector4(1, 1, 1, 1));
-			return provider;
+			var material : Material	= new Material();
+			
+			material.setProperty(BasicProperties.DIFFUSE_COLOR, new Vector4(1, 1, 1, 1));
+			
+			return material;
 		}
 
 	}

@@ -1,9 +1,9 @@
 package aerys.minko.type.parser.collada.resource.effect.profile
 {
-	import aerys.minko.type.data.DataProvider;
+	import aerys.minko.render.material.Material;
 
 	public interface IProfile
 	{
-		function createDataProvider(params : Object, setParams : Object) : DataProvider;
+		function createMaterial(params : Object, setParams : Object) : Material;
 	}
 }

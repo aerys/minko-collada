@@ -1,8 +1,8 @@
 package aerys.minko.type.parser.collada.instance
 {
 	import aerys.minko.Minko;
+	import aerys.minko.render.material.Material;
 	import aerys.minko.scene.node.ISceneNode;
-	import aerys.minko.type.data.DataProvider;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
@@ -47,9 +47,9 @@ package aerys.minko.type.parser.collada.instance
 			_document	= document;
 		}
 		
-		public function createDataProvider() : DataProvider
+		public function createMaterial() : Material
 		{
-			return Effect(resource).createDataProvider(_setParams);
+			return Effect(resource).createMaterial(_setParams);
 		}
 		
 		public function createSceneNode(options				: ParserOptions,

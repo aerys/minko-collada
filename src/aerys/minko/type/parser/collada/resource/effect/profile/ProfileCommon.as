@@ -1,6 +1,7 @@
 package aerys.minko.type.parser.collada.resource.effect.profile
 {
-	import aerys.minko.type.data.DataProvider;
+	import aerys.minko.render.material.Material;
+	import aerys.minko.render.material.basic.BasicMaterial;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.effect.NewParam;
 	import aerys.minko.type.parser.collada.resource.effect.technique.Blinn;
@@ -12,7 +13,7 @@ package aerys.minko.type.parser.collada.resource.effect.profile
 	public class ProfileCommon implements IProfile
 	{
 		public static const NS					: Namespace		= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
-		public static const DEFAULT_PROVIDER	: DataProvider	= new DataProvider({ diffuseColor: 0x00ff00ff });
+		public static const DEFAULT_MATERIAL	: Material		= new BasicMaterial({ diffuseColor: 0x00ff00ff });
 		
 		private var _id			: String;
 		private var _params		: Object;
@@ -66,7 +67,7 @@ package aerys.minko.type.parser.collada.resource.effect.profile
 			_document	= document;
 		}
 		
-		public function createDataProvider(params : Object, setParams : Object) : DataProvider
+		public function createMaterial(params : Object, setParams : Object) : Material
 		{
 			var key			: String;
 			var localParams : Object = new Object();
@@ -76,7 +77,7 @@ package aerys.minko.type.parser.collada.resource.effect.profile
 			for (key in _params)
 				localParams[key] = _params[key];
 			
-			return _technique.createDataProvider(localParams, setParams);
+			return _technique.createMaterial(localParams, setParams);
 		}
 	}
 }

@@ -1,7 +1,7 @@
 package aerys.minko.type.parser.collada.resource.effect
 {
 	import aerys.minko.Minko;
-	import aerys.minko.type.data.DataProvider;
+	import aerys.minko.render.material.Material;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
@@ -91,7 +91,7 @@ package aerys.minko.type.parser.collada.resource.effect
 			_document	= document;
 		}
 		
-		public function createDataProvider(setParams : Object) : DataProvider
+		public function createMaterial(setParams : Object) : Material
 		{
 			var profileCommon : ProfileCommon = null;
 			
@@ -102,11 +102,11 @@ package aerys.minko.type.parser.collada.resource.effect
 			if (!profileCommon)
 			{
 				Minko.log(DebugLevel.PLUGIN_WARNING, 'No valid profile was found for effect: ' + _name);
-				return ProfileCommon.DEFAULT_PROVIDER;
+				return ProfileCommon.DEFAULT_MATERIAL;
 			}
 			else
 			{
-				return profile.createDataProvider(params, setParams);
+				return profile.createMaterial(params, setParams);
 			}
 		}
 		

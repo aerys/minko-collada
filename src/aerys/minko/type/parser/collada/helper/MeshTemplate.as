@@ -1,6 +1,6 @@
 package aerys.minko.type.parser.collada.helper
 {
-	import aerys.minko.render.effect.Effect;
+	import aerys.minko.render.Effect;
 	import aerys.minko.scene.node.mesh.Mesh;
 	import aerys.minko.scene.node.mesh.geometry.Geometry;
 	import aerys.minko.scene.node.mesh.geometry.GeometrySanitizer;

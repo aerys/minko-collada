@@ -1,20 +1,17 @@
 package aerys.minko.type.parser.collada.instance
 {
-	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.render.effect.Effect;
+	import aerys.minko.render.Effect;
+	import aerys.minko.render.material.Material;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.mesh.Mesh;
-	import aerys.minko.type.data.DataProvider;
 	import aerys.minko.type.loader.parser.ParserOptions;
-	import aerys.minko.type.log.DebugLevel;
-	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;
+	import aerys.minko.type.parser.collada.resource.ColladaMaterial;
 	import aerys.minko.type.parser.collada.resource.Geometry;
 	import aerys.minko.type.parser.collada.resource.IResource;
-	import aerys.minko.type.parser.collada.resource.Material;
 	
 	public class InstanceGeometry implements IInstance
 	{
@@ -90,13 +87,14 @@ package aerys.minko.type.parser.collada.instance
 				
 				if (meshTemplate.indexData.length != 0)
 				{
-					var localMeshes : Vector.<Mesh> = 
-						meshTemplate.generateMeshes(effect, options.vertexStreamUsage, options.indexStreamUsage);
+					var localMeshes : Vector.<Mesh> = meshTemplate.generateMeshes(
+						effect, options.vertexStreamUsage, options.indexStreamUsage
+					);
 					
 					var i : uint = 0;
 					for each (var localMesh : Mesh in localMeshes)
 					{
-						localMesh.bindings.addProvider(getMaterialProvider(meshTemplate.materialName));
+						localMesh.material = getMaterial(meshTemplate.materialName);
 						localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
 						
 						group.addChild(localMesh);
@@ -131,17 +129,17 @@ package aerys.minko.type.parser.collada.instance
 			return result;
 		}
 		
-		private function getMaterialProvider(materialName : String) : DataProvider
+		private function getMaterial(materialName : String) : Material
 		{
 			if (materialName == null || materialName == '')
-				return Material.DEFAULT_PROVIDER;
+				return ColladaMaterial.DEFAULT_MATERIAL;
 			else
 			{
 				var materialInstance : InstanceMaterial = _bindMaterial[materialName];
 				
 				return materialInstance != null ? 
-					Material(materialInstance.resource).dataProvider :
-					Material.DEFAULT_PROVIDER;
+					ColladaMaterial(materialInstance.resource).material :
+					ColladaMaterial.DEFAULT_MATERIAL;
 			}
 		}
 	}

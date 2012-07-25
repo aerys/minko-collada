@@ -18,7 +18,7 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.parser.collada.instance.InstanceController;
 	import aerys.minko.type.parser.collada.resource.Geometry;
 	import aerys.minko.type.parser.collada.resource.IResource;
-	import aerys.minko.type.parser.collada.resource.Material;
+	import aerys.minko.type.parser.collada.resource.ColladaMaterial;
 	import aerys.minko.type.parser.collada.resource.Node;
 	import aerys.minko.type.parser.collada.resource.VisualScene;
 	import aerys.minko.type.parser.collada.resource.animation.Animation;
@@ -52,7 +52,7 @@ package aerys.minko.type.parser.collada
 			'effect'		: Effect,
 			'geometry'		: Geometry,
 			'image'			: Image,
-			'material'		: Material,
+			'material'		: ColladaMaterial,
 			'node'			: Node,
 			'visual_scene'	: VisualScene
 		};
@@ -86,7 +86,7 @@ package aerys.minko.type.parser.collada
 		public function getEffectById		(id : String) : Effect		{ return _effects[id];		}
 		public function getGeometryById		(id : String) : Geometry	{ return _geometries[id];	}
 		public function getImageById		(id : String) : Image		{ return _images[id];		}
-		public function getMaterialById		(id : String) : Material	{ return _materials[id];	}
+		public function getMaterialById		(id : String) : ColladaMaterial	{ return _materials[id];	}
 		public function getNodeById			(id	: String) : Node		{ return _nodes[id];		}
 		public function getVisualSceneById	(id	: String) : VisualScene	{ return _visualScenes[id];	}
 		
@@ -114,7 +114,7 @@ package aerys.minko.type.parser.collada
 			Effect		.fillStoreFromXML(xmlDocument, this, _effects);
 			Geometry	.fillStoreFromXML(xmlDocument, this, _geometries);
 			Image		.fillStoreFromXML(xmlDocument, this, _images);
-			Material 	.fillStoreFromXML(xmlDocument, this, _materials);
+			ColladaMaterial 	.fillStoreFromXML(xmlDocument, this, _materials);
 			Node		.fillStoreFromXML(xmlDocument, this, _nodes);
 			VisualScene	.fillStoreFromXML(xmlDocument, this, _visualScenes);
 		}

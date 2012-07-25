@@ -1,9 +1,9 @@
 package aerys.minko.type.parser.collada.resource.effect.technique
 {
 	import aerys.minko.Minko;
-	import aerys.minko.render.effect.basic.BasicProperties;
+	import aerys.minko.render.material.Material;
+	import aerys.minko.render.material.basic.BasicProperties;
 	import aerys.minko.render.resource.texture.TextureResource;
-	import aerys.minko.type.data.DataProvider;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
@@ -28,12 +28,12 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 		public function get ambient()			: CommonColorOrTextureOrParam	{ return _ambient;				}
 		public function get diffuse()			: CommonColorOrTextureOrParam	{ return _diffuse;				}
 		public function get specular()			: CommonColorOrTextureOrParam	{ return _specular;				}
-		public function get shininess()			: Number				{ return _shininess;			}
+		public function get shininess()			: Number						{ return _shininess;			}
 		public function get reflective()		: CommonColorOrTextureOrParam	{ return _reflective;			}
-		public function get reflectivity()		: Number				{ return _reflectivity;			}
+		public function get reflectivity()		: Number						{ return _reflectivity;			}
 		public function get transparent()		: CommonColorOrTextureOrParam	{ return _transparent;			}
-		public function get transparency()		: Number				{ return _transparency;			}
-		public function get indexOfRefraction()	: Number				{ return _indexOfRefraction;	}
+		public function get transparency()		: Number						{ return _transparency;			}
+		public function get indexOfRefraction()	: Number						{ return _indexOfRefraction;	}
 		
 		public static function createFromXML(xml : XML, document : ColladaDocument) : Blinn
 		{
@@ -92,31 +92,34 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			_indexOfRefraction	= indexOfRefraction;
 		}
 	
-		public function createDataProvider(params : Object, setParams : Object) : DataProvider
+		public function createMaterial(params : Object, setParams : Object) : Material
 		{
-			var provider		: DataProvider	= new DataProvider();
-			var diffuseValue	: Object		= _diffuse.getValue(params, setParams);
+			var material		: Material	= new Material();
+			var diffuseValue	: Object	= _diffuse.getValue(params, setParams);
 			
 			if (diffuseValue is Vector4)
 			{
-				provider.setProperty(BasicProperties.DIFFUSE_COLOR, diffuseValue);
+				material.setProperty(BasicProperties.DIFFUSE_COLOR, diffuseValue);
 			}
 			else if (diffuseValue is TextureResource)
 			{
-				provider.setProperty(BasicProperties.DIFFUSE_MAP, diffuseValue);
+				material.setProperty(BasicProperties.DIFFUSE_MAP, diffuseValue);
 			}
 			else
 			{
-				Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: Could not evaluate Phong in profile_COMMON. ' +
-					'It has been replaced by a random color.');
+				Minko.log(
+					DebugLevel.PLUGIN_WARNING,
+					'ColladaPlugin: Could not evaluate Phong in profile_COMMON. '
+					+ 'It has been replaced by a random color.'
+				);
 				
-				provider.setProperty(
+				material.setProperty(
 					BasicProperties.DIFFUSE_COLOR, 
 					new Vector4(Math.random(), Math.random(), Math.random(), 1)
 				);
 			}
 			
-			return provider;
+			return material;
 		}
 
 	}
