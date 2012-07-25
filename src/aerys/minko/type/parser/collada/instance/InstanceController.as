@@ -101,7 +101,7 @@ package aerys.minko.type.parser.collada.instance
 				var i : uint = 0;
 				for each (var localMesh : Mesh in localMeshes)
 				{
-					localMesh.bindings.addProvider (materialProvider);
+					localMesh.material = materialProvider;
 					localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
 					group.addChild(localMesh);
 					++i;
