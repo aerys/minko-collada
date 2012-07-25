@@ -1,13 +1,13 @@
 package aerys.minko.type.parser.collada.helper
 {
 	import aerys.minko.render.Effect;
-	import aerys.minko.scene.node.mesh.Mesh;
-	import aerys.minko.scene.node.mesh.geometry.Geometry;
-	import aerys.minko.scene.node.mesh.geometry.GeometrySanitizer;
-	import aerys.minko.type.stream.IVertexStream;
-	import aerys.minko.type.stream.IndexStream;
-	import aerys.minko.type.stream.VertexStream;
-	import aerys.minko.type.stream.format.VertexFormat;
+	import aerys.minko.scene.node.Mesh;
+	import aerys.minko.render.geometry.Geometry;
+	import aerys.minko.render.geometry.GeometrySanitizer;
+	import aerys.minko.render.geometry.stream.IVertexStream;
+	import aerys.minko.render.geometry.stream.IndexStream;
+	import aerys.minko.render.geometry.stream.VertexStream;
+	import aerys.minko.render.geometry.stream.format.VertexFormat;
 
 	public class MeshTemplate
 	{

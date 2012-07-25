@@ -3,12 +3,12 @@ package aerys.minko.type.parser.collada.helper
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.enum.InputType;
-	import aerys.minko.type.stream.IndexStream;
-	import aerys.minko.type.stream.StreamUsage;
-	import aerys.minko.type.stream.VertexStream;
-	import aerys.minko.type.stream.VertexStreamList;
-	import aerys.minko.type.stream.format.VertexComponent;
-	import aerys.minko.type.stream.format.VertexFormat;
+	import aerys.minko.render.geometry.stream.IndexStream;
+	import aerys.minko.render.geometry.stream.StreamUsage;
+	import aerys.minko.render.geometry.stream.VertexStream;
+	import aerys.minko.render.geometry.stream.VertexStreamList;
+	import aerys.minko.render.geometry.stream.format.VertexComponent;
+	import aerys.minko.render.geometry.stream.format.VertexFormat;
 
 	public class Triangles
 	{
