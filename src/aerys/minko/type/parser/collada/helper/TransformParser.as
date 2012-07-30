@@ -23,7 +23,7 @@ package aerys.minko.type.parser.collada.helper
 				{
 					case 'lookat':
 						var lookAt : Vector.<Vector4> = NumberListParser.parseVector3List(child);
-						transform.pointAt(lookAt[0], lookAt[1], lookAt[2]);
+						transform.lookAt(lookAt[0], lookAt[1], lookAt[2]);
 						break;
 					
 					case 'matrix':
