@@ -102,6 +102,10 @@ package aerys.minko.type.parser.collada.instance
 				for each (var localMesh : Mesh in localMeshes)
 				{
 					localMesh.material = materialProvider;
+					
+					if (options.effect)
+						localMesh.material.effect = options.effect;
+					
 					localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
 					group.addChild(localMesh);
 					++i;
