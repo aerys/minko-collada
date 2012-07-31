@@ -1,6 +1,7 @@
 package aerys.minko.type.parser.collada.resource.effect.technique
 {
 	import aerys.minko.render.material.Material;
+	import aerys.minko.render.material.basic.BasicMaterial;
 	import aerys.minko.render.material.basic.BasicProperties;
 	import aerys.minko.render.resource.texture.TextureResource;
 	import aerys.minko.type.math.Vector4;
@@ -41,7 +42,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 		
 		public function createMaterial(params : Object, setParams : Object) : Material
 		{
-			var material : Material	= new Material();
+			var material : Material	= new BasicMaterial();
 			
 			material.setProperty(BasicProperties.DIFFUSE_COLOR, new Vector4(1, 1, 1, 1));
 			

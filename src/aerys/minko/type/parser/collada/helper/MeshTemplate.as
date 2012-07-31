@@ -87,9 +87,9 @@ package aerys.minko.type.parser.collada.helper
 				);
 				
 				var subMesh : Mesh = new Mesh(
-					new Geometry(new <IVertexStream>[vertexStream], indexStream),
-					null,
-					effect
+					new Geometry(new <IVertexStream>[vertexStream], indexStream)//,
+//					null,
+//					effect
 				);
 				
 				subMesh.name = _meshName + bufferId;
