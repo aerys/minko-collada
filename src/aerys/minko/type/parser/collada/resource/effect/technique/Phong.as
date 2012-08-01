@@ -118,7 +118,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 				
 				material.setProperty(
 					BasicProperties.DIFFUSE_COLOR, 
-					(0xFFFFFF * Math.random()) << 8 + 0xFF
+					(uint(0xFFFFFF * Math.random())) << 8 | 0xFF
 				);
 			}
 			

@@ -44,7 +44,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 		{
 			var material : Material	= new BasicMaterial();
 			
-			material.setProperty(BasicProperties.DIFFUSE_COLOR, new Vector4(1, 1, 1, 1));
+			material.setProperty(BasicProperties.DIFFUSE_COLOR, 0xFFFFFFFF);
 			
 			return material;
 		}

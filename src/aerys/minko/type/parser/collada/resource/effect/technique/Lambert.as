@@ -96,7 +96,7 @@
 				
 				material.setProperty(
 					BasicProperties.DIFFUSE_COLOR, 
-					(0xFFFFFF * Math.random()) << 8 + 0xFF
+					(0xFFFFFF * Math.random()) << 8 | 0xFF
 				);
 			}
 			
