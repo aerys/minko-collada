@@ -261,7 +261,7 @@ package aerys.minko.type.parser.collada
 					var meshes : Vector.<ISceneNode> =
 						scene is Group ? Group(scene).getDescendantsByType(Mesh) : new <ISceneNode>[scene];
 
-					var jointNames : Vector.<String>	= new <String>[];
+					var joints : Vector.<Group>	= new <Group>[];
 					for each (var jointName : String in skin.jointNames)
 					{
 						var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName]; // handle collada 1.4 "ID_REF"
@@ -273,17 +273,17 @@ package aerys.minko.type.parser.collada
 							continue;
 						}
 
-						jointNames.push(joint.name);
+						joints.push(joint);
 					}
-
+					
 					var skinController	: AbstractController = new SkinningController(
 						SkinningMethod.DUAL_QUATERNION,
 						mainScene,
-						jointNames,
+						joints,
 						skin.bindShapeMatrix,
 						skin.invBindMatrices
 					);
-
+					
 					for each (var mesh : ISceneNode in meshes)
 						Mesh(mesh).addController(skinController);
 				}
