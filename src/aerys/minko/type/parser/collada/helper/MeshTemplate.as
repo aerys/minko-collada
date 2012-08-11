@@ -64,14 +64,13 @@ package aerys.minko.type.parser.collada.helper
 									   vertexStreamUsage	: uint,
 									   indexStreamUsage		: uint) : Vector.<Mesh>
 		{
-			var indexDatas	: Vector.<Vector.<uint>>	= new Vector.<Vector.<uint>>();
 			var vertexDatas	: Vector.<Vector.<Number>>	= new Vector.<Vector.<Number>>();
+			var indexDatas	: Vector.<Vector.<uint>>	= new Vector.<Vector.<uint>>();
 			
 			GeometrySanitizer.splitBuffers(_vertexData, _indexData, vertexDatas, indexDatas, _vertexFormat.size);
 			
-			var numBuffers : uint = indexDatas.length;
-			
-			var meshes : Vector.<Mesh> = new Vector.<Mesh>(numBuffers);
+			var numBuffers 	: uint 			= indexDatas.length;
+			var meshes 		: Vector.<Mesh> = new Vector.<Mesh>(numBuffers);
 			
 			for (var bufferId : uint = 0; bufferId < numBuffers; ++bufferId)
 			{
