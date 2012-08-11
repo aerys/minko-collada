@@ -4,7 +4,7 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.controller.AbstractController;
 	import aerys.minko.scene.controller.AnimationController;
-	import aerys.minko.scene.controller.mesh.SkinningController;
+	import aerys.minko.scene.controller.mesh.skinning.SkinningController;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.Mesh;
@@ -16,9 +16,9 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceController;
+	import aerys.minko.type.parser.collada.resource.ColladaMaterial;
 	import aerys.minko.type.parser.collada.resource.Geometry;
 	import aerys.minko.type.parser.collada.resource.IResource;
-	import aerys.minko.type.parser.collada.resource.ColladaMaterial;
 	import aerys.minko.type.parser.collada.resource.Node;
 	import aerys.minko.type.parser.collada.resource.VisualScene;
 	import aerys.minko.type.parser.collada.resource.animation.Animation;
@@ -276,8 +276,8 @@ package aerys.minko.type.parser.collada
 						joints.push(joint);
 					}
 					
-					var skinController	: AbstractController = new SkinningController(
-						SkinningMethod.DUAL_QUATERNION,
+					var skinController : AbstractController = new SkinningController(
+						options.skinningMethod,
 						mainScene,
 						joints,
 						skin.bindShapeMatrix,
