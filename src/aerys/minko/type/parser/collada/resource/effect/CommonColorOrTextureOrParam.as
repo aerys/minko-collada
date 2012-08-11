@@ -45,7 +45,7 @@ package aerys.minko.type.parser.collada.resource.effect
 					break;
 				
 				case 'texture':
-					textureName	= firstChild.@texture;
+					textureName		= firstChild.@texture;
 					textureCoord	= firstChild.@texcoord;
 					break;
 				
@@ -87,6 +87,8 @@ package aerys.minko.type.parser.collada.resource.effect
 		
 		public function getValue(params : Object, setParams : Object) : Object
 		{
+			var image : Image;
+			
 			if (_paramName != null)
 			{
 				var param : NewParam = params[_paramName];
@@ -96,16 +98,10 @@ package aerys.minko.type.parser.collada.resource.effect
 				}
 				else if (param.data is Surface)
 				{
-					
 				}
-//				else if (param.data is ??)
-//				{
-//					
-//				}
 			}
 			else if (_textureName != null)
 			{
-				
 				if (params[_textureName])
 				{
 					var sampler2D : Sampler2D = NewParam(params[_textureName]).data as Sampler2D;
@@ -114,11 +110,17 @@ package aerys.minko.type.parser.collada.resource.effect
 						var surface : Surface = NewParam(params[sampler2D.source]).data as Surface;
 						if (surface)
 						{
-							var image : Image = _document.getImageById(surface.initFrom);
+							image = _document.getImageById(surface.initFrom);
 							if (image.imageData.textureResource)
 								return image.imageData.textureResource;
 						}
 					}
+				}
+				else if (_document.getImageById(_textureName))
+				{
+					image = _document.getImageById(_textureName);
+					if (image.imageData.textureResource)
+						return image.imageData.textureResource;
 				}
 			}
 			else
