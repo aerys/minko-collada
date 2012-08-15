@@ -3,12 +3,12 @@ package aerys.minko.type.parser.collada.helper
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.parser.collada.enum.InputType;
-	import aerys.minko.type.stream.IndexStream;
-	import aerys.minko.type.stream.StreamUsage;
-	import aerys.minko.type.stream.VertexStream;
-	import aerys.minko.type.stream.VertexStreamList;
-	import aerys.minko.type.stream.format.VertexComponent;
-	import aerys.minko.type.stream.format.VertexFormat;
+	import aerys.minko.render.geometry.stream.IndexStream;
+	import aerys.minko.render.geometry.stream.StreamUsage;
+	import aerys.minko.render.geometry.stream.VertexStream;
+	import aerys.minko.render.geometry.stream.VertexStreamList;
+	import aerys.minko.render.geometry.stream.format.VertexComponent;
+	import aerys.minko.render.geometry.stream.format.VertexFormat;
 
 	public class Triangles
 	{
@@ -83,10 +83,10 @@ package aerys.minko.type.parser.collada.helper
 		private function initializeFromXML(xmlPrimitive	: XML, 
 										   xmlMesh		: XML) : void
 		{
-			_semantics			= new Vector.<String>();
+			_semantics			= new <String>[];
 			_material			= xmlPrimitive.@material;
-			_offsets			= new Object();
-			_sources			= new Object();	
+			_offsets			= {};
+			_sources			= {};	
 			
 			_indicesPerVertex	= 0;
 			
@@ -132,7 +132,7 @@ package aerys.minko.type.parser.collada.helper
 		 */		
 		private function fillVerticesFromTriangles(xmlPrimitive : XML) : void
 		{
-			_triangleVertices = new Vector.<uint>();
+			_triangleVertices = new <uint>[];
 			NumberListParser.parseUintList(xmlPrimitive.NS::p[0], _triangleVertices);
 		}
 		
@@ -141,7 +141,7 @@ package aerys.minko.type.parser.collada.helper
 		 */		
 		private function fillVerticesFromPolylist(xmlPrimitive : XML) : void
 		{
-			_triangleVertices	= new Vector.<uint>();
+			_triangleVertices	= new <uint>[];
 			
 			var writeIndex : int = 0;
 			
@@ -265,7 +265,7 @@ package aerys.minko.type.parser.collada.helper
 					format.addComponent(InputType.minko_collada::TO_COMPONENT[_semantics[componentId]]);
 			
 			
-			var dwordsPerVertex		: uint				= format.size;
+			var dwordsPerVertex		: uint				= format.vertexSize;
 			var bufferSize			: uint 				= numVertices * dwordsPerVertex;
 			var vertexBuffer		: Vector.<Number>	= new Vector.<Number>(bufferSize, true);
 			var numTriangleVertices	: uint				= _triangleVertices.length;

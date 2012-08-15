@@ -1,12 +1,14 @@
 package aerys.minko.type.parser.collada.resource.effect
 {
+	import aerys.minko.Minko;
+	import aerys.minko.render.material.Material;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
-	import aerys.minko.type.parser.collada.helper.ParamParser;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceEffect;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.effect.profile.IProfile;
-	import aerys.minko.type.parser.collada.resource.effect.profile.ProfileFactory;
+	import aerys.minko.type.parser.collada.resource.effect.profile.ProfileCommon;
 	
 	public class Effect implements IResource
 	{
@@ -52,20 +54,23 @@ package aerys.minko.type.parser.collada.resource.effect
 			{
 				switch (child.localName())
 				{
+					case 'profile_COMMON':
+						profiles.push(ProfileCommon.createFromXML(child, document));
+						break;
+					
 					case 'profile_BRIDGE':
 					case 'profile_CG':
-					case 'profile_COMMON':
 					case 'profile_GLES':
 					case 'profile_GLES2':
 					case 'profile_GLSL':
-						profiles.push(ProfileFactory.createProfile(child));
+						Minko.log(DebugLevel.PLUGIN_WARNING,
+							'Skipping profile "' + child.localName() + '" on effect "' + name + '". ' + 
+							'Only profile_COMMON is supported, please check your export settings.'
+						);
 						break;
 					
 					case 'newparam':
-						var paramName	: String	= child.@sid;
-						var paramValue	: *			= ParamParser.parseParam(child);
-						
-						params[paramName]	= paramValue;
+						params[child.@sid] = NewParam.createFromXML(child, document);
 						break;
 				}
 			}
@@ -84,6 +89,25 @@ package aerys.minko.type.parser.collada.resource.effect
 			_params		= params;
 			_profiles	= profiles;
 			_document	= document;
+		}
+		
+		public function createMaterial(setParams : Object) : Material
+		{
+			var profileCommon : ProfileCommon = null;
+			
+			for each (var profile : IProfile in _profiles)
+				if (profile is ProfileCommon)
+					profileCommon = ProfileCommon(profile);
+			
+			if (!profileCommon)
+			{
+				Minko.log(DebugLevel.PLUGIN_WARNING, 'No valid profile was found for effect: ' + _name);
+				return ProfileCommon.DEFAULT_MATERIAL;
+			}
+			else
+			{
+				return profile.createMaterial(params, setParams);
+			}
 		}
 		
 		public function createInstance() : IInstance

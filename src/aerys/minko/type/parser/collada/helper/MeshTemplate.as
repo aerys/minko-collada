@@ -1,13 +1,13 @@
 package aerys.minko.type.parser.collada.helper
 {
-	import aerys.minko.render.effect.Effect;
-	import aerys.minko.scene.node.mesh.Mesh;
-	import aerys.minko.scene.node.mesh.geometry.Geometry;
-	import aerys.minko.scene.node.mesh.geometry.GeometrySanitizer;
-	import aerys.minko.type.stream.IVertexStream;
-	import aerys.minko.type.stream.IndexStream;
-	import aerys.minko.type.stream.VertexStream;
-	import aerys.minko.type.stream.format.VertexFormat;
+	import aerys.minko.render.Effect;
+	import aerys.minko.scene.node.Mesh;
+	import aerys.minko.render.geometry.Geometry;
+	import aerys.minko.render.geometry.GeometrySanitizer;
+	import aerys.minko.render.geometry.stream.IVertexStream;
+	import aerys.minko.render.geometry.stream.IndexStream;
+	import aerys.minko.render.geometry.stream.VertexStream;
+	import aerys.minko.render.geometry.stream.format.VertexFormat;
 
 	public class MeshTemplate
 	{
@@ -64,14 +64,13 @@ package aerys.minko.type.parser.collada.helper
 									   vertexStreamUsage	: uint,
 									   indexStreamUsage		: uint) : Vector.<Mesh>
 		{
-			var indexDatas	: Vector.<Vector.<uint>>	= new Vector.<Vector.<uint>>();
 			var vertexDatas	: Vector.<Vector.<Number>>	= new Vector.<Vector.<Number>>();
+			var indexDatas	: Vector.<Vector.<uint>>	= new Vector.<Vector.<uint>>();
 			
-			GeometrySanitizer.splitBuffers(_vertexData, _indexData, vertexDatas, indexDatas, _vertexFormat.size);
+			GeometrySanitizer.splitBuffers(_vertexData, _indexData, vertexDatas, indexDatas, _vertexFormat.vertexSize);
 			
-			var numBuffers : uint = indexDatas.length;
-			
-			var meshes : Vector.<Mesh> = new Vector.<Mesh>(numBuffers);
+			var numBuffers 	: uint 			= indexDatas.length;
+			var meshes 		: Vector.<Mesh> = new Vector.<Mesh>(numBuffers);
 			
 			for (var bufferId : uint = 0; bufferId < numBuffers; ++bufferId)
 			{
@@ -87,9 +86,7 @@ package aerys.minko.type.parser.collada.helper
 				);
 				
 				var subMesh : Mesh = new Mesh(
-					new Geometry(new <IVertexStream>[vertexStream], indexStream),
-					null,
-					effect
+					new Geometry(new <IVertexStream>[vertexStream], indexStream)
 				);
 				
 				subMesh.name = _meshName + bufferId;

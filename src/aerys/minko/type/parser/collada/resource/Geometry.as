@@ -3,19 +3,16 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.ns.minko_stream;
-	import aerys.minko.scene.node.mesh.geometry.GeometrySanitizer;
+	import aerys.minko.render.geometry.GeometrySanitizer;
+	import aerys.minko.render.geometry.stream.IndexStream;
+	import aerys.minko.render.geometry.stream.VertexStream;
 	import aerys.minko.type.loader.parser.ParserOptions;
-	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;
 	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.parser.collada.helper.Triangles;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceGeometry;
-	import aerys.minko.type.stream.IndexStream;
-	import aerys.minko.type.stream.VertexStream;
-	
-	import flash.utils.getTimer;
 	
 	public class Geometry implements IResource
 	{
@@ -86,15 +83,15 @@ package aerys.minko.type.parser.collada.resource
 			newGeometry._id						= xmlGeometry.@id;
 			newGeometry._name					= xmlGeometry.@name;
 			
-			newGeometry._verticesDataSemantics	= new Vector.<String>();
+			newGeometry._verticesDataSemantics	= new <String>[];
 			newGeometry._verticesDataSources	= new Object();
-			newGeometry._triangleStores			= new Vector.<Triangles>();
+			newGeometry._triangleStores			= new <Triangles>[];
 			
 			var xmlMesh		: XML = xmlGeometry.NS::mesh[0];
 			
 			if (!xmlMesh)
 			{
-				Minko.log(0, "Unsupported geometry: '" + newGeometry._name + "'.");
+				Minko.log(0, 'Unsupported geometry: \'' + newGeometry._name + '\'.');
 				
 				return null;
 			}
@@ -145,7 +142,7 @@ package aerys.minko.type.parser.collada.resource
 			if (_meshTemplates != null)
 				return;
 			
-			_meshTemplates = new Vector.<MeshTemplate>();
+			_meshTemplates = new <MeshTemplate>[];
 			
 			for each (var triangleStore : Triangles in _triangleStores)
 			{
@@ -166,7 +163,7 @@ package aerys.minko.type.parser.collada.resource
 				
 				var indexData		: Vector.<uint>		= indexStream.minko_stream::_data;
 				var vertexData		: Vector.<Number>	= vertexStream.minko_stream::_data;
-				var dwordsPerVertex	: uint				= vertexStream.format.size;
+				var dwordsPerVertex	: uint				= vertexStream.format.vertexSize;
 				
 				if (!fast)
 					GeometrySanitizer.removeDuplicatedVertices(vertexData, indexData, dwordsPerVertex);
@@ -176,7 +173,8 @@ package aerys.minko.type.parser.collada.resource
 					vertexData,
 					indexData,
 					materialName,
-					vertexStream.format);
+					vertexStream.format
+				);
 				
 				_meshTemplates.push(meshTemplate);
 			}

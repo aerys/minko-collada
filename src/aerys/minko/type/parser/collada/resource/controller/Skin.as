@@ -8,8 +8,8 @@ package aerys.minko.type.parser.collada.resource.controller
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
 	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.parser.collada.resource.Geometry;
-	import aerys.minko.type.stream.format.VertexComponent;
-	import aerys.minko.type.stream.format.VertexFormat;
+	import aerys.minko.render.geometry.stream.format.VertexComponent;
+	import aerys.minko.render.geometry.stream.format.VertexFormat;
 
 	public class Skin
 	{
@@ -74,8 +74,8 @@ package aerys.minko.type.parser.collada.resource.controller
 				boneWeights			= optimizedBoneWeights;
 				numBonesPerVertex	= optimizedNumBonesPerVertex;
 			}
-			
-			reduceNumBones(boneWeights, jointNames, invBindMatrices);
+			// @fixme creates errors in shader compiler
+			//reduceNumBones(boneWeights, jointNames, invBindMatrices);
 			
 			return new Skin(
 				sourceId,
@@ -239,7 +239,7 @@ package aerys.minko.type.parser.collada.resource.controller
 			var numBones	: uint				= jointsNames.length;
 			var boneIsUsed 	: Vector.<Boolean>	= new Vector.<Boolean>(numBones, true);
 			
-			var weightId	: uint;
+			var weightId	: int;
 			var numWeights	: uint				= bonesWeights.length;
 			for (weightId = 0; weightId < numWeights; weightId += 2)
 			{
@@ -275,8 +275,8 @@ package aerys.minko.type.parser.collada.resource.controller
 				
 				if (newBoneId != -1)
 				{
-					jointsNames[newBoneId] = jointsNames[oldBoneId];
-					invBindMatrices[newBoneId] = invBindMatrices[oldBoneId];
+					jointsNames[newBoneId] 		= jointsNames[oldBoneId];
+					invBindMatrices[newBoneId] 	= invBindMatrices[oldBoneId];
 				}
 			}
 			
@@ -342,7 +342,7 @@ package aerys.minko.type.parser.collada.resource.controller
 		private function addBoneData(oldBuffer	: Vector.<Number>,
 									 oldFormat	: VertexFormat) : Vector.<Number>
 		{
-			var oldDwordPerVertex	: uint = oldFormat.size;
+			var oldDwordPerVertex	: uint = oldFormat.vertexSize;
 			var boneDwordPerVertex	: uint = 2 * _numBonesPerVertex;
 			
 			var newDwordPerVertex	: uint = oldDwordPerVertex + boneDwordPerVertex;

@@ -191,6 +191,7 @@ package aerys.minko.type.parser.collada.resource.animation
 			switch (_transformType)
 			{
 				case TransformType.MATRIX:
+				case TransformType.TRANSFORM:
 					var matrix : Matrix4x4 = getMatrixValueAt(t);
 					matrix.getRawData(data, 0, false);
 					break;

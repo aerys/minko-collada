@@ -1,7 +1,7 @@
 package aerys.minko.type.parser.collada.enum
 {
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.type.stream.format.VertexComponent;
+	import aerys.minko.render.geometry.stream.format.VertexComponent;
 	
 
 	/**

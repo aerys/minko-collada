@@ -1,22 +1,50 @@
 package aerys.minko.type.parser.collada.resource
 {
+	import aerys.minko.render.material.Material;
+	import aerys.minko.render.material.basic.BasicMaterial;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceEffect;
 	import aerys.minko.type.parser.collada.instance.InstanceMaterial;
 	
-	public class Material implements IResource
+	public class ColladaMaterial implements IResource
 	{
-		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		private static const NS 				: Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		
+		public static const DEFAULT_MATERIAL 	: Material 	= new BasicMaterial({diffuseColor: 0x00ff00ff});
 		
 		private var _document		: ColladaDocument;
 		private var _id				: String;
 		private var _name			: String;
 		private var _instanceEffect : InstanceEffect;
 		
-		public function get id()				: String			{ return _id;				}
-		public function get name()				: String			{ return _name;				}
-		public function get instanceEffect()	: InstanceEffect	{ return _instanceEffect;	}
+		private var _material		: Material;
+		
+		public function get id() : String
+		{
+			return _id;
+		}
+		
+		public function get name() : String
+		{
+			return _name;
+		}
+		
+		public function get instanceEffect() : InstanceEffect
+		{
+			return _instanceEffect;
+		}
+		
+		public function get material() : Material
+		{
+			if (!_material)
+			{
+				_material = _instanceEffect.createMaterial();
+				_material.name = _id;
+			}
+			
+			return _material;
+		}
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
 												document	: ColladaDocument, 
@@ -30,12 +58,12 @@ package aerys.minko.type.parser.collada.resource
 			
 			for each (var xmlMaterial : XML in xmlMaterials)
 			{
-				var material : Material = createFromXML(xmlMaterial, document);
+				var material : ColladaMaterial = createFromXML(xmlMaterial, document);
 				store[material.id] = material;
 			}
 		}
 		
-		public static function createFromXML(xmlMaterial : XML, document : ColladaDocument) : Material
+		public static function createFromXML(xmlMaterial : XML, document : ColladaDocument) : ColladaMaterial
 		{
 			var id					: String			= xmlMaterial.@id;
 			var name				: String			= xmlMaterial.@name;
@@ -44,10 +72,10 @@ package aerys.minko.type.parser.collada.resource
 				document
 			);
 			
-			return new Material(id, name, instanceEffect, document);
+			return new ColladaMaterial(id, name, instanceEffect, document);
 		}
 		
-		public function Material(id				: String,
+		public function ColladaMaterial(id				: String,
 								 name			: String, 
 								 instanceEffect	: InstanceEffect,
 								 document		: ColladaDocument)

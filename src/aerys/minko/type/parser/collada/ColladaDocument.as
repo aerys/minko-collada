@@ -4,10 +4,10 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.controller.AbstractController;
 	import aerys.minko.scene.controller.AnimationController;
-	import aerys.minko.scene.controller.mesh.SkinningController;
+	import aerys.minko.scene.controller.mesh.skinning.SkinningController;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
-	import aerys.minko.scene.node.mesh.Mesh;
+	import aerys.minko.scene.node.Mesh;
 	import aerys.minko.type.animation.SkinningMethod;
 	import aerys.minko.type.animation.timeline.ITimeline;
 	import aerys.minko.type.error.collada.ColladaError;
@@ -16,9 +16,9 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceController;
+	import aerys.minko.type.parser.collada.resource.ColladaMaterial;
 	import aerys.minko.type.parser.collada.resource.Geometry;
 	import aerys.minko.type.parser.collada.resource.IResource;
-	import aerys.minko.type.parser.collada.resource.Material;
 	import aerys.minko.type.parser.collada.resource.Node;
 	import aerys.minko.type.parser.collada.resource.VisualScene;
 	import aerys.minko.type.parser.collada.resource.animation.Animation;
@@ -52,7 +52,7 @@ package aerys.minko.type.parser.collada
 			'effect'		: Effect,
 			'geometry'		: Geometry,
 			'image'			: Image,
-			'material'		: Material,
+			'material'		: ColladaMaterial,
 			'node'			: Node,
 			'visual_scene'	: VisualScene
 		};
@@ -86,7 +86,7 @@ package aerys.minko.type.parser.collada
 		public function getEffectById		(id : String) : Effect		{ return _effects[id];		}
 		public function getGeometryById		(id : String) : Geometry	{ return _geometries[id];	}
 		public function getImageById		(id : String) : Image		{ return _images[id];		}
-		public function getMaterialById		(id : String) : Material	{ return _materials[id];	}
+		public function getMaterialById		(id : String) : ColladaMaterial	{ return _materials[id];	}
 		public function getNodeById			(id	: String) : Node		{ return _nodes[id];		}
 		public function getVisualSceneById	(id	: String) : VisualScene	{ return _visualScenes[id];	}
 		
@@ -114,7 +114,7 @@ package aerys.minko.type.parser.collada
 			Effect		.fillStoreFromXML(xmlDocument, this, _effects);
 			Geometry	.fillStoreFromXML(xmlDocument, this, _geometries);
 			Image		.fillStoreFromXML(xmlDocument, this, _images);
-			Material 	.fillStoreFromXML(xmlDocument, this, _materials);
+			ColladaMaterial 	.fillStoreFromXML(xmlDocument, this, _materials);
 			Node		.fillStoreFromXML(xmlDocument, this, _nodes);
 			VisualScene	.fillStoreFromXML(xmlDocument, this, _visualScenes);
 		}
@@ -261,7 +261,7 @@ package aerys.minko.type.parser.collada
 					var meshes : Vector.<ISceneNode> =
 						scene is Group ? Group(scene).getDescendantsByType(Mesh) : new <ISceneNode>[scene];
 
-					var jointNames : Vector.<String>	= new <String>[];
+					var joints : Vector.<Group>	= new <Group>[];
 					for each (var jointName : String in skin.jointNames)
 					{
 						var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName]; // handle collada 1.4 "ID_REF"
@@ -273,17 +273,17 @@ package aerys.minko.type.parser.collada
 							continue;
 						}
 
-						jointNames.push(joint.name);
+						joints.push(joint);
 					}
-
-					var skinController	: AbstractController = new SkinningController(
-						SkinningMethod.DUAL_QUATERNION,
+					
+					var skinController : AbstractController = new SkinningController(
+						options.skinningMethod,
 						mainScene,
-						jointNames,
+						joints,
 						skin.bindShapeMatrix,
 						skin.invBindMatrices
 					);
-
+					
 					for each (var mesh : ISceneNode in meshes)
 						Mesh(mesh).addController(skinController);
 				}

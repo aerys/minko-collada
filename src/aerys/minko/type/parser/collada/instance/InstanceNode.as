@@ -1,8 +1,10 @@
 package aerys.minko.type.parser.collada.instance
 {
+	import aerys.minko.Minko;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.type.loader.parser.ParserOptions;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
@@ -33,9 +35,9 @@ package aerys.minko.type.parser.collada.instance
 			var name		: String = xml.@name;
 			var scopedId	: String = xml.@sid;
 			
-			if (sourceId.length == 0) sourceId = null;
-			if (scopedId.length == 0) scopedId = null;
-			if (name.length == 0) name = null;
+			if (sourceId.length == 0)	sourceId = null;
+			if (scopedId.length == 0)	scopedId = null;
+			if (name.length == 0)		name = null;
 			
 			return new InstanceNode(document, sourceId, name, scopedId);
 		}
@@ -62,7 +64,9 @@ package aerys.minko.type.parser.collada.instance
 			
 			var group : Group = new Group();
 			group.transform.copyFrom(transform);
-			group.name = _sourceId;
+			
+			if (_sourceId != null && _sourceId.length != 0)
+				group.name = _sourceId;
 			
 			for (var childId : uint = 0; childId < numChilds; ++childId)
 			{
@@ -71,15 +75,12 @@ package aerys.minko.type.parser.collada.instance
 				
 				if (child)
 					group.addChild(child);
-//				else
-//					throw new Error();
+				else
+					Minko.log(DebugLevel.PLUGIN_WARNING, 'Dropping unknown node in group: "' + group.name + '"', this);
 			}
 			
-			if (_sourceId != null)
-				sourceIdToSceneNode[_sourceId] = group;
-			
-			if (_scopedId != null)
-				scopedIdToSceneNode[_scopedId] = group;
+			if (_sourceId != null) sourceIdToSceneNode[_sourceId] = group;
+			if (_scopedId != null) scopedIdToSceneNode[_scopedId] = group;
 			
 			return group;
 		}
