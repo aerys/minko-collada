@@ -265,7 +265,7 @@ package aerys.minko.type.parser.collada.helper
 					format.addComponent(InputType.minko_collada::TO_COMPONENT[_semantics[componentId]]);
 			
 			
-			var dwordsPerVertex		: uint				= format.size;
+			var dwordsPerVertex		: uint				= format.vertexSize;
 			var bufferSize			: uint 				= numVertices * dwordsPerVertex;
 			var vertexBuffer		: Vector.<Number>	= new Vector.<Number>(bufferSize, true);
 			var numTriangleVertices	: uint				= _triangleVertices.length;

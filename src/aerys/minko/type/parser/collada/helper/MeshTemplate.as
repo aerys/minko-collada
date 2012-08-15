@@ -67,7 +67,7 @@ package aerys.minko.type.parser.collada.helper
 			var vertexDatas	: Vector.<Vector.<Number>>	= new Vector.<Vector.<Number>>();
 			var indexDatas	: Vector.<Vector.<uint>>	= new Vector.<Vector.<uint>>();
 			
-			GeometrySanitizer.splitBuffers(_vertexData, _indexData, vertexDatas, indexDatas, _vertexFormat.size);
+			GeometrySanitizer.splitBuffers(_vertexData, _indexData, vertexDatas, indexDatas, _vertexFormat.vertexSize);
 			
 			var numBuffers 	: uint 			= indexDatas.length;
 			var meshes 		: Vector.<Mesh> = new Vector.<Mesh>(numBuffers);

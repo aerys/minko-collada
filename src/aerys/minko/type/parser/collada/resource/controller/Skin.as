@@ -342,7 +342,7 @@ package aerys.minko.type.parser.collada.resource.controller
 		private function addBoneData(oldBuffer	: Vector.<Number>,
 									 oldFormat	: VertexFormat) : Vector.<Number>
 		{
-			var oldDwordPerVertex	: uint = oldFormat.size;
+			var oldDwordPerVertex	: uint = oldFormat.vertexSize;
 			var boneDwordPerVertex	: uint = 2 * _numBonesPerVertex;
 			
 			var newDwordPerVertex	: uint = oldDwordPerVertex + boneDwordPerVertex;
