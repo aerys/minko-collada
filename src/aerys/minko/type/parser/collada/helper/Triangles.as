@@ -1,14 +1,19 @@
 package aerys.minko.type.parser.collada.helper
 {
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.type.error.collada.ColladaError;
-	import aerys.minko.type.parser.collada.enum.InputType;
 	import aerys.minko.render.geometry.stream.IndexStream;
 	import aerys.minko.render.geometry.stream.StreamUsage;
 	import aerys.minko.render.geometry.stream.VertexStream;
 	import aerys.minko.render.geometry.stream.VertexStreamList;
 	import aerys.minko.render.geometry.stream.format.VertexComponent;
 	import aerys.minko.render.geometry.stream.format.VertexFormat;
+	import aerys.minko.render.geometry.stream.iterator.VertexIterator;
+	import aerys.minko.render.geometry.stream.iterator.VertexReference;
+	import aerys.minko.type.error.collada.ColladaError;
+	import aerys.minko.type.parser.collada.enum.InputType;
+	
+	import flash.utils.ByteArray;
+	import flash.utils.Endian;
 
 	public class Triangles
 	{
@@ -265,11 +270,11 @@ package aerys.minko.type.parser.collada.helper
 					format.addComponent(InputType.minko_collada::TO_COMPONENT[_semantics[componentId]]);
 			
 			
-			var dwordsPerVertex		: uint				= format.vertexSize;
+			var dwordsPerVertex		: uint				= format.numBytesPerVertex;
 			var bufferSize			: uint 				= numVertices * dwordsPerVertex;
 			var vertexBuffer		: Vector.<Number>	= new Vector.<Number>(bufferSize, true);
 			var numTriangleVertices	: uint				= _triangleVertices.length;
-			var component		: VertexComponent
+			var component			: VertexComponent
 			
 			numSemantics = verticesSemantics.length;
 			for (componentId = 0; componentId < numSemantics; ++componentId)
@@ -281,10 +286,10 @@ package aerys.minko.type.parser.collada.helper
 				
 				var source			: Source	= verticesDataSources[semantic];
 				var sourceData		: Array		= source.data;
-				var componentDwords	: uint		= component.size;
+				var componentDwords	: uint		= component.numProperties;
 				var sourceStride	: uint		= source.stride;
 				
-				var innerOffset		: uint		= format.getOffsetForComponent(component);
+				var innerOffset		: uint		= format.getBytesOffsetForComponent(component);
 				
 				for (var indexOffset : uint = _offsets['VERTEX']; 
 					 indexOffset < numTriangleVertices; 
@@ -310,11 +315,11 @@ package aerys.minko.type.parser.collada.helper
 				if (!component)
 					continue;
 				
-				source	= _sources[_semantics[componentId]];
-				sourceData	= source.data;
-				componentDwords	= component.size;
+				source			= _sources[_semantics[componentId]];
+				sourceData		= source.data;
+				componentDwords	= component.numProperties;
 				sourceStride	= source.stride;
-				innerOffset		= format.getOffsetForComponent(component);
+				innerOffset		= format.getBytesOffsetForComponent(component);
 					
 				for (indexOffset = _offsets['VERTEX'], index2Offset = _offsets[semantic]; 
 					indexOffset < numTriangleVertices; 
@@ -335,20 +340,22 @@ package aerys.minko.type.parser.collada.helper
 			}
 			
 			var j : Number = 0;
-			for (var i : uint = format.getOffsetForComponent(VertexComponent.ID);
+			for (var i : uint = format.getBytesOffsetForComponent(VertexComponent.ID);
 				i < bufferSize;
 				i += dwordsPerVertex)
-				vertexBuffer[i] = j++;
-			
-			if (format.hasComponent(VertexComponent.UV))
 			{
-				for (i = format.getOffsetForField('v');
-					 i < bufferSize;
-					 i += dwordsPerVertex)
-					vertexBuffer[i] = 1 - vertexBuffer[i];
+				vertexBuffer[i] = j++;
 			}
 			
-			return new VertexStream(StreamUsage.DYNAMIC, format, vertexBuffer);
+			if (format.hasComponent(VertexComponent.UV))
+				for (i = format.getBytesOffsetForProperty('v');
+					i < bufferSize;
+					i += dwordsPerVertex)
+				{
+					vertexBuffer[i] = 1 - vertexBuffer[i];
+				}
+			
+			return VertexStream.fromVector(StreamUsage.DYNAMIC, format, vertexBuffer);
 		}
 		
 		public function computeIndexStream() : IndexStream
@@ -366,6 +373,7 @@ package aerys.minko.type.parser.collada.helper
 											verticesDataSources	: Object) : VertexStream
 		{
 			var streamList : VertexStreamList = computeVertexStreamList(verticesSemantics, verticesDataSources);
+			
 			return VertexStream.extractSubStream(streamList, StreamUsage.DYNAMIC);
 		}
 		
@@ -412,35 +420,34 @@ package aerys.minko.type.parser.collada.helper
 													   source			: Source, 
 													   isVertexSource	: Boolean) : VertexStream
 		{
-			var buffer : Vector.<Number>;
-			
-			buffer = createVertexBuffer(semantic, source, isVertexSource);
-			return createVertexStream(semantic, buffer);
+			return createVertexStream(semantic, createVertexBuffer(semantic, source, isVertexSource));
 		}
 		
 		private function createVertexBuffer(semantic		: String,
 											source			: Source,
-											isVertexSource	: Boolean) : Vector.<Number>
+											isVertexSource	: Boolean) : ByteArray
 		{
-			var numTriangleVertices	: uint				= _triangleVertices.length;
-			var numVertices			: uint				= numTriangleVertices / _indicesPerVertex;
-			var sourceData			: Array				= source.data;
-			var sourceStride		: uint				= source.stride
+			var numTriangleVertices	: uint		= _triangleVertices.length;
+			var numVertices			: uint		= numTriangleVertices / _indicesPerVertex;
+			var sourceData			: Array		= source.data;
+			var sourceStride		: uint		= source.stride
 			
-			var vertexBuffer		: Vector.<Number>	= new Vector.<Number>(numVertices * sourceStride);
-			var vertexBufferPos 	: uint				= 0;
+			var vertexBuffer		: ByteArray	= new ByteArray();
 			
+			vertexBuffer.endian = Endian.LITTLE_ENDIAN;
 			for (var indexOffset : uint = _offsets[isVertexSource ? 'VERTEX' : semantic]; 
-				indexOffset < numTriangleVertices; 
-				indexOffset += _indicesPerVertex)
+			 	 indexOffset < numTriangleVertices; 
+				 indexOffset += _indicesPerVertex)
 			{
 				var sourceIndex			: uint = _triangleVertices[indexOffset] * sourceStride;
 				var sourceIndexLimit	: uint = sourceIndex + sourceStride;
 				
 				for (; sourceIndex < sourceIndexLimit; ++sourceIndex)
-					vertexBuffer[vertexBufferPos++] = sourceData[sourceIndex];
+					vertexBuffer.writeFloat(sourceData[sourceIndex]);
 			}
 			
+			vertexBuffer.position = 0;
+						
 			return vertexBuffer;
 		}
 		
@@ -449,35 +456,42 @@ package aerys.minko.type.parser.collada.helper
 		 * if uvw was present in the feed, strip the w component.
 		 */		
 		private function createVertexStream(semantic	: String,
-											buffer		: Vector.<Number>) : VertexStream
+											buffer		: ByteArray) : VertexStream
 		{
 			var component	: VertexComponent	= InputType.minko_collada::TO_COMPONENT[semantic];
 			var format		: VertexFormat		= new VertexFormat(component);
 			
 			if (semantic == InputType.TEXCOORD)
 			{
-				var bufferLength	: uint = buffer.length;
-				var numVertices		: uint = _triangleVertices.length / _indicesPerVertex;
-				
-				// sometimes, collada feed 3 numbers for texcoords (event for 2 dimensional images).
-				if (bufferLength == 3 * numVertices)
+				var numDwords	: uint = buffer.bytesAvailable >>> 2;
+				var numVertices	: uint = _triangleVertices.length / _indicesPerVertex;
+
+				// sometimes, collada feed 3 numbers for texcoords (even for 2 dimensional images).
+				if (numDwords == 3 * numVertices)
 				{
+					buffer.position = 0;
 					for (var vertexId : uint = 0; vertexId < numVertices; ++vertexId)
-					{
-						buffer[2 * vertexId] = buffer[3 * vertexId];
-						buffer[2 * vertexId + 1] = buffer[3 * vertexId + 1];
-					}
+						buffer.writeBytes(buffer, vertexId * 12, 8);
 					
-					buffer			= buffer;
-					bufferLength	= buffer.length	= 2 * numVertices;
+					numDwords = 2 * numVertices;
+					buffer.length = numVertices << 3;
 				}
 				
-				if (bufferLength != 2 * numVertices)
-					throw new Error("Failed importing UV stream.");
+				if (numDwords != 2 * numVertices)
+					throw new Error('Failed importing UV stream.');
 				
+				buffer.position = 0;
 				// collada invert the v coordinate.
-				for (var i : uint = 1; i < bufferLength; i += 2)
-					buffer[i] = 1 - buffer[i];
+				for (var i : uint = 1; i < numDwords; i += 2)
+				{
+					var u : Number = buffer.readFloat();
+					var v : Number = buffer.readFloat();
+					
+					buffer.position -= 4;
+					buffer.writeFloat(1. - v);
+				}
+				
+				buffer.position = 0;
 			}
 			
 			return new VertexStream(StreamUsage.DYNAMIC, format, buffer);
@@ -485,18 +499,20 @@ package aerys.minko.type.parser.collada.helper
 		
 		public function computeIdVertexStream() : VertexStream
 		{
-			var numTriangleVertices	: uint				= _triangleVertices.length;
-			var numVertices			: uint				= numTriangleVertices / _indicesPerVertex;
+			var numTriangleVertices	: uint		= _triangleVertices.length;
+			var numVertices			: uint		= numTriangleVertices / _indicesPerVertex;
 			
-			var vertexBuffer		: Vector.<Number>	= new Vector.<Number>(numVertices);
-			var vertexBufferPos 	: uint				= 0;
+			var vertexBuffer		: ByteArray	= new ByteArray();
 			
-			for (var indexOffset : uint = _offsets['VERTEX']; 
-				indexOffset < numTriangleVertices; 
-				indexOffset += _indicesPerVertex)
+			vertexBuffer.endian = Endian.LITTLE_ENDIAN;
+			for (var indexOffset : uint = _offsets['VERTEX'];
+				 indexOffset < numTriangleVertices; 
+				 indexOffset += _indicesPerVertex)
 			{
-				vertexBuffer[vertexBufferPos++] = _triangleVertices[indexOffset];
+				vertexBuffer.writeFloat(_triangleVertices[indexOffset]);
 			}
+			
+			vertexBuffer.position = 0;
 			
 			return new VertexStream(StreamUsage.DYNAMIC, new VertexFormat(VertexComponent.ID), vertexBuffer);
 		}

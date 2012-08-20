@@ -1,6 +1,8 @@
 package aerys.minko.type.parser.collada.resource.controller
 {
 	import aerys.minko.ns.minko_collada;
+	import aerys.minko.render.geometry.stream.format.VertexComponent;
+	import aerys.minko.render.geometry.stream.format.VertexFormat;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
@@ -8,8 +10,9 @@ package aerys.minko.type.parser.collada.resource.controller
 	import aerys.minko.type.parser.collada.helper.NumberListParser;
 	import aerys.minko.type.parser.collada.helper.Source;
 	import aerys.minko.type.parser.collada.resource.Geometry;
-	import aerys.minko.render.geometry.stream.format.VertexComponent;
-	import aerys.minko.render.geometry.stream.format.VertexFormat;
+	
+	import flash.utils.ByteArray;
+	import flash.utils.Endian;
 
 	public class Skin
 	{
@@ -303,8 +306,8 @@ package aerys.minko.type.parser.collada.resource.controller
 			{
 				var meshTemplate : MeshTemplate = meshTemplates[meshId];
 				
-				var oldVertexData	: Vector.<Number>	= meshTemplate.vertexData;
-				var oldFormat		: VertexFormat		= meshTemplate.vertexFormat;
+				var oldVertexData	: ByteArray		= meshTemplate.vertexData;
+				var oldFormat		: VertexFormat	= meshTemplate.vertexFormat;
 				
 				// create vertex format
 				var vertexFormat : VertexFormat = oldFormat.clone();
@@ -339,41 +342,45 @@ package aerys.minko.type.parser.collada.resource.controller
 			}
 		}
 		
-		private function addBoneData(oldBuffer	: Vector.<Number>,
-									 oldFormat	: VertexFormat) : Vector.<Number>
+		private function addBoneData(oldBuffer	: ByteArray,
+									 oldFormat	: VertexFormat) : ByteArray
 		{
-			var oldDwordPerVertex	: uint = oldFormat.vertexSize;
-			var boneDwordPerVertex	: uint = 2 * _numBonesPerVertex;
+			var startPosition		: uint		= oldBuffer.position;
+			var oldBytesPerVertex	: uint 		= oldFormat.numBytesPerVertex;
+			var boneBytesPerVertex	: uint 		= _numBonesPerVertex << 3;
 			
-			var newDwordPerVertex	: uint = oldDwordPerVertex + boneDwordPerVertex;
+			var newBytesPerVertex	: uint 		= oldBytesPerVertex + boneBytesPerVertex;
 			
-			var numVertices			: uint = oldBuffer.length / oldDwordPerVertex;
-			var newBuffer			: Vector.<Number>	= new Vector.<Number>(numVertices * newDwordPerVertex, true);
+			var numVertices			: uint 		= oldBuffer.length / oldBytesPerVertex;
+			var newBuffer			: ByteArray	= new ByteArray();
 			
-			var oldReadOffset		: uint = 0;
-			var oldVertexIdOffset	: uint = oldFormat.getOffsetForComponent(VertexComponent.ID);
-			var newWriteOffset		: uint = 0;
+			var oldReadOffset		: uint 		= 0;
+			var oldVertexIdOffset	: uint 		= oldFormat.getBytesOffsetForComponent(VertexComponent.ID);
+			var newWriteOffset		: uint 		= 0;
 			
-			var oldReadLimit		: uint = oldDwordPerVertex;
+			newBuffer.endian = Endian.LITTLE_ENDIAN;
 			
 			for (var i : uint = 0; i < numVertices; ++i)
 			{
 				// copy old vertex to new one
-				for (; oldReadOffset < oldReadLimit; ++oldReadOffset)
-					newBuffer[newWriteOffset++] = oldBuffer[oldReadOffset];
+				newBuffer.writeBytes(oldBuffer, oldReadOffset, oldBytesPerVertex);
 				
 				// read from old buffer where to read the new bone
-				var boneReadOffset	: uint = boneDwordPerVertex * oldBuffer[oldVertexIdOffset];
-				var boneReadLimit	: uint = boneReadOffset + boneDwordPerVertex;
+				oldBuffer.position = oldVertexIdOffset;
+				
+				var boneReadOffset	: uint = (boneBytesPerVertex >>> 2) * oldBuffer.readFloat();
+				var boneReadLimit	: uint = boneReadOffset + (boneBytesPerVertex >>> 2);
 				
 				for (; boneReadOffset < boneReadLimit; ++boneReadOffset)
-					newBuffer[newWriteOffset++] = _boneWeights[boneReadOffset];
+					newBuffer.writeFloat(_boneWeights[boneReadOffset]);
 				
 				// increment iterators
-				oldVertexIdOffset	+= oldDwordPerVertex;
-				oldReadLimit		+= oldDwordPerVertex;
-				boneReadLimit		+= boneDwordPerVertex;
+				oldReadOffset 		+= oldBytesPerVertex
+				oldVertexIdOffset	+= oldBytesPerVertex;
 			}
+			
+			oldBuffer.position = startPosition;
+			newBuffer.position = 0;
 			
 			return newBuffer;
 		}

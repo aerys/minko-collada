@@ -6,6 +6,8 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.render.geometry.GeometrySanitizer;
 	import aerys.minko.render.geometry.stream.IndexStream;
 	import aerys.minko.render.geometry.stream.VertexStream;
+	import aerys.minko.render.geometry.stream.iterator.VertexIterator;
+	import aerys.minko.render.geometry.stream.iterator.VertexReference;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;
@@ -13,6 +15,8 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.type.parser.collada.helper.Triangles;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceGeometry;
+	
+	import flash.utils.ByteArray;
 	
 	public class Geometry implements IResource
 	{
@@ -161,9 +165,9 @@ package aerys.minko.type.parser.collada.resource
 					vertexStream	= triangleStore.computeVertexStream(_verticesDataSemantics, _verticesDataSources);
 				}
 				
-				var indexData		: Vector.<uint>		= indexStream.minko_stream::_data;
-				var vertexData		: Vector.<Number>	= vertexStream.minko_stream::_data;
-				var dwordsPerVertex	: uint				= vertexStream.format.vertexSize;
+				var indexData		: Vector.<uint>	= indexStream.minko_stream::_data;
+				var vertexData		: ByteArray		= vertexStream.minko_stream::_data;
+				var dwordsPerVertex	: uint			= vertexStream.format.numBytesPerVertex;
 				
 				if (!fast)
 					GeometrySanitizer.removeDuplicatedVertices(vertexData, indexData, dwordsPerVertex);

@@ -1,18 +1,20 @@
 package aerys.minko.type.parser.collada.helper
 {
 	import aerys.minko.render.Effect;
-	import aerys.minko.scene.node.Mesh;
 	import aerys.minko.render.geometry.Geometry;
 	import aerys.minko.render.geometry.GeometrySanitizer;
 	import aerys.minko.render.geometry.stream.IVertexStream;
 	import aerys.minko.render.geometry.stream.IndexStream;
 	import aerys.minko.render.geometry.stream.VertexStream;
 	import aerys.minko.render.geometry.stream.format.VertexFormat;
+	import aerys.minko.scene.node.Mesh;
+	
+	import flash.utils.ByteArray;
 
 	public class MeshTemplate
 	{
 		private var _meshName		: String;
-		private var _vertexData		: Vector.<Number>;
+		private var _vertexData		: ByteArray;
 		private var _indexData		: Vector.<uint>;
 		private var _materialName	: String;
 		private var _vertexFormat	: VertexFormat;
@@ -37,13 +39,13 @@ package aerys.minko.type.parser.collada.helper
 			return _indexData;
 		}
 		
-		public function get vertexData() : Vector.<Number>
+		public function get vertexData() : ByteArray
 		{
 			return _vertexData;
 		}
 		
 		public function MeshTemplate(meshName		: String,
-									 vertexData		: Vector.<Number>,
+									 vertexData		: ByteArray,
 									 indexData		: Vector.<uint>,
 									 materialName	: String,
 									 vertexFormat	: VertexFormat)
@@ -53,6 +55,9 @@ package aerys.minko.type.parser.collada.helper
 			_indexData		= indexData;
 			_materialName	= materialName;
 			_vertexFormat	= vertexFormat;
+			
+			if (vertexData.bytesAvailable % _vertexFormat.numBytesPerVertex != 0)
+				throw new Error();
 		}
 		
 		public function clone() : MeshTemplate
@@ -64,30 +69,35 @@ package aerys.minko.type.parser.collada.helper
 									   vertexStreamUsage	: uint,
 									   indexStreamUsage		: uint) : Vector.<Mesh>
 		{
-			var vertexDatas	: Vector.<Vector.<Number>>	= new Vector.<Vector.<Number>>();
+			var vertexDatas	: Vector.<ByteArray>		= new <ByteArray>[];
 			var indexDatas	: Vector.<Vector.<uint>>	= new Vector.<Vector.<uint>>();
 			
-			GeometrySanitizer.splitBuffers(_vertexData, _indexData, vertexDatas, indexDatas, _vertexFormat.vertexSize);
+			GeometrySanitizer.splitBuffers(_vertexData, _indexData, vertexDatas, indexDatas, _vertexFormat.numBytesPerVertex);
 			
 			var numBuffers 	: uint 			= indexDatas.length;
 			var meshes 		: Vector.<Mesh> = new Vector.<Mesh>(numBuffers);
 			
 			for (var bufferId : uint = 0; bufferId < numBuffers; ++bufferId)
 			{
+				var vertices 	: ByteArray 	= vertexDatas[bufferId] as ByteArray;
+				var indices 	: Vector.<uint> = indexDatas[bufferId] as Vector.<uint>;
+				
+				if (!GeometrySanitizer.isValid(indices, vertices, _vertexFormat.numBytesPerVertex))
+					throw new Error();
+				
 				var vertexStream : VertexStream = new VertexStream(
 					vertexStreamUsage, 
 					_vertexFormat, 
-					vertexDatas[bufferId]
+					vertices
 				);
 				
 				var indexStream	: IndexStream = new IndexStream(
 					indexStreamUsage,
-					indexDatas[bufferId]
+					indices
 				);
 				
-				var subMesh : Mesh = new Mesh(
-					new Geometry(new <IVertexStream>[vertexStream], indexStream)
-				);
+				var geom : Geometry = new Geometry(new <IVertexStream>[vertexStream], indexStream);
+				var subMesh : Mesh = new Mesh(geom);
 				
 				subMesh.name = _meshName + bufferId;
 				
