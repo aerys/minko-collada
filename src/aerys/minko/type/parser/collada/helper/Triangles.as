@@ -231,18 +231,22 @@ package aerys.minko.type.parser.collada.helper
 		public function fastComputeIndexStream(verticesSemantics	: Vector.<String>,
 											   verticesDataSources	: Object) : IndexStream
 		{
-			var numTriangleVertices	: uint				= _triangleVertices.length;
-			var numVertices			: uint				= numTriangleVertices / _indicesPerVertex;
+			var numTriangleVertices	: uint		= _triangleVertices.length;
+			var numVertices			: uint		= numTriangleVertices / _indicesPerVertex;
 			
-			var indexBuffer			: Vector.<uint>		= new Vector.<uint>(numVertices);
-			var vertexBufferPos 	: uint				= 0;
+			var indexBuffer			: ByteArray	= new ByteArray();
+			var vertexBufferPos 	: uint		= 0;
+			
+			indexBuffer.endian = Endian.LITTLE_ENDIAN;
 			
 			for (var indexOffset : uint = _offsets['VERTEX']; 
 				indexOffset < numTriangleVertices; 
 				indexOffset += _indicesPerVertex)
 			{
-				indexBuffer[vertexBufferPos++] = _triangleVertices[indexOffset];
+				indexBuffer.writeShort(_triangleVertices[indexOffset]);
 			}
+			
+			indexBuffer.position = 0;
 			
 			return new IndexStream(StreamUsage.DYNAMIC, indexBuffer);
 		}
@@ -360,11 +364,13 @@ package aerys.minko.type.parser.collada.helper
 		
 		public function computeIndexStream() : IndexStream
 		{
-			var numVertices	: uint			= _triangleVertices.length / _indicesPerVertex;
-			var indexBuffer : Vector.<uint> = new Vector.<uint>(numVertices, true);
+			var numVertices	: uint		= _triangleVertices.length / _indicesPerVertex;
+			var indexBuffer : ByteArray = new ByteArray();
 			
+			indexBuffer.endian = Endian.LITTLE_ENDIAN;
 			for (var i : uint = 0; i < numVertices; ++i)
-				indexBuffer[i] = i;
+				indexBuffer.writeShort(i);
+			indexBuffer.position = 0;
 			
 			return new IndexStream(StreamUsage.DYNAMIC, indexBuffer);
 		}

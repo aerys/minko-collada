@@ -165,9 +165,9 @@ package aerys.minko.type.parser.collada.resource
 					vertexStream	= triangleStore.computeVertexStream(_verticesDataSemantics, _verticesDataSources);
 				}
 				
-				var indexData		: Vector.<uint>	= indexStream.minko_stream::_data;
-				var vertexData		: ByteArray		= vertexStream.minko_stream::_data;
-				var dwordsPerVertex	: uint			= vertexStream.format.numBytesPerVertex;
+				var indexData		: ByteArray	= indexStream.minko_stream::_data;
+				var vertexData		: ByteArray	= vertexStream.minko_stream::_data;
+				var dwordsPerVertex	: uint		= vertexStream.format.numBytesPerVertex;
 				
 				if (!fast)
 					GeometrySanitizer.removeDuplicatedVertices(vertexData, indexData, dwordsPerVertex);

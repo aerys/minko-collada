@@ -15,7 +15,7 @@ package aerys.minko.type.parser.collada.helper
 	{
 		private var _meshName		: String;
 		private var _vertexData		: ByteArray;
-		private var _indexData		: Vector.<uint>;
+		private var _indexData		: ByteArray;
 		private var _materialName	: String;
 		private var _vertexFormat	: VertexFormat;
 		
@@ -34,7 +34,7 @@ package aerys.minko.type.parser.collada.helper
 			return _vertexFormat;
 		}
 		
-		public function get indexData() : Vector.<uint>
+		public function get indexData() : ByteArray
 		{
 			return _indexData;
 		}
@@ -46,7 +46,7 @@ package aerys.minko.type.parser.collada.helper
 		
 		public function MeshTemplate(meshName		: String,
 									 vertexData		: ByteArray,
-									 indexData		: Vector.<uint>,
+									 indexData		: ByteArray,
 									 materialName	: String,
 									 vertexFormat	: VertexFormat)
 		{
@@ -69,8 +69,8 @@ package aerys.minko.type.parser.collada.helper
 									   vertexStreamUsage	: uint,
 									   indexStreamUsage		: uint) : Vector.<Mesh>
 		{
-			var vertexDatas	: Vector.<ByteArray>		= new <ByteArray>[];
-			var indexDatas	: Vector.<Vector.<uint>>	= new Vector.<Vector.<uint>>();
+			var vertexDatas	: Vector.<ByteArray>	= new <ByteArray>[];
+			var indexDatas	: Vector.<ByteArray>	= new <ByteArray>[];
 			
 			GeometrySanitizer.splitBuffers(_vertexData, _indexData, vertexDatas, indexDatas, _vertexFormat.numBytesPerVertex);
 			
@@ -79,8 +79,8 @@ package aerys.minko.type.parser.collada.helper
 			
 			for (var bufferId : uint = 0; bufferId < numBuffers; ++bufferId)
 			{
-				var vertices 	: ByteArray 	= vertexDatas[bufferId] as ByteArray;
-				var indices 	: Vector.<uint> = indexDatas[bufferId] as Vector.<uint>;
+				var vertices 	: ByteArray	= vertexDatas[bufferId] as ByteArray;
+				var indices 	: ByteArray = indexDatas[bufferId] as ByteArray;
 				
 				if (!GeometrySanitizer.isValid(indices, vertices, _vertexFormat.numBytesPerVertex))
 					throw new Error();
