@@ -150,11 +150,13 @@ package aerys.minko.type.parser.collada.helper
 			for (var i : uint = 0; i < dataLength; i += 16)
 			{
 				var matrix	: Matrix4x4	= new Matrix4x4(
-					parseFloat(data[i]),		parseFloat(data[i + 1]),	parseFloat(data[i + 2]),	parseFloat(data[i + 3]),
-					parseFloat(data[i + 4]),	parseFloat(data[i + 5]),	parseFloat(data[i + 6]),	parseFloat(data[i + 7]),
-					parseFloat(data[i + 8]),	parseFloat(data[i + 9]),	parseFloat(data[i + 10]),	parseFloat(data[i + 11]),
-					parseFloat(data[i + 12]),	parseFloat(data[i + 13]),	parseFloat(data[i + 14]), parseFloat(data[i + 15])
+					parseFloat(data[i]),			parseFloat(data[uint(i + 1)]),	parseFloat(data[uint(i + 2)]),	parseFloat(data[uint(i + 3)]),
+					parseFloat(data[uint(i + 4)]),	parseFloat(data[uint(i + 5)]),	parseFloat(data[uint(i + 6)]),	parseFloat(data[uint(i + 7)]),
+					parseFloat(data[uint(i + 8)]),	parseFloat(data[uint(i + 9)]),	parseFloat(data[uint(i + 10)]),	parseFloat(data[uint(i + 11)]),
+					parseFloat(data[uint(i + 12)]),	parseFloat(data[uint(i + 13)]),	parseFloat(data[uint(i + 14)]), parseFloat(data[uint(i + 15)])
 				).transpose();
+				
+				MatrixSanitizer.sanitize(matrix);
 				
 				result.push(matrix);
 			}
@@ -223,6 +225,8 @@ package aerys.minko.type.parser.collada.helper
 				parseFloat(data[8]),	parseFloat(data[9]),	parseFloat(data[10]),	parseFloat(data[11]),
 				parseFloat(data[12]),	parseFloat(data[13]),	parseFloat(data[14]),	parseFloat(data[15])
 			).transpose();
+			
+			MatrixSanitizer.sanitize(matrix);
 			
 			return matrix;
 		}

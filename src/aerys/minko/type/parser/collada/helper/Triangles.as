@@ -229,26 +229,22 @@ package aerys.minko.type.parser.collada.helper
 		}
 		
 		public function fastComputeIndexStream(verticesSemantics	: Vector.<String>,
-											   verticesDataSources	: Object) : IndexStream
+											   verticesDataSources	: Object) : Vector.<uint>
 		{
-			var numTriangleVertices	: uint		= _triangleVertices.length;
-			var numVertices			: uint		= numTriangleVertices / _indicesPerVertex;
+			var numTriangleVertices	: uint			= _triangleVertices.length;
+			var numVertices			: uint			= numTriangleVertices / _indicesPerVertex;
 			
-			var indexBuffer			: ByteArray	= new ByteArray();
-			var vertexBufferPos 	: uint		= 0;
-			
-			indexBuffer.endian = Endian.LITTLE_ENDIAN;
+			var indexBuffer			: Vector.<uint>	= new <uint>[];
+			var vertexBufferPos 	: uint			= 0;
 			
 			for (var indexOffset : uint = _offsets['VERTEX']; 
-				indexOffset < numTriangleVertices; 
-				indexOffset += _indicesPerVertex)
+				 indexOffset < numTriangleVertices; 
+				 indexOffset += _indicesPerVertex)
 			{
-				indexBuffer.writeShort(_triangleVertices[indexOffset]);
+				indexBuffer.push(_triangleVertices[indexOffset]);
 			}
 			
-			indexBuffer.position = 0;
-			
-			return new IndexStream(StreamUsage.DYNAMIC, indexBuffer);
+			return indexBuffer;
 		}
 		
 		public function fastComputeVertexStream(verticesSemantics	: Vector.<String>,
@@ -326,9 +322,9 @@ package aerys.minko.type.parser.collada.helper
 				innerOffset		= format.getBytesOffsetForComponent(component);
 					
 				for (indexOffset = _offsets['VERTEX'], index2Offset = _offsets[semantic]; 
-					indexOffset < numTriangleVertices; 
-					indexOffset += _indicesPerVertex,
-					index2Offset += _indicesPerVertex)
+					 indexOffset < numTriangleVertices; 
+					 indexOffset += _indicesPerVertex,
+					 index2Offset += _indicesPerVertex)
 				{
 					vertexId			= _triangleVertices[indexOffset];
 					
@@ -353,26 +349,32 @@ package aerys.minko.type.parser.collada.helper
 			
 			if (format.hasComponent(VertexComponent.UV))
 				for (i = format.getBytesOffsetForProperty('v');
-					i < bufferSize;
-					i += dwordsPerVertex)
+					 i < bufferSize;
+					 i += dwordsPerVertex)
 				{
-					vertexBuffer[i] = 1 - vertexBuffer[i];
+					vertexBuffer[i] = 1. - vertexBuffer[i];
+				}
+			
+			if (format.hasComponent(VertexComponent.XYZ))
+				for (i = format.getBytesOffsetForProperty('z');
+					 i < bufferSize;
+					 i += dwordsPerVertex)
+				{
+					vertexBuffer[i] *= -1.;
 				}
 			
 			return VertexStream.fromVector(StreamUsage.DYNAMIC, format, vertexBuffer);
 		}
 		
-		public function computeIndexStream() : IndexStream
+		public function computeIndexStream() : Vector.<uint>
 		{
-			var numVertices	: uint		= _triangleVertices.length / _indicesPerVertex;
-			var indexBuffer : ByteArray = new ByteArray();
+			var numIndices	: uint			= _triangleVertices.length / _indicesPerVertex;
+			var data		: Vector.<uint>	= new <uint>[];
 			
-			indexBuffer.endian = Endian.LITTLE_ENDIAN;
-			for (var i : uint = 0; i < numVertices; ++i)
-				indexBuffer.writeShort(i);
-			indexBuffer.position = 0;
+			for (var i : uint = 0; i < numIndices; ++i)
+				data[i] = numIndices - 1 - i;
 			
-			return new IndexStream(StreamUsage.DYNAMIC, indexBuffer);
+			return data;
 		}
 		
 		public function computeVertexStream(verticesSemantics	: Vector.<String>,

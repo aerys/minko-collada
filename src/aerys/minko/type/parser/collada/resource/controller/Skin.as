@@ -50,8 +50,9 @@ package aerys.minko.type.parser.collada.resource.controller
 			
 			// retrieve bind shape matrix
 			var xmlBindShapeMatrix	: XML		= xmlNode.NS::bind_shape_matrix[0];
-			var bindShapeMatrix		: Matrix4x4 = xmlBindShapeMatrix != null ? 
-				NumberListParser.parseMatrix3D(xmlBindShapeMatrix) : new Matrix4x4();;
+			var bindShapeMatrix		: Matrix4x4 = xmlBindShapeMatrix != null
+				? NumberListParser.parseMatrix3D(xmlBindShapeMatrix)
+				: new Matrix4x4();
 			
 			// retrieve joints
 			var jointSourceId		: String				= xmlNode..NS::joints.NS::input.(@semantic == 'JOINT').@source.substring(1);

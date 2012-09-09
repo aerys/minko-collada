@@ -197,8 +197,8 @@ package aerys.minko.type.parser.collada
 			
 			// scale depending on collada unit, and switch from right to left handed
 			var unit : Number = _metaData.unit.meter;
-			if (!isNaN(unit) && unit != 0)
-				wrapper.transform.setScale(unit, unit, -unit);
+//			if (!isNaN(unit) && unit != 0)
+//				wrapper.transform.setScale(unit, unit, -unit);
 			
 			// change up axis
 			var upAxis : String = _metaData.upAxis;

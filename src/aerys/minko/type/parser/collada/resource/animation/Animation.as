@@ -2,9 +2,11 @@ package aerys.minko.type.parser.collada.resource.animation
 {
 	import aerys.minko.Minko;
 	import aerys.minko.type.animation.timeline.ITimeline;
+	import aerys.minko.type.animation.timeline.MatrixSegmentTimeline;
 	import aerys.minko.type.animation.timeline.MatrixTimeline;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.resource.IResource;
@@ -102,10 +104,11 @@ package aerys.minko.type.parser.collada.resource.animation
 						setMatrixData(time, vector, targetName);
 						
 						// why do we have to do this? animation data from the collada file is plain wrong.
-						vector[3] = vector[7] = vector[11] = 0
+//						vector[3] = vector[7] = vector[11] = 0
 						vector[15] = 1;
 						var matrix : Matrix4x4 = new Matrix4x4();
-						matrix.setRawData(vector, 0, false);
+						
+						matrix.setRawData(vector);
 						
 						minkoTimes.push((time * 1000) << 0);
 						minkoMatrices.push(matrix);
@@ -117,7 +120,8 @@ package aerys.minko.type.parser.collada.resource.animation
 	//						break;
 					
 	//				if (i != timesLength)
-						timelines.push(new MatrixTimeline('transform', minkoTimes, minkoMatrices));
+//						timelines.push(new MatrixTimeline('transform', minkoTimes, minkoMatrices, true));
+						timelines.push(new MatrixSegmentTimeline('transform', minkoTimes, minkoMatrices));
 	//				else
 	//					timelines.push(new MatrixLinearRegularTimeline('transform', deltaTime, minkoMatrices));
 					
