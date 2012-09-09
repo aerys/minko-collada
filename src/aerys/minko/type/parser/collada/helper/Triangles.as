@@ -15,7 +15,7 @@ package aerys.minko.type.parser.collada.helper
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 
-	public class Triangles
+	public final class Triangles
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
@@ -355,13 +355,16 @@ package aerys.minko.type.parser.collada.helper
 					vertexBuffer[i] = 1. - vertexBuffer[i];
 				}
 			
-			if (format.hasComponent(VertexComponent.XYZ))
-				for (i = format.getBytesOffsetForProperty('z');
-					 i < bufferSize;
-					 i += dwordsPerVertex)
-				{
-					vertexBuffer[i] *= -1.;
-				}
+			// invert z to handle right to left handed coordinates
+			for (i = 0; i < bufferSize; i+= dwordsPerVertex)
+			{
+				if (format.hasComponent(VertexComponent.XYZ))
+					vertexBuffer[format.getOffsetForProperty('x')] *= -1.0;
+				if (format.hasComponent(VertexComponent.NORMAL))
+					vertexBuffer[format.getOffsetForProperty('nx')] *= -1.0;
+				if (format.hasComponent(VertexComponent.TANGENT))
+					vertexBuffer[format.getOffsetForProperty('tx')] *= -1.0;
+			}
 			
 			return VertexStream.fromVector(StreamUsage.DYNAMIC, format, vertexBuffer);
 		}
