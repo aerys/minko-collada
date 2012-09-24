@@ -1,15 +1,19 @@
 package aerys.minko.type.parser.collada.enum
 {
+	import aerys.minko.ns.minko_collada;
+	import aerys.minko.render.geometry.stream.format.VertexComponent;
 	
 
 	/**
 	 * All types of input nodes.
 	 * 
-	 * @author Romain Gilliotte <romain.gilliotte@aerys.in>
+	 * @author Romain Gilliotte
 	 * @see Collada 1.5 specs, page 5-48
 	 */	
 	public class InputType
 	{
+		use namespace minko_collada;
+		
 		public static const BINORMAL		: String = 'BINORMAL';
 		public static const COLOR			: String = 'COLOR';
 		public static const CONTINUITY		: String = 'CONTINUITY';
@@ -33,5 +37,14 @@ package aerys.minko.type.parser.collada.enum
 		public static const UV				: String = 'UV';
 		public static const VERTEX			: String = 'VERTEX';
 		public static const WEIGHT			: String = 'WEIGHT';
+		
+		minko_collada static const TO_COMPONENT : Object = new Object();
+		{
+			TO_COMPONENT[POSITION] = VertexComponent.XYZ;
+			//TO_COMPONENT[COLOR] = VertexComponent.RGBA;
+			TO_COMPONENT[TEXCOORD] = VertexComponent.UV;
+			TO_COMPONENT[NORMAL] = VertexComponent.NORMAL;
+			TO_COMPONENT[TANGENT] = VertexComponent.TANGENT;
+		};
 	}
 }

@@ -1,11 +1,12 @@
 package aerys.minko.type.parser.collada.instance
 {
-	import aerys.minko.scene.node.IScene;
-	import aerys.minko.scene.node.group.Joint;
-	import aerys.minko.scene.node.group.TransformGroup;
-	import aerys.minko.type.error.collada.ColladaError;
+	import aerys.minko.Minko;
+	import aerys.minko.scene.node.Group;
+	import aerys.minko.scene.node.ISceneNode;
+	import aerys.minko.type.loader.parser.ParserOptions;
+	import aerys.minko.type.log.DebugLevel;
+	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
-	import aerys.minko.type.parser.collada.enum.NodeType;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.Node;
 	
@@ -13,11 +14,33 @@ package aerys.minko.type.parser.collada.instance
 	{
 		private var _document	: ColladaDocument;
 		
-		private var _id			: String;
+		private var _sourceId	: String;
 		private var _name		: String;
 		private var _scopedId	: String;
 		
-		private var _minkoScene	: IScene;
+		public function get sourceId() : String
+		{
+			return _sourceId;
+		}
+		
+		public function get resource() : IResource
+		{
+			return _document.getNodeById(_sourceId);
+		}
+		
+		public static function createFromXML(document	: ColladaDocument, 
+											 xml		: XML) : InstanceNode
+		{
+			var sourceId	: String = String(xml.@url).substr(1);
+			var name		: String = xml.@name;
+			var scopedId	: String = xml.@sid;
+			
+			if (sourceId.length == 0)	sourceId = null;
+			if (scopedId.length == 0)	scopedId = null;
+			if (name.length == 0)		name = null;
+			
+			return new InstanceNode(document, sourceId, name, scopedId);
+		}
 		
 		public function InstanceNode(document	: ColladaDocument,
 									 sourceId	: String,
@@ -25,62 +48,41 @@ package aerys.minko.type.parser.collada.instance
 									 scopedId	: String = null)
 		{
 			_document	= document;
-			_id			= sourceId;
+			_sourceId	= sourceId;
 			_name		= name;
-			_scopedId	= scopedId
+			_scopedId	= scopedId;
 		}
 		
-		public static function createFromXML(document	: ColladaDocument, 
-											 xml		: XML) : InstanceNode
+		public function createSceneNode(options				: ParserOptions,
+										sourceIdToSceneNode	: Object,
+										scopedIdToSceneNode	: Object) : ISceneNode
 		{
-			var sid			: String = xml.@sid;
-			var name		: String = xml.@name;
-			var sourceId	: String = String(xml.@url).substr(1);
+			var nodeResource	: Node					= Node(resource);
+			var transform		: Matrix4x4				= nodeResource.transform;
+			var childs			: Vector.<IInstance>	= nodeResource.childs;
+			var numChilds		: uint					= childs.length;
 			
-			return new InstanceNode(document, sourceId, name, sid);
-		}
-		
-		public static function createFromSourceId(document	: ColladaDocument, 
-												  sourceId	: String) : InstanceNode
-		{
-			return new InstanceNode(document, sourceId);
-		}
-		
-		public function toScene() : IScene
-		{
-			switch (Node(resource).type)
+			var group : Group = new Group();
+			group.transform.copyFrom(transform);
+			
+			if (_sourceId != null && _sourceId.length != 0)
+				group.name = _sourceId;
+			
+			for (var childId : uint = 0; childId < numChilds; ++childId)
 			{
-				case NodeType.NODE:		return toTransformGroup();
-				case NodeType.JOINT:	return toJoint();
-				default: throw new ColladaError('Unknown node type ' + Node(resource).type);
-			}
-		}
-		
-		public function toTransformGroup() : IScene
-		{
-			if (!_minkoScene)
-			{
-				_minkoScene = Node(resource).toTransformGroup();
-				_minkoScene = _document.parserOptions.replaceNodeFunction(_minkoScene);
+				var child : ISceneNode = 
+					childs[childId].createSceneNode(options, sourceIdToSceneNode, scopedIdToSceneNode);
+				
+				if (child)
+					group.addChild(child);
+				else
+					Minko.log(DebugLevel.PLUGIN_WARNING, 'Dropping unknown node in group: "' + group.name + '"', this);
 			}
 			
-			return _minkoScene;
-		}
-		
-		public function toJoint() : IScene
-		{
-			if (!_minkoScene)
-			{
-				_minkoScene = Node(resource).toJoint();
-				_minkoScene = _document.parserOptions.replaceNodeFunction(_minkoScene);
-			}
+			if (_sourceId != null) sourceIdToSceneNode[_sourceId] = group;
+			if (_scopedId != null) scopedIdToSceneNode[_scopedId] = group;
 			
-			return _minkoScene;
-		}
-		
-		public function get resource() : IResource
-		{
-			return _document.getNodeById(_id);
+			return group;
 		}
 	}
 }

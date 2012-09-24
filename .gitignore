@@ -8,3 +8,5 @@ bin-debug/
 bin-release/
 build/
 html-template/
+
+/bin/minko-collada.swc
