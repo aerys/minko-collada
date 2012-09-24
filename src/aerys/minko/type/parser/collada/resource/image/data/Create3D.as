@@ -1,25 +1,18 @@
 package aerys.minko.type.parser.collada.resource.image.data
 {
-	import aerys.minko.type.error.collada.ColladaError;
-	
-	import flash.display.BitmapData;
-	import flash.events.EventDispatcher;
-
-	public class Create3D/* extends EventDispatcher*/ implements IImageData
+	public class Create3D extends AbstractImageData
 	{
-		/*public function get isLoaded() : Boolean { return false; }
-		public function get bitmapData() : BitmapData { return null; }*/
-		
-		public function get path() : String	{ return null; }
+		public static function createFromXML(xml : XML) : Create3D
+		{
+			return new Create3D();
+		}
 		
 		public function Create3D()
 		{
-			throw new ColladaError('3D textures are not supported');
-		}
-		
-		public function load() : void
-		{
-			throw new ColladaError('3D textures are not supported');
+			super(null);
+			
+			throw new Error('The \'create_3d\' collada token is not yet ' +
+				'supported. Minko is open-source! Feel free to improve it.');
 		}
 	}
 }

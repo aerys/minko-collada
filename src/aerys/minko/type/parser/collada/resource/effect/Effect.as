@@ -1,12 +1,14 @@
 package aerys.minko.type.parser.collada.resource.effect
 {
+	import aerys.minko.Minko;
+	import aerys.minko.render.material.Material;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
-	import aerys.minko.type.parser.collada.helper.ParamParser;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceEffect;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.effect.profile.IProfile;
-	import aerys.minko.type.parser.collada.resource.effect.profile.ProfileFactory;
+	import aerys.minko.type.parser.collada.resource.effect.profile.ProfileCommon;
 	
 	public class Effect implements IResource
 	{
@@ -19,7 +21,7 @@ package aerys.minko.type.parser.collada.resource.effect
 		private var _profiles	: Vector.<IProfile>;
 		
 		public function get id()		: String 			{ return _id;		}
-		public function get name()		: String 			{ return _name;	}
+		public function get name()		: String 			{ return _name;		}
 		public function get params()	: Object 			{ return _params;	}
 		public function get profiles()	: Vector.<IProfile>	{ return _profiles; }
 		
@@ -43,44 +45,74 @@ package aerys.minko.type.parser.collada.resource.effect
 		public static function createFromXML(xml		: XML, 
 											 document	: ColladaDocument) : Effect
 		{
-			var effect : Effect = new Effect();
-			
-			effect._document	= document;
-			effect._id			= xml.@id;
-			effect._name		= xml.@name;
-			
-			effect._profiles	= new Vector.<IProfile>();
-			effect._params		= new Object();
+			var id			: String			= xml.@id;
+			var name		: String			= xml.@name;
+			var profiles	: Vector.<IProfile>	= new Vector.<IProfile>();
+			var params		: Object			= new Object();
 			
 			for each (var child : XML in xml.children())
 			{
 				switch (child.localName())
 				{
+					case 'profile_COMMON':
+						profiles.push(ProfileCommon.createFromXML(child, document));
+						break;
+					
 					case 'profile_BRIDGE':
 					case 'profile_CG':
-					case 'profile_COMMON':
 					case 'profile_GLES':
 					case 'profile_GLES2':
 					case 'profile_GLSL':
-						effect._profiles.push(ProfileFactory.createProfile(child));
+						Minko.log(DebugLevel.PLUGIN_WARNING,
+							'Skipping profile "' + child.localName() + '" on effect "' + name + '". ' + 
+							'Only profile_COMMON is supported, please check your export settings.'
+						);
 						break;
-						
+					
 					case 'newparam':
-						var paramName	: String	= child.@sid;
-						var paramValue	: *			= ParamParser.parseParam(child);
-						
-						effect._params[paramName]	= paramValue;
-						
+						params[child.@sid] = NewParam.createFromXML(child, document);
 						break;
 				}
 			}
 			
-			return effect;
+			return new Effect(id, name, params, profiles, document);
 		}
 		
-		public function createInstance():IInstance
+		public function Effect(id		: String,
+							   name		: String,
+							   params	: Object,
+							   profiles	: Vector.<IProfile>,
+							   document	: ColladaDocument)
 		{
-			return InstanceEffect.createFromSourceId(_id, _document);
+			_id			= id;
+			_name		= name;
+			_params		= params;
+			_profiles	= profiles;
+			_document	= document;
+		}
+		
+		public function createMaterial(setParams : Object) : Material
+		{
+			var profileCommon : ProfileCommon = null;
+			
+			for each (var profile : IProfile in _profiles)
+				if (profile is ProfileCommon)
+					profileCommon = ProfileCommon(profile);
+			
+			if (!profileCommon)
+			{
+				Minko.log(DebugLevel.PLUGIN_WARNING, 'No valid profile was found for effect: ' + _name);
+				return ProfileCommon.DEFAULT_MATERIAL;
+			}
+			else
+			{
+				return profile.createMaterial(params, setParams);
+			}
+		}
+		
+		public function createInstance() : IInstance
+		{
+			return new InstanceEffect(_id, {}, _document);
 		}
 	}
 }

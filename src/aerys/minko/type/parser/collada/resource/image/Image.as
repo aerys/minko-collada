@@ -4,7 +4,7 @@ package aerys.minko.type.parser.collada.resource.image
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceImage;
 	import aerys.minko.type.parser.collada.resource.IResource;
-	import aerys.minko.type.parser.collada.resource.image.data.IImageData;
+	import aerys.minko.type.parser.collada.resource.image.data.AbstractImageData;
 	import aerys.minko.type.parser.collada.resource.image.data.ImageDataFactory;
 	
 	public class Image implements IResource
@@ -16,12 +16,12 @@ package aerys.minko.type.parser.collada.resource.image
 		private var _id			: String;
 		private var _sid		: String;
 		private var _name		: String;
-		private var _imageData	: IImageData;
+		private var _imageData	: AbstractImageData;
 		
-		public function get id()		: String		{ return _id; }
-		public function get sid()		: String		{ return _sid; }
-		public function get name()		: String		{ return _name; }
-		public function get imageData()	: IImageData	{ return _imageData; }
+		public function get id()		: String			{ return _id; }
+		public function get sid()		: String			{ return _sid; }
+		public function get name()		: String			{ return _name; }
+		public function get imageData()	: AbstractImageData	{ return _imageData; }
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
 												document	: ColladaDocument, 
@@ -56,7 +56,7 @@ package aerys.minko.type.parser.collada.resource.image
 		
 		public function createInstance() : IInstance
 		{
-			return InstanceImage.createFromSourceId(_id, _document);
+			return new InstanceImage(_id, _document);
 		}
 	}
 }

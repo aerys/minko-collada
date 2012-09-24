@@ -1,7 +1,8 @@
 package aerys.minko.type.parser.collada.instance
 {
-	import aerys.minko.scene.node.IScene;
+	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.type.error.collada.ColladaError;
+	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	
@@ -10,19 +11,9 @@ package aerys.minko.type.parser.collada.instance
 		private var _document	: ColladaDocument;
 		private var _sourceId	: String;
 		
-		public static function createFromXML(xml		: XML, 
-											 document	: ColladaDocument) : InstanceImage
+		public function get sourceId() : String
 		{
-			throw new ColladaError('not yet implemented');
-		}
-		
-		public static function createFromSourceId(sourceId	: String, 
-												  document	: ColladaDocument) : InstanceImage
-		{
-			var im : InstanceImage = new InstanceImage();
-			im._document = document;
-			im._sourceId = sourceId;
-			return im;
+			return _sourceId;
 		}
 		
 		public function get resource() : IResource
@@ -30,9 +21,23 @@ package aerys.minko.type.parser.collada.instance
 			return _document.getImageById(_sourceId);
 		}
 		
-		public function toScene():IScene
+		public static function createFromXML(xml		: XML, 
+											 document	: ColladaDocument) : InstanceImage
 		{
-			return null;
+			throw new ColladaError('not yet implemented');
+		}
+		
+		public function InstanceImage(sourceId : String, document : ColladaDocument)
+		{
+			_sourceId = sourceId;
+			_document = document;
+		}
+		
+		public function createSceneNode(options				: ParserOptions,
+										sourceIdToSceneNode	: Object,
+										scopedIdToSceneNode	: Object) : ISceneNode
+		{
+			throw new Error('Images cannot be mapped to sceneNodes');
 		}
 	}
 }

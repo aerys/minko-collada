@@ -4,40 +4,65 @@ package aerys.minko.type.parser.collada.helper
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.math.Vector4;
 	
+	import flash.utils.ByteArray;
+	import flash.utils.Endian;
+	import flash.utils.getTimer;
+	
 	public class NumberListParser
 	{
 		public static function parseIntList(xml : XML) : Vector.<int>
 		{
 			var data		: Array			= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint			= data.length;
-			var result		: Vector.<int>	= new Vector.<int>();
+			var result		: Vector.<int>	= new Vector.<int>(dataLength, true);
 			
 			for (var i : uint = 0; i < dataLength; ++i)
-				result.push(parseInt(data[i]));
+				result[i] = parseInt(data[i]);
 			
 			return result;
 		}
 		
-		public static function parseUintList(xml : XML) : Vector.<uint>
+		public static function parseUintList(xml : XML, out : Vector.<uint>) : uint
 		{
-			var data		: Array			= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
-			var dataLength	: uint			= data.length;
-			var result		: Vector.<uint>	= new Vector.<uint>();
+			var feed			: String		= String(xml);
+			var feedLength		: uint			= feed.length;
 			
-			for (var i : uint = 0; i < dataLength; ++i)
-				result.push(parseInt(data[i]));
+			var currentNumber	: uint			= 0;
+			var lastWasSpace	: Boolean		= false;
+			var numId			: uint			= 0;
 			
-			return result;
+			for (var charId : uint = 0; charId < feedLength; ++charId)
+			{
+				var charCode : uint = feed.charCodeAt(charId) - 48;
+				
+				if (charCode < 10)
+				{
+					currentNumber	*= 10;
+					currentNumber	+= charCode;
+					lastWasSpace	= false;
+				}
+				else if (!lastWasSpace)
+				{
+					out[numId++]	= currentNumber;
+					currentNumber	= 0;
+					lastWasSpace	= true;
+				}
+			}
+			
+			if (!lastWasSpace)
+				out[numId++] = currentNumber;
+			
+			return numId;
 		}
 		
 		public static function parseNumberList(xml : XML) : Vector.<Number>
 		{
 			var data		: Array				= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint				= data.length;
-			var result		: Vector.<Number>	= new Vector.<Number>();
+			var result		: Vector.<Number>	= new Vector.<Number>(dataLength, true);
 			
 			for (var i : uint = 0; i < dataLength; ++i)
-				result.push(parseFloat(data[i]));
+				result[i] = parseFloat(data[i]);
 			
 			return result;
 		}
@@ -46,7 +71,7 @@ package aerys.minko.type.parser.collada.helper
 		{
 			var data		: Array				= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint				= data.length;
-			var result		: Vector.<Vector4>	= new Vector.<Vector4>();
+			var result		: Vector.<Vector4>	= new Vector.<Vector4>(dataLength / 3, true);
 			
 			if (dataLength % 3 != 0)
 				throw new ColladaError('Invalid data length');
@@ -59,7 +84,7 @@ package aerys.minko.type.parser.collada.helper
 				
 				var vector	: Vector4 = new Vector4(float1, float2, float3);
 				
-				result.push(vector);
+				result[i] = vector;
 			}
 			
 			return result;
@@ -69,7 +94,7 @@ package aerys.minko.type.parser.collada.helper
 		{
 			var data		: Array				= String(xml).replace(/[ \t\n\r]+/g, ' ').split(' ');
 			var dataLength	: uint				= data.length;
-			var result		: Vector.<Vector4>	= new Vector.<Vector4>();
+			var result		: Vector.<Vector4>	= new Vector.<Vector4>(dataLength / 4, true);
 			
 			if (dataLength % 4 != 0)
 				throw new ColladaError('Invalid data length');
@@ -83,7 +108,7 @@ package aerys.minko.type.parser.collada.helper
 				
 				var vector	: Vector4 = new Vector4(float1, float2, float3, float4);
 				
-				result.push(vector);
+				result[i] = vector;
 			}
 			
 			return result;
@@ -125,11 +150,13 @@ package aerys.minko.type.parser.collada.helper
 			for (var i : uint = 0; i < dataLength; i += 16)
 			{
 				var matrix	: Matrix4x4	= new Matrix4x4(
-					parseFloat(data[i]),		parseFloat(data[i + 1]),	parseFloat(data[i + 2]),	parseFloat(data[i + 3]),
-					parseFloat(data[i + 4]),	parseFloat(data[i + 5]),	parseFloat(data[i + 6]),	parseFloat(data[i + 7]),
-					parseFloat(data[i + 8]),	parseFloat(data[i + 9]),	parseFloat(data[i + 10]),	parseFloat(data[i + 11]),
-					parseFloat(data[i + 12]),	parseFloat(data[i + 13]),	parseFloat(data[i + 14]), parseFloat(data[i + 15])
+					parseFloat(data[i]),			parseFloat(data[uint(i + 1)]),	parseFloat(data[uint(i + 2)]),	parseFloat(data[uint(i + 3)]),
+					parseFloat(data[uint(i + 4)]),	parseFloat(data[uint(i + 5)]),	parseFloat(data[uint(i + 6)]),	parseFloat(data[uint(i + 7)]),
+					parseFloat(data[uint(i + 8)]),	parseFloat(data[uint(i + 9)]),	parseFloat(data[uint(i + 10)]),	parseFloat(data[uint(i + 11)]),
+					parseFloat(data[uint(i + 12)]),	parseFloat(data[uint(i + 13)]),	parseFloat(data[uint(i + 14)]), parseFloat(data[uint(i + 15)])
 				).transpose();
+				
+				MatrixSanitizer.sanitize(matrix);
 				
 				result.push(matrix);
 			}
@@ -198,6 +225,8 @@ package aerys.minko.type.parser.collada.helper
 				parseFloat(data[8]),	parseFloat(data[9]),	parseFloat(data[10]),	parseFloat(data[11]),
 				parseFloat(data[12]),	parseFloat(data[13]),	parseFloat(data[14]),	parseFloat(data[15])
 			).transpose();
+			
+			MatrixSanitizer.sanitize(matrix);
 			
 			return matrix;
 		}

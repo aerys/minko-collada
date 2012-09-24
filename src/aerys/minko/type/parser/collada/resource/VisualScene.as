@@ -1,10 +1,8 @@
 package aerys.minko.type.parser.collada.resource
 {
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.scene.node.group.Group;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
-	import aerys.minko.type.parser.collada.instance.InstanceNode;
 	import aerys.minko.type.parser.collada.instance.InstanceVisualScene;
 	
 	use namespace minko_collada;
@@ -53,17 +51,6 @@ package aerys.minko.type.parser.collada.resource
 		public function createInstance() : IInstance
 		{
 			return new InstanceVisualScene(_document, _id); 
-		}
-		
-		public function toGroup() : Group
-		{
-			var group : Group = new Group();
-			group.name = _name;
-			
-			for each (var child : IInstance in _childs)
-				group.addChild(child.toScene());
-			
-			return _document.parserOptions.replaceNodeFunction(group);
 		}
 	}
 }
