@@ -211,12 +211,13 @@ package aerys.minko.type.parser.collada
 			var animationStore : Animation = _animations['mergedAnimations'];
 			if (animationStore)
 			{
-				var timelines			: Vector.<ITimeline>	= new Vector.<ITimeline>();
-				var targetNames			: Vector.<String>		= new Vector.<String>();
+				var timelines			: Vector.<ITimeline>	= new <ITimeline>[];
+				var targetNames			: Vector.<String>		= new <String>[];
+				
 				animationStore.getTimelines(timelines, targetNames);
 				
-				var numTimelines		: uint					= timelines.length;
-				var timeLinesByNodeName	: Object				= new Object();
+				var numTimelines		: uint		= timelines.length;
+				var timeLinesByNodeName	: Object	= {};
 				
 				for (var timelineId : uint = 0; timelineId < numTimelines; ++timelineId)
 				{
@@ -224,15 +225,20 @@ package aerys.minko.type.parser.collada
 					var targetName	: String	= targetNames[timelineId];
 					
 					if (timeLinesByNodeName[targetName] == undefined)
-						timeLinesByNodeName[targetName] = new Vector.<ITimeline>();
+						timeLinesByNodeName[targetName] = new <ITimeline>[];
 					
 					timeLinesByNodeName[targetName].push(timeline);
 				}
 				
 				for (var targetName_ : String in timeLinesByNodeName)
-					(sourceIdToScene[targetName_] as ISceneNode).addController(
-						new AnimationController(timeLinesByNodeName[targetName_])
-					);
+				{
+					var sceneNode : ISceneNode	= sourceIdToScene[targetName_] as ISceneNode;
+					
+					timelines 	= timeLinesByNodeName[targetName_];
+					
+					if (sceneNode && timelines)
+						sceneNode.addController(new AnimationController(timelines));
+				}
 			}
 
 			// check if loadSkin is available
