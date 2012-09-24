@@ -347,14 +347,6 @@ package aerys.minko.type.parser.collada.helper
 				vertexBuffer[i] = j++;
 			}
 			
-			if (format.hasComponent(VertexComponent.UV))
-				for (i = format.getBytesOffsetForProperty('v');
-					 i < bufferSize;
-					 i += dwordsPerVertex)
-				{
-					vertexBuffer[i] = 1. - vertexBuffer[i];
-				}
-			
 			// invert z to handle right to left handed coordinates
 			for (i = 0; i < bufferSize; i+= dwordsPerVertex)
 			{
@@ -364,6 +356,13 @@ package aerys.minko.type.parser.collada.helper
 					vertexBuffer[format.getOffsetForProperty('nx')] *= -1.0;
 				if (format.hasComponent(VertexComponent.TANGENT))
 					vertexBuffer[format.getOffsetForProperty('tx')] *= -1.0;
+				
+				if (format.hasComponent(VertexComponent.UV))
+				{
+					var vOffset : uint = format.getOffsetForProperty('v');
+					
+					vertexBuffer[vOffset] = 1. - vertexBuffer[vOffset];
+				}
 			}
 			
 			return VertexStream.fromVector(StreamUsage.DYNAMIC, format, vertexBuffer);
