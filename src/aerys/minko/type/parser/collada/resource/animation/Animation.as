@@ -1,16 +1,15 @@
 package aerys.minko.type.parser.collada.resource.animation
 {
-	import aerys.minko.scene.node.IScene;
+	import aerys.minko.Minko;
 	import aerys.minko.type.animation.timeline.ITimeline;
-	import aerys.minko.type.animation.timeline.MatrixLinearRegularTimeline;
-	import aerys.minko.type.animation.timeline.MatrixLinearTimeline;
 	import aerys.minko.type.animation.timeline.MatrixSegmentTimeline;
+	import aerys.minko.type.animation.timeline.MatrixTimeline;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.resource.IResource;
-	
-	import flash.utils.getTimer;
 	
 	public class Animation implements IResource
 	{
@@ -76,59 +75,63 @@ package aerys.minko.type.parser.collada.resource.animation
 		public function getTimelines(timelines 		: Vector.<ITimeline>,
 									 targetNames	: Vector.<String>) : void
 		{
-			var times			: Vector.<Number>;
-			var timesCollection	: Object				= new Object();
-			var vector			: Vector.<Number>		= new Vector.<Number>(16);
-			
-			retrieveTimes(timesCollection);
-			for each (times in timesCollection)
-				times.sort(cmp);
-			removeDuplicateTimes(timesCollection);
+			var vector			: Vector.<Number>	= new Vector.<Number>(16);
+			var timesCollection	: Object			= retrieveTimes();
 			
 			for (var targetName : String in timesCollection)
 			{
-				times = timesCollection[targetName];
-				
-				if (times.length == 1 && isNaN(times[0]))
-					continue;
-				
-				var timesLength			: uint					= times.length;
-				var minkoTimes			: Vector.<uint>			= new Vector.<uint>();
-				var minkoMatrices		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
-				
-				for (var i : uint = 0; i < timesLength; ++i)
+				try
 				{
-					var time : Number = times[i];
+					var times : Vector.<Number> = timesCollection[targetName];
 					
-					vector[0]	= vector[5]	 = vector[10] = vector[15] = 1;
-					vector[1]	= vector[2]	 = vector[3]  = 0;
-					vector[4]	= vector[6]  = vector[7]  = 0;
-					vector[8]	= vector[9]  = vector[11] = 0;
-					vector[12]	= vector[13] = vector[14] = 0;
+					if (times.length == 1 && isNaN(times[0]))
+						continue;
 					
-					setMatrixData(time, vector, targetName);
+					var timesLength			: uint					= times.length;
+					var minkoTimes			: Vector.<uint>			= new Vector.<uint>();
+					var minkoMatrices		: Vector.<Matrix4x4>	= new Vector.<Matrix4x4>();
 					
-					// why do we have to do this? animation data from the collada file is plain wrong.
-					vector[3] = vector[7] = vector[11] = 0
-					vector[15] = 1;
-					var matrix : Matrix4x4 = new Matrix4x4();
-					matrix.setRawData(vector, 0, false);
+					for (var i : uint = 0; i < timesLength; ++i)
+					{
+						var time : Number = times[i];
+						
+						vector[0]	= vector[5]	 = vector[10] = vector[15] = 1;
+						vector[1]	= vector[2]	 = vector[3]  = 0;
+						vector[4]	= vector[6]  = vector[7]  = 0;
+						vector[8]	= vector[9]  = vector[11] = 0;
+						vector[12]	= vector[13] = vector[14] = 0;
+						
+						setMatrixData(time, vector, targetName);
+						
+						// why do we have to do this? animation data from the collada file is plain wrong.
+//						vector[3] = vector[7] = vector[11] = 0
+						vector[15] = 1;
+						var matrix : Matrix4x4 = new Matrix4x4();
+						
+						matrix.setRawData(vector);
+						
+						minkoTimes.push((time * 1000) << 0);
+						minkoMatrices.push(matrix);
+					}
 					
-					minkoTimes.push((time * 1000) << 0);
-					minkoMatrices.push(matrix);
+	//				var deltaTime : uint = minkoTimes[1] - minkoTimes[0];
+	//				for (i = 1; i < timesLength; ++i)
+	//					if (Math.abs(deltaTime - minkoTimes[i] + minkoTimes[i - 1]) > 1)
+	//						break;
+					
+	//				if (i != timesLength)
+//						timelines.push(new MatrixTimeline('transform', minkoTimes, minkoMatrices, true));
+						timelines.push(new MatrixSegmentTimeline('transform', minkoTimes, minkoMatrices));
+	//				else
+	//					timelines.push(new MatrixLinearRegularTimeline('transform', deltaTime, minkoMatrices));
+					
+					targetNames.push(targetName);
 				}
-				
-//				var deltaTime : uint = minkoTimes[1] - minkoTimes[0];
-//				for (i = 1; i < timesLength; ++i)
-//					if (Math.abs(deltaTime - minkoTimes[i] + minkoTimes[i - 1]) > 1)
-//						break;
-				
-//				if (i != timesLength)
-					timelines.push(new MatrixLinearTimeline('transform', minkoTimes, minkoMatrices));
-//				else
-//					timelines.push(new MatrixLinearRegularTimeline('transform', deltaTime, minkoMatrices));
-				
-				targetNames.push(targetName);
+				catch (e : Error)
+				{
+					Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: Droping animation for \'' + targetName + '\' (' + e.message + ')', this);
+					continue;
+				}
 			}
 		}
 		
@@ -147,25 +150,31 @@ package aerys.minko.type.parser.collada.resource.animation
 			return 100000 * (v1 - v2);
 		}
 		
-		public function retrieveTimes(out : Object) : void
+		public function retrieveTimes(timeCollections : Object = null) : Object
 		{
+			timeCollections ||= new Object();
+			
+			var i : uint;
+			
+			// retrieve times
 			var channelCount	: uint	= _channels.length;
-			for (var i : uint = 0; i < channelCount; ++i)
-				_channels[i].retrieveTimes(out);
+			for (i = 0; i < channelCount; ++i)
+				_channels[i].retrieveTimes(timeCollections);
 			
 			var animationCount : uint	= _animations.length;
 			for (i = 0; i < animationCount; ++i)
-				_animations[i].retrieveTimes(out);
-		}
-		
-		private function removeDuplicateTimes(timesContainer : Object) : void
-		{
-			for each (var times : Vector.<Number> in timesContainer)
+				_animations[i].retrieveTimes(timeCollections);
+			
+			for each (var times : Vector.<Number> in timeCollections)
 			{
+				// sort
+				times.sort(cmp);
+				
+				// remove duplicates
 				var timeCount	: uint		= times.length;
 				var lastTime	: Number	= times[0];
 				
-				for (var i : uint = 1; i < timeCount; ++i)
+				for (i = 1; i < timeCount; ++i)
 				{
 					if (times[i] == lastTime)
 					{
@@ -176,6 +185,8 @@ package aerys.minko.type.parser.collada.resource.animation
 						lastTime = times[i];
 				}
 			}
+			
+			return timeCollections;
 		}
 		
 		public function createInstance() : IInstance

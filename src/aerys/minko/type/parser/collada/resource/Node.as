@@ -1,12 +1,9 @@
 package aerys.minko.type.parser.collada.resource
 {
+	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.scene.node.IScene;
-	import aerys.minko.scene.node.group.Joint;
-	import aerys.minko.scene.node.group.TransformGroup;
-	import aerys.minko.type.error.collada.ColladaError;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
-	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.enum.NodeType;
 	import aerys.minko.type.parser.collada.helper.TransformParser;
@@ -43,56 +40,100 @@ package aerys.minko.type.parser.collada.resource
 												document	: ColladaDocument, 
 												store		: Object) : void
 		{
-			var xmlNodeLibrary	: XML		= xmlDocument..NS::library_nodes[0];
+			var xmlNodeLibrary : XML = xmlDocument..NS::library_nodes[0];
 			if (xmlNodeLibrary == null)
 				return;
 			
-			var xmlNodes		: XMLList	= xmlNodeLibrary.NS::node;
-			
+			var xmlNodes : XMLList = xmlNodeLibrary.NS::node;
 			for each (var xmlNode : XML in xmlNodes)
 			{
-				var node : Node = new Node(xmlNode, document);
+				var node : Node = Node.createFromXML(xmlNode, document);
 				store[node.id] = node;
 			}
 		}
 		
-		public function Node(xmlNode : XML, document : ColladaDocument) 
+		public static function createFromXML(xmlNode : XML, document : ColladaDocument) : Node
 		{
-			_document	= document;
+			var id			: String	= xmlNode.@id;
+			var sid			: String	= xmlNode.@sid;
+			var name		: String	= xmlNode.@name;
+			var transform	: Matrix4x4	= TransformParser.parseTransform(xmlNode);
 			
-			_id			= xmlNode.@id;
-			_sid		= xmlNode.@sid;
-			_name		= xmlNode.@name;
-			_transform	= TransformParser.parseTransform(xmlNode);
+			if (id != null && id.length == 0)
+				id = null;
 			
-			_type		= String(xmlNode.@type).toUpperCase();
-			if (_type.length == 0)
-				_type = NodeType.NODE;
+			if (sid != null && sid.length == 0)
+				sid = null;
 			
-			_childs		= new Vector.<IInstance>();
+			if (name != null && name.length == 0)
+				name = null;
+			
+			var type : String = String(xmlNode.@type).toUpperCase();
+			if (type.length == 0)
+				type = NodeType.NODE;
+			
+			var childs : Vector.<IInstance> = new Vector.<IInstance>();
 			for each (var child : XML in xmlNode.children())
 			{
-				
-				var localName : String = child.localName();
-				
-				if (localName == 'node')
-					_childs.push(document.delegateResourceCreation(child));
+				switch (child.localName())
+				{
+					case 'node':
+						childs.push(document.delegateResourceCreation(child));
+						break;
 					
-				else if (localName == 'instance_camera')
-					0; // do nothing
+					case 'instance_controller':
+						childs.push(InstanceController.createFromXML(document, child));
+						break;
 					
-				else if (localName == 'instance_controller')
-					_childs.push(InstanceController.createFromXML(document, child));
-				
-				else if (localName == 'instance_geometry')
-					_childs.push(InstanceGeometry.createFromXML(document, child));
-				
-				else if (localName == 'instance_light')
-					0; // do nothing
-				
-				else if (localName == 'instance_node')
-					_childs.push(InstanceNode.createFromXML(document, child));
+					case 'instance_geometry':
+						childs.push(InstanceGeometry.createFromXML(document, child));
+						break;
+					
+					case 'instance_node':
+						childs.push(InstanceNode.createFromXML(document, child));
+					
+					case 'instance_camera':
+					case 'instance_light':
+						Minko.log(DebugLevel.PLUGIN_NOTICE, 'ColladaPlugin: Dropping ' + 
+							child.localName() + ' declaration in node ' + [id, sid, name].join());
+						break;
+					
+					// ignore transformation, it's parsed in a helper function
+					case 'lookat':
+					case 'matrix':
+					case 'rotate':
+					case 'scale':
+					case 'skew':
+					case 'translate':
+					case 'extra':
+						break;
+					
+					default:
+						Minko.log(DebugLevel.PLUGIN_WARNING, 'ColladaPlugin: Found unknown ' + 
+							child.localName() + ' declaration in node ' + [id, sid, name].join());
+						break;
+					
+				}
 			}
+			
+			return new Node(id, sid, name, transform, type, childs, document);
+		}
+		
+		public function Node(id			: String, 
+							 sid		: String, 
+							 name		: String, 
+							 transform	: Matrix4x4, 
+							 type		: String, 
+							 childs		: Vector.<IInstance>,
+							 document	: ColladaDocument)
+		{
+			_id			= id;
+			_sid		= sid;
+			_name		= name;
+			_transform	= transform;
+			_type		= type;
+			_childs		= childs;
+			_document	= document;
 		}
 		
 		public function getChildAt(index : uint) : IInstance
@@ -102,68 +143,8 @@ package aerys.minko.type.parser.collada.resource
 		
 		public function createInstance() : IInstance				
 		{
-			return new InstanceNode(_document, _id); 
+			return new InstanceNode(_document, _id, _name, _sid); 
 		}
 		
-		/**
-		 * to be fixed
-		 * child.toScene will instanciate every time a new minko object
-		 * 
-		 * what happens for a scene with many times the same mesh?
-		 * 
-		 * @return 
-		 */		
-		public function toTransformGroup() : TransformGroup
-		{
-			if (_type != NodeType.NODE)
-				throw new ColladaError('Cannot convert joint node to TransformGroup');
-			
-			var tf : TransformGroup = new TransformGroup();
-			tf.name = _id;
-			
-			Matrix4x4.copy(_transform, tf.transform);
-			tf.transform.appendScale(1);				// used to invalidate the matrix
-			
-			for each (var child : IInstance in _childs)
-			{
-				var minkoChild : IScene = child.toScene();
-				
-				if (minkoChild != null)
-				{
-					minkoChild = _document.parserOptions.replaceNodeFunction(minkoChild);
-					
-					tf.addChild(minkoChild);
-				}
-			}
-			
-			return tf;
-		}
-		
-		public function toJoint() : Joint
-		{
-			if (_type != NodeType.JOINT)
-				throw new ColladaError('Cannot convert standard node to joint');
-			
-			var joint : Joint = new Joint();
-			joint.name = _id;
-			joint.boneName = _sid && _sid.length != 0 ? _sid : _id;
-			
-			Matrix4x4.copy(_transform, joint.transform);
-			joint.transform.appendScale(1);				// used to invalidate the matrix
-			
-			for each (var child : IInstance in _childs)
-			{
-				var minkoChild : IScene = child.toScene();
-				
-				if (minkoChild != null)
-				{
-					minkoChild = _document.parserOptions.replaceNodeFunction(minkoChild);
-					
-					joint.addChild(minkoChild);
-				}
-			}
-			
-			return joint;
-		}
 	}
 }
