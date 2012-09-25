@@ -4,7 +4,10 @@ package aerys.minko.type.parser.collada.helper
 	{
 		public static function argbToRbga(color : uint) : uint
 		{
-			var a : uint = ((color & 0xFF000000) >> 24);
+			var a : uint = ((color & 0xFF000000));
+			
+			a = a >>> 24;
+			
 			color = color << 8 | a;
 			
 			return color;
