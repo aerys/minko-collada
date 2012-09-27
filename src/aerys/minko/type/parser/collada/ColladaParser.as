@@ -97,7 +97,7 @@ package aerys.minko.type.parser.collada
 			for each (var image : Image in _document.images)
 			{
 				var imageURL	: String	= image.imageData.path;
-				var loader		: ILoader	= _options.dependencyLoaderClosure(imageURL, true, _options);
+				var loader		: ILoader	= _options.dependencyLoaderFunction(imageURL, true, _options);
 				
 				if (loader)
 				{
