@@ -37,10 +37,10 @@ package aerys.minko.type.parser.collada.resource.effect
 			{
 				case 'color':
 					var xmlColor : Vector4 = NumberListParser.parseVector4(firstChild);
-					color = ((xmlColor.x * 255) << 0) 
-						| ((xmlColor.y * 255) << 8) 
-						| ((xmlColor.z * 255) << 16) 
-						| ((xmlColor.w * 255) << 24)
+					color = ((xmlColor.x * 255) << 24) 
+						| ((xmlColor.y * 255) << 16) 
+						| ((xmlColor.z * 255) << 8) 
+						| ((xmlColor.w * 255))
 					
 					break;
 				
