@@ -90,7 +90,7 @@ package aerys.minko.type.parser.collada
 			_document = new ColladaDocument();
 			_document.loadFromXML(_lastXML);
 			
-			if (!_options.loadDependencies)
+			if (_options.dependencyLoaderFunction == null)
 				return null;
 			
 			var dependencies : Vector.<ILoader> = new <ILoader>[];

@@ -7,42 +7,40 @@ package aerys.minko.type.parser.collada.helper
 	{
 		public static function sanitize(matrix : Matrix4x4) : void
 		{
-//			var rawData : Vector.<Number> = matrix.getRawData();
+//			var raw	: Vector.<Number> 	= matrix.getRawData();
+//
+//			raw[2] *= -1.;
+//			raw[6] *= -1.;
+//			raw[8] *= -1.;
+//			raw[9] *= -1.;
+//			raw[11] *= -1.;
+//			raw[14] *= -1.;
 //			
-//			rawData[2] *= -1.;
-//			rawData[6] *= -1.;
-//			rawData[8] *= -1.;
-//			rawData[9] *= -1.;
-//			rawData[11] *= -1.;
-//			rawData[14] *= -1.;
-//			
-//			matrix.setRawData(rawData);
+//			matrix.setRawData(raw);
 			
-			var scale : Vector4 = matrix.getScale();
-			var translation : Vector4 = matrix.getTranslation();
-			var update : Boolean = false;
+			var scale 				: Vector4 	= matrix.getScale();
+			var numNegativeScales 	: uint 		= 0;
 			
 			if (scale.x < 0)
-			{
-				translation.x *= -1;
-				scale.x *= -1;
-				update = true;
-			}
+				numNegativeScales++;
 			if (scale.y < 0)
-			{
-				translation.y *= -1;
-				scale.y *= -1;
-				update = true;
-			}
+				numNegativeScales++;
 			if (scale.z < 0)
-			{
-				translation.z *= -1;
-				scale.z *= -1;
-				update = true;
-			}
+				numNegativeScales++;
 			
-			if (update)
-				matrix.world(translation, matrix.getRotation(), scale);
+			if (numNegativeScales % 2)
+			{
+//				var translation : Vector4 	= matrix.getTranslation();
+//				var rotation	: Vector4	= matrix.getRotation();
+				
+				matrix.setColumn(2, matrix.getColumn(2).scaleBy(-1));
+				
+//				rotation.z *= -1;
+//				scale.z *= -1;
+//				translation.z *= -1;
+				
+//				matrix.world(translation, rotation, scale);
+			}
 		}
 	}
 }
