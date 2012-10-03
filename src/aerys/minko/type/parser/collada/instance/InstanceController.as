@@ -137,7 +137,6 @@ package aerys.minko.type.parser.collada.instance
 		
 		private function getMaterial(materialName : String) : Material
 		{
-			var materialName		: String = materialName;
 			var materialInstance	: InstanceMaterial = materialName != null && materialName != ''
 				? _bindMaterial[materialName]
 				: null;
