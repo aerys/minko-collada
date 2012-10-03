@@ -1,15 +1,14 @@
 package aerys.minko.type.parser.collada
 {
+	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
+	
 	import aerys.minko.type.Signal;
 	import aerys.minko.type.loader.ILoader;
 	import aerys.minko.type.loader.TextureLoader;
 	import aerys.minko.type.loader.parser.IParser;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.resource.image.Image;
-	
-	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	import flash.utils.Dictionary;
 	
 	public class ColladaParser implements IParser
 	{
@@ -90,14 +89,14 @@ package aerys.minko.type.parser.collada
 			_document = new ColladaDocument();
 			_document.loadFromXML(_lastXML);
 			
-			if (!_options.loadDependencies)
+			if (!(_options.dependencyLoaderFunction is Function))
 				return null;
 			
 			var dependencies : Vector.<ILoader> = new <ILoader>[];
 			for each (var image : Image in _document.images)
 			{
 				var imageURL	: String	= image.imageData.path;
-				var loader		: ILoader	= _options.dependencyLoaderClosure(imageURL, true, _options);
+				var loader		: ILoader	= _options.dependencyLoaderFunction(imageURL, true, _options);
 				
 				if (loader)
 				{
