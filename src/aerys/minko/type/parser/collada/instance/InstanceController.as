@@ -1,5 +1,6 @@
 package aerys.minko.type.parser.collada.instance
 {
+	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.render.Effect;
 	import aerys.minko.render.material.Material;
@@ -7,6 +8,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.Mesh;
 	import aerys.minko.type.loader.parser.ParserOptions;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;
 	import aerys.minko.type.parser.collada.resource.ColladaMaterial;
@@ -82,7 +84,18 @@ package aerys.minko.type.parser.collada.instance
 										scopedIdToSceneNode	: Object) : ISceneNode
 		{
 			var skin			: Skin					= Controller(resource).skin;
-			skin.computeMeshTemplates(options);
+			
+			try
+			{
+				skin.computeMeshTemplates(options);
+			}
+			catch (e : Error)
+			{
+				Minko.log(
+					DebugLevel.PLUGIN_ERROR,
+					'ColladaPlugin: Error evaluating controller node \'' + _name + '\'.'
+				);
+			}
 			
 			var meshTemplateId	: uint;
 			var effect			: Effect				= options.effect;
@@ -92,30 +105,36 @@ package aerys.minko.type.parser.collada.instance
 			
 			for (meshTemplateId = 0; meshTemplateId < numMeshes; ++meshTemplateId)
 			{
-				var meshTemplate		: MeshTemplate	= meshTemplates[meshTemplateId];
+				var meshTemplate	: MeshTemplate	= meshTemplates[meshTemplateId];
 				
-				var materialProvider	: Material = getMaterial(meshTemplate.materialName);
-				var localMeshes 		: Vector.<Mesh> = 
-					meshTemplate.generateMeshes(effect, options.vertexStreamUsage, options.indexStreamUsage);
-				
-				var i : uint = 0;
-				for each (var localMesh : Mesh in localMeshes)
+				if (meshTemplate)
 				{
-					localMesh.material = materialProvider;
+					var materialProvider	: Material 		= getMaterial(meshTemplate.materialName);
+					var localMeshes 		: Vector.<Mesh> = meshTemplate.generateMeshes(
+						effect, options.vertexStreamUsage, options.indexStreamUsage
+					);
 					
-					if (options.effect)
-						localMesh.material.effect = options.effect;
-					
-					localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
-					group.addChild(localMesh);
-					++i;
+					var i : uint = 0;
+					for each (var localMesh : Mesh in localMeshes)
+					{
+						localMesh.material = materialProvider;
+						
+						if (options.effect)
+							localMesh.material.effect = options.effect;
+						
+						localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
+						group.addChild(localMesh);
+						++i;
+					}
 				}
 			}
 			
 			var result : ISceneNode = sanitize(group);
 			
-			if (_sourceId != null) sourceIdToSceneNode[_sourceId] = result;
-			if (_scopedId != null) scopedIdToSceneNode[_scopedId] = result;
+			if (_sourceId != null)
+				sourceIdToSceneNode[_sourceId] = result;
+			if (_scopedId != null)
+				scopedIdToSceneNode[_scopedId] = result;
 			
 			return result;
 		}

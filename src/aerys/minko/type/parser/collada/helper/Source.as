@@ -125,14 +125,14 @@ package aerys.minko.type.parser.collada.helper
 					else if (paramType == Matrix4x4)
 					{
 						currentDatum = new Matrix4x4(
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)])
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)])
 						).transpose();
 						
 						MatrixSanitizer.sanitize(currentDatum);
@@ -163,13 +163,13 @@ package aerys.minko.type.parser.collada.helper
 		public function getComponentByParamIndex(index		: uint, 
 												 paramIndex	: uint) : Object
 		{
-			return _data[index * _paramNames.length + paramIndex];
+			return _data[uint(index * _paramNames.length + paramIndex)];
 		}
 		
 		public function getComponentByParamName(index		: uint, 
 												paramName	: String) : Object
 		{
-			return _data[index * _paramNames.length + _paramNames.indexOf(paramName)];
+			return _data[uint(index * _paramNames.length + _paramNames.indexOf(paramName))];
 		}
 	}
 }

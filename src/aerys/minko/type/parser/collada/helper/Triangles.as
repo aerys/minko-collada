@@ -1,5 +1,6 @@
 package aerys.minko.type.parser.collada.helper
 {
+	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.render.geometry.stream.IndexStream;
 	import aerys.minko.render.geometry.stream.StreamUsage;
@@ -10,6 +11,8 @@ package aerys.minko.type.parser.collada.helper
 	import aerys.minko.render.geometry.stream.iterator.VertexIterator;
 	import aerys.minko.render.geometry.stream.iterator.VertexReference;
 	import aerys.minko.type.error.collada.ColladaError;
+	import aerys.minko.type.log.DebugLevel;
+	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.enum.InputType;
 	
 	import flash.utils.ByteArray;
@@ -118,7 +121,18 @@ package aerys.minko.type.parser.collada.helper
 				_offsets[semantic] = offset;
 				
 				if (semantic != 'VERTEX')
-					_sources[semantic] = Source.createFromXML(sources.(@id == sourceId)[0]);
+				{
+					var source : XML = sources.(@id == sourceId)[0];
+					
+					if (source != null)
+						_sources[semantic] = Source.createFromXML(source);
+					else
+						Minko.log(
+							DebugLevel.PLUGIN_ERROR,
+							'ColladaPlugin: Broken reference to source with id \''
+							+ sourceId + '\'.'
+						);
+				}
 			}
 			
 			// will triangulate the data in here and push ids to _triangleVertices
@@ -326,9 +340,9 @@ package aerys.minko.type.parser.collada.helper
 					 indexOffset += _indicesPerVertex,
 					 index2Offset += _indicesPerVertex)
 				{
-					vertexId			= _triangleVertices[indexOffset];
+					var dataId	: uint = _triangleVertices[index2Offset];
 					
-					var dataId		: uint = _triangleVertices[index2Offset];
+					vertexId			= _triangleVertices[indexOffset];
 					sourceIndex			= dataId * sourceStride;
 					sourceIndexLimit	= sourceIndex + componentDwords;
 					
@@ -374,7 +388,7 @@ package aerys.minko.type.parser.collada.helper
 			var data		: Vector.<uint>	= new <uint>[];
 			
 			for (var i : uint = 0; i < numIndices; ++i)
-				data[i] = numIndices - 1 - i;
+				data[i] = numIndices - i - 1;
 			
 			return data;
 		}
@@ -382,9 +396,20 @@ package aerys.minko.type.parser.collada.helper
 		public function computeVertexStream(verticesSemantics	: Vector.<String>,
 											verticesDataSources	: Object) : VertexStream
 		{
-			var streamList : VertexStreamList = computeVertexStreamList(verticesSemantics, verticesDataSources);
+			var streamList 	: VertexStreamList 	= computeVertexStreamList(verticesSemantics, verticesDataSources);
+			var stream		: VertexStream		= VertexStream.extractSubStream(streamList, StreamUsage.DYNAMIC);
+//			var format		: VertexFormat		= stream.format;
+//			var numVertices	: uint				= stream.numVertices;
+//			var scale		: Matrix4x4			= new Matrix4x4().appendScale(1, 1, -1);
+//			
+//			if (format.hasComponent(VertexComponent.XYZ))
+//				stream.applyTransform(VertexComponent.XYZ, scale);
+//			if (format.hasComponent(VertexComponent.NORMAL))
+//				stream.applyTransform(VertexComponent.NORMAL, scale);
+//			if (format.hasComponent(VertexComponent.TANGENT))
+//				stream.applyTransform(VertexComponent.TANGENT, scale);
 			
-			return VertexStream.extractSubStream(streamList, StreamUsage.DYNAMIC);
+			return stream;
 		}
 		
 		private function computeVertexStreamList(verticesSemantics		: Vector.<String>,
@@ -418,9 +443,10 @@ package aerys.minko.type.parser.collada.helper
 				if (InputType.minko_collada::TO_COMPONENT[semantic] == undefined)
 					continue;
 				
-				vertexStreamList.pushVertexStream(
-					computeVertexStreamFromSource(semantic, _sources[semantic], false)
-				);
+				if (_sources[semantic])
+					vertexStreamList.pushVertexStream(
+						computeVertexStreamFromSource(semantic, _sources[semantic], false)
+					);
 			}
 			
 			return vertexStreamList;
@@ -441,7 +467,6 @@ package aerys.minko.type.parser.collada.helper
 			var numVertices			: uint		= numTriangleVertices / _indicesPerVertex;
 			var sourceData			: Array		= source.data;
 			var sourceStride		: uint		= source.stride
-			
 			var vertexBuffer		: ByteArray	= new ByteArray();
 			
 			vertexBuffer.endian = Endian.LITTLE_ENDIAN;

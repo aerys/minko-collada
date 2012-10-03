@@ -1,5 +1,6 @@
 package aerys.minko.type.parser.collada.instance
 {
+	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.render.Effect;
 	import aerys.minko.render.material.Material;
@@ -7,6 +8,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.Mesh;
 	import aerys.minko.type.loader.parser.ParserOptions;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;
 	import aerys.minko.type.parser.collada.resource.ColladaMaterial;
@@ -74,12 +76,24 @@ package aerys.minko.type.parser.collada.instance
 		{
 			var geometry			: Geometry				= Geometry(resource);
 			
-			geometry.computeMeshTemplates(options);
+			try
+			{
+				geometry.computeMeshTemplates(options);
+			}
+			catch (e : Error)
+			{
+				Minko.log(
+					DebugLevel.PLUGIN_ERROR,
+					'ColladaPlugin: Error evaluating geometry node \'' + _name + '\'.'
+				);
+			}
 			
+			var group				: Group					= new Group();
 			var effect				: Effect				= options.effect;
 			var subMeshTemplates	: Vector.<MeshTemplate>	= geometry.meshTemplates;
-			var numMeshes			: uint					= subMeshTemplates != null ? subMeshTemplates.length : 0;
-			var group				: Group					= new Group();
+			var numMeshes			: uint					= subMeshTemplates != null
+				? subMeshTemplates.length
+				: 0;
 			
 			for (var meshTemplateId : uint = 0; meshTemplateId < numMeshes; ++meshTemplateId)
 			{

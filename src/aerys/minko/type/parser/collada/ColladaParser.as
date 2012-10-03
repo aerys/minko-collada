@@ -90,14 +90,14 @@ package aerys.minko.type.parser.collada
 			_document = new ColladaDocument();
 			_document.loadFromXML(_lastXML);
 			
-			if (!_options.loadDependencies)
+			if (_options.dependencyLoaderFunction == null)
 				return null;
 			
 			var dependencies : Vector.<ILoader> = new <ILoader>[];
 			for each (var image : Image in _document.images)
 			{
 				var imageURL	: String	= image.imageData.path;
-				var loader		: ILoader	= _options.dependencyLoaderClosure(imageURL, true, _options);
+				var loader		: ILoader	= _options.dependencyLoaderFunction(imageURL, true, _options);
 				
 				if (loader)
 				{

@@ -8,7 +8,6 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
-	import aerys.minko.type.parser.collada.helper.ColorModifier;
 	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTextureOrParam;
 
 	public class Blinn implements ILightedTechnique
@@ -105,7 +104,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			}
 			else if (diffuseValue is uint)
 			{
-				material.setProperty(BasicProperties.DIFFUSE_COLOR, ColorModifier.argbToRbga(uint(diffuseValue)));
+				material.setProperty(BasicProperties.DIFFUSE_COLOR, diffuseValue);
 			}
 			else if (diffuseValue is TextureResource)
 			{

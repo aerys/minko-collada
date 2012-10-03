@@ -3,11 +3,7 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.ns.minko_stream;
-	import aerys.minko.render.geometry.GeometrySanitizer;
-	import aerys.minko.render.geometry.stream.IndexStream;
 	import aerys.minko.render.geometry.stream.VertexStream;
-	import aerys.minko.render.geometry.stream.iterator.VertexIterator;
-	import aerys.minko.render.geometry.stream.iterator.VertexReference;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;

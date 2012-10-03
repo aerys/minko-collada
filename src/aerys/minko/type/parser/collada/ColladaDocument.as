@@ -193,17 +193,18 @@ package aerys.minko.type.parser.collada
 			var scopedIdToScene	: Object		= new Object();
 			var mainScene		: Group			= Group(instance.createSceneNode(options, sourceIdToScene, scopedIdToScene));
 			var wrapper			: Group			= new Group(mainScene);
+			
 			wrapper.name = 'colladaWrapper' + uint(Math.random() * 1000);
 			
 			// scale depending on collada unit, and switch from right to left handed
 			var unit : Number = _metaData.unit.meter;
-//			if (!isNaN(unit) && unit != 0)
-//				wrapper.transform.setScale(unit, unit, -unit);
+			if (!isNaN(unit) && unit != 0)
+				wrapper.transform.setScale(unit, unit, unit);
 			
 			// change up axis
 			var upAxis : String = _metaData.upAxis;
 			if (upAxis == 'Z_UP')
-				wrapper.transform.setRotation(Math.PI / 2, 0, 0);
+				wrapper.transform.setRotation(-Math.PI / 2, 0, 0);
 			else if (upAxis == 'X_UP')
 				wrapper.transform.setRotation(0, 0, Math.PI / 2);
 			
@@ -240,7 +241,7 @@ package aerys.minko.type.parser.collada
 						sceneNode.addController(new AnimationController(timelines));
 				}
 			}
-
+			
 			// check if loadSkin is available
 			if (options.loadSkin)
 			{
@@ -259,39 +260,50 @@ package aerys.minko.type.parser.collada
 					var scene	: ISceneNode	= sourceIdToScene[controllerInstance.sourceId];
 					if (scene == null)
 					{
-						Minko.log(DebugLevel.PLUGIN_WARNING, 'Unable to find instance linked to controller ' +
-							'named "' + controllerInstance.sourceId + '". Dropping skin.');
+						Minko.log(
+							DebugLevel.PLUGIN_WARNING,
+							'Unable to find instance linked to controller ' +
+							'named \'' + controllerInstance.sourceId + '\': dropping skin.'
+						);
 						continue;
 					}
 
-					var meshes : Vector.<ISceneNode> =
-						scene is Group ? Group(scene).getDescendantsByType(Mesh) : new <ISceneNode>[scene];
+					var meshes : Vector.<ISceneNode> = scene is Group
+						? Group(scene).getDescendantsByType(Mesh)
+						: new <ISceneNode>[scene];
 
 					var joints : Vector.<Group>	= new <Group>[];
 					for each (var jointName : String in skin.jointNames)
 					{
-						var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName]; // handle collada 1.4 "ID_REF"
+						// handle collada 1.4 "ID_REF"
+						var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName];
 
 						if (joint == null)
 						{
-							Minko.log(DebugLevel.PLUGIN_WARNING, 'Unable to find bone named "'
-								+ jointName + '". Dropping skin for mesh named "' + scene.name + '".');
+							Minko.log(
+								DebugLevel.PLUGIN_WARNING, 'Unable to find bone named \''
+								+ jointName + '\'. Dropping skin for mesh named \'' + scene.name
+								+ '\'.'
+							);
 							continue;
 						}
 
 						joints.push(joint);
 					}
 					
-					var skinController : AbstractController = new SkinningController(
-						options.skinningMethod,
-						mainScene,
-						joints,
-						skin.bindShapeMatrix,
-						skin.invBindMatrices
-					);
-					
-					for each (var mesh : ISceneNode in meshes)
-						Mesh(mesh).addController(skinController);
+					if (joints.length)
+					{
+						var skinController : AbstractController = new SkinningController(
+							options.skinningMethod,
+							mainScene,
+							joints,
+							skin.bindShapeMatrix,
+							skin.invBindMatrices
+						);
+						
+						for each (var mesh : ISceneNode in meshes)
+							Mesh(mesh).addController(skinController);
+					}
 				}
 			}
 			
