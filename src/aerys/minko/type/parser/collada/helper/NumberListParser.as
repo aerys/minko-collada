@@ -219,7 +219,7 @@ package aerys.minko.type.parser.collada.helper
 			if (dataLength != 16)
 				throw new ColladaError('Invalid data length');
 			
-			var matrix : Matrix4x4 = matrix = new Matrix4x4(
+			var matrix : Matrix4x4 = new Matrix4x4(
 				parseFloat(data[0]),	parseFloat(data[1]),	parseFloat(data[2]),	parseFloat(data[3]),
 				parseFloat(data[4]),	parseFloat(data[5]),	parseFloat(data[6]),	parseFloat(data[7]),
 				parseFloat(data[8]),	parseFloat(data[9]),	parseFloat(data[10]),	parseFloat(data[11]),
