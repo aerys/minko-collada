@@ -20,6 +20,8 @@ package aerys.minko.type.parser.collada.helper
 		private var _materialName	: String;
 		private var _vertexFormat	: VertexFormat;
 		
+		private var _geometries		: Vector.<Geometry>;
+		
 		public function get meshName() : String
 		{
 			return _meshName;
@@ -66,6 +68,53 @@ package aerys.minko.type.parser.collada.helper
 			return new MeshTemplate(_meshName, _vertexData, _indexData, _materialName, _vertexFormat);
 		}
 		
+		private function generateMeshesAndGeometries(result				: Vector.<Mesh>,
+													 vertexDatas 		: Vector.<ByteArray>,
+													 indexDatas 		: Vector.<ByteArray>,
+													 vertexStreamUsage	: uint,
+													 indexStreamUsage	: uint,
+													 numBuffers 		: uint = 0) : void
+		{
+			numBuffers = numBuffers || result.length;
+			_geometries = new Vector.<Geometry>(numBuffers);
+			for (var bufferId : uint = 0; bufferId < numBuffers; ++bufferId)
+			{
+				var vertices 	: ByteArray	= vertexDatas[bufferId] as ByteArray;
+				var indices 	: ByteArray = indexDatas[bufferId] as ByteArray;
+				var verticesPos	: uint		= vertices.position;
+				var indicesPos 	: uint		= indices.position;
+				
+				GeometrySanitizer.removeDuplicatedVertices(
+					vertices, indices, _vertexFormat.numBytesPerVertex
+				);
+				
+				if (!GeometrySanitizer.isValid(indices, vertices, _vertexFormat.numBytesPerVertex))
+					throw new Error();
+				
+				var vertexStream : VertexStream = new VertexStream(
+					vertexStreamUsage,
+					_vertexFormat,
+					vertices
+				);
+				
+				var indexStream	: IndexStream = new IndexStream(
+					indexStreamUsage,
+					indices
+				);
+				
+				var geom : Geometry = new Geometry(new <IVertexStream>[vertexStream], indexStream);
+				_geometries[bufferId] = geom;
+				var subMesh : Mesh = new Mesh(geom);
+				
+				subMesh.name = _meshName + bufferId;
+				
+				result[bufferId] = subMesh;
+				
+				vertices.position = verticesPos;
+				indices.position = indicesPos;
+			}
+		}
+		
 		public function generateMeshes(effect				: Effect, 
 									   vertexStreamUsage	: uint,
 									   indexStreamUsage		: uint) : Vector.<Mesh>
@@ -79,53 +128,21 @@ package aerys.minko.type.parser.collada.helper
 			
 			var numBuffers 	: uint 			= indexDatas.length;
 			var meshes 		: Vector.<Mesh> = new Vector.<Mesh>(numBuffers);
-			
-			for (var bufferId : uint = 0; bufferId < numBuffers; ++bufferId)
+			if (!_geometries)
 			{
-				var vertices 	: ByteArray	= vertexDatas[bufferId] as ByteArray;
-				
-				// if the GeometrySanitizer.splitBuffers() did not split the buffer we duplicate it
-				if (vertices == _vertexData)
+				generateMeshesAndGeometries(meshes, vertexDatas, indexDatas, vertexStreamUsage, indexStreamUsage, numBuffers);
+			}
+			else
+			{
+				for (var bufferId : uint = 0; bufferId < numBuffers; ++bufferId)
 				{
-					var tmpVertices : ByteArray = new ByteArray();
-					tmpVertices.endian = Endian.LITTLE_ENDIAN;
-					vertices.position = 0;
-					tmpVertices.writeBytes(vertices);
-					vertices = tmpVertices;
-					vertices.position = 0;
+					var geom : Geometry = _geometries[bufferId];
+					var mesh : Mesh = new Mesh(geom);
+					
+					mesh.name = _meshName + bufferId;
+					
+					meshes[bufferId] = mesh;
 				}
-				
-				var indices 	: ByteArray = indexDatas[bufferId] as ByteArray;
-				var verticesPos	: uint		= vertices.position;
-				var indicesPos 	: uint		= indices.position;
-				
-				GeometrySanitizer.removeDuplicatedVertices(
-					vertices, indices, _vertexFormat.numBytesPerVertex
-				);
-				
-				if (!GeometrySanitizer.isValid(indices, vertices, _vertexFormat.numBytesPerVertex))
-					throw new Error();
-				
-				var vertexStream : VertexStream = new VertexStream(
-					vertexStreamUsage, 
-					_vertexFormat, 
-					vertices
-				);
-				
-				var indexStream	: IndexStream = new IndexStream(
-					indexStreamUsage,
-					indices
-				);
-				
-				var geom : Geometry = new Geometry(new <IVertexStream>[vertexStream], indexStream);
-				var subMesh : Mesh = new Mesh(geom);
-				
-				subMesh.name = _meshName + bufferId;
-				
-				meshes[bufferId] = subMesh;
-				
-				vertices.position = verticesPos;
-				indices.position = indicesPos;
 			}
 			
 			return meshes;
