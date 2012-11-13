@@ -10,6 +10,7 @@ package aerys.minko.type.parser.collada.helper
 	import aerys.minko.scene.node.Mesh;
 	
 	import flash.utils.ByteArray;
+	import flash.utils.Endian;
 
 	public class MeshTemplate
 	{
@@ -82,7 +83,21 @@ package aerys.minko.type.parser.collada.helper
 			for (var bufferId : uint = 0; bufferId < numBuffers; ++bufferId)
 			{
 				var vertices 	: ByteArray	= vertexDatas[bufferId] as ByteArray;
+				
+				// if the GeometrySanitizer.splitBuffers() did not split the buffer we duplicate it
+				if (vertices == _vertexData)
+				{
+					var tmpVertices : ByteArray = new ByteArray();
+					tmpVertices.endian = Endian.LITTLE_ENDIAN;
+					vertices.position = 0;
+					tmpVertices.writeBytes(vertices);
+					vertices = tmpVertices;
+					vertices.position = 0;
+				}
+				
 				var indices 	: ByteArray = indexDatas[bufferId] as ByteArray;
+				var verticesPos	: uint		= vertices.position;
+				var indicesPos 	: uint		= indices.position;
 				
 				GeometrySanitizer.removeDuplicatedVertices(
 					vertices, indices, _vertexFormat.numBytesPerVertex
@@ -108,6 +123,9 @@ package aerys.minko.type.parser.collada.helper
 				subMesh.name = _meshName + bufferId;
 				
 				meshes[bufferId] = subMesh;
+				
+				vertices.position = verticesPos;
+				indices.position = indicesPos;
 			}
 			
 			return meshes;
