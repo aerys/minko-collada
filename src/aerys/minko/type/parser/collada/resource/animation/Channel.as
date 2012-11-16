@@ -1,5 +1,8 @@
 package aerys.minko.type.parser.collada.resource.animation
 {
+	import aerys.minko.type.animation.timeline.ITimeline;
+	import aerys.minko.type.animation.timeline.MatrixTimeline;
+	import aerys.minko.type.animation.timeline.ScalarTimeline;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.enum.TransformType;
 	import aerys.minko.type.parser.collada.helper.Source;
@@ -47,6 +50,84 @@ package aerys.minko.type.parser.collada.resource.animation
 				_sources[semantic] = source;
 			}
 		}
+        
+        public function getTimes() : Vector.<uint>
+        {
+            var inputSourceData			: Array				= Source(_sources['INPUT']).data;
+            var inputSourceDataLength	: uint				= inputSourceData.length;
+            var times       			: Vector.<uint>	    = new <uint>[];
+            
+            for (var timeId : uint = 0; timeId < inputSourceDataLength; ++timeId)
+                times[timeId] = uint(inputSourceData[timeId] * 1000);
+            
+            return times;
+        }
+        
+        public function getTimeline() : ITimeline
+        {
+            switch (_transformType)
+            {
+                case TransformType.MATRIX:
+                case TransformType.TRANSFORM:
+                    return getMatrixTimeline('transform');
+                    break ;
+                case TransformType.VISIBILITY:
+                    return getScalarTimeline('visible', false);
+                    break ;
+                case TransformType.TRANSFORM_0_0:
+                case TransformType.TRANSFORM_0_1:
+                case TransformType.TRANSFORM_0_2:
+                case TransformType.TRANSFORM_0_3:
+                case TransformType.TRANSFORM_1_0:
+                case TransformType.TRANSFORM_1_1:
+                case TransformType.TRANSFORM_1_2:
+                case TransformType.TRANSFORM_1_3:
+                case TransformType.TRANSFORM_2_0:
+                case TransformType.TRANSFORM_2_1:
+                case TransformType.TRANSFORM_2_2:
+                case TransformType.TRANSFORM_2_3:
+                case TransformType.TRANSFORM_3_0:
+                case TransformType.TRANSFORM_3_1:
+                case TransformType.TRANSFORM_3_2:
+                case TransformType.TRANSFORM_3_3:
+                case TransformType.ROTATE_X:
+                case TransformType.ROTATE_Y:
+                case TransformType.ROTATE_Z:
+                case TransformType.TRANSLATE:
+                default: 
+                    throw new Error('Unknown animation type: \'' + _transformType + '\'.');
+                    break;
+            }
+
+            return null;
+        }
+        
+        private function getScalarTimeline(propertyPath : String,
+                                           interpolate  : Boolean) : ScalarTimeline
+        {
+            var times    : Vector.<uint>     = getTimes();
+            var numTimes : uint              = times.length;
+            var values   : Vector.<Number>   = new Vector.<Number>(numTimes, true);
+            
+            for (var timeId : uint = 0; timeId < numTimes; ++timeId)
+                values[timeId] = getFloatValudByIndex(timeId);
+            
+            trace(values);
+            
+            return new ScalarTimeline(propertyPath, times, values, interpolate); 
+        }
+        
+        private function getMatrixTimeline(propertyPath  : String) : MatrixTimeline
+        {
+            var times    : Vector.<uint>        = getTimes();
+            var numTimes : uint                 = times.length;
+            var matrices : Vector.<Matrix4x4>   = new Vector.<Matrix4x4>(numTimes, true);
+            
+            for (var timeId : uint = 0; timeId < numTimes; ++timeId)
+                matrices[timeId] = getMatrixValueByIndex(timeId);
+            
+            return new MatrixTimeline(propertyPath, times, matrices);
+        }
 		
 		public function retrieveTimes(out : Object) : void
 		{
@@ -81,8 +162,15 @@ package aerys.minko.type.parser.collada.resource.animation
 			
 			return i;
 		}
+        
+        public function getFloatValudByIndex(index : uint) : Number
+        {
+            var outputSource : Source = _sources['OUTPUT'];
+            
+            return outputSource.data[index];
+        }
 		
-		private function getSimpleValueAt(t : Number) : Number
+		public function getFloatValueAt(t : Number) : Number
 		{
 			var out				: Number;
 			var timeIndex		: uint = getTimeIndexAt(t);
@@ -150,6 +238,13 @@ package aerys.minko.type.parser.collada.resource.animation
 			return out;
 		}
 		
+        private function getMatrixValueByIndex(index : uint) : Matrix4x4
+        {
+            var outputSource	: Source	= _sources['OUTPUT'];
+            
+            return outputSource.getComponentByParamIndex(index, 0) as Matrix4x4;
+        }
+        
 		private function getMatrixValueAt(t : Number, out : Matrix4x4 = null) : Matrix4x4
 		{
 			out ||= new Matrix4x4();
@@ -185,10 +280,10 @@ package aerys.minko.type.parser.collada.resource.animation
 			
 			return out;
 		}
-		
-		public function setMatrixData(t : Number, data : Vector.<Number>) : void
+        
+		public function getMatrixData(t : Number, data : Vector.<Number>) : void
 		{
-			switch (_transformType)
+ 			switch (_transformType)
 			{
 				case TransformType.MATRIX:
 				case TransformType.TRANSFORM:
@@ -197,67 +292,67 @@ package aerys.minko.type.parser.collada.resource.animation
 					break;
 				
 				case TransformType.TRANSFORM_0_0:
-					data[0] = getSimpleValueAt(t); 
+					data[0] = getFloatValueAt(t); 
 					break;
 				
 				case TransformType.TRANSFORM_0_1: 
-					data[1] = getSimpleValueAt(t); 
+					data[1] = getFloatValueAt(t); 
 					break;
 				
 				case TransformType.TRANSFORM_0_2:
-					data[2] = getSimpleValueAt(t);
+					data[2] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_0_3:
-					data[3] = getSimpleValueAt(t);
+					data[3] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_1_0:
-					data[4] = getSimpleValueAt(t);
+					data[4] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_1_1:
-					data[5] = getSimpleValueAt(t);
+					data[5] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_1_2:
-					data[6] = getSimpleValueAt(t);
+					data[6] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_1_3:
-					data[7] = getSimpleValueAt(t);
+					data[7] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_2_0:
-					data[8] = getSimpleValueAt(t);
+					data[8] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_2_1:
-					data[9] = getSimpleValueAt(t);
+					data[9] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_2_2:
-					data[10] = getSimpleValueAt(t);
+					data[10] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_2_3:
-					data[11] = getSimpleValueAt(t);
+					data[11] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_3_0:
-					data[12] = getSimpleValueAt(t);
+					data[12] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_3_1:
-					data[13] = getSimpleValueAt(t);
+					data[13] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_3_2:
-					data[14] = getSimpleValueAt(t);
+					data[14] = getFloatValueAt(t);
 					break;
 				
 				case TransformType.TRANSFORM_3_3:
-					data[15] = getSimpleValueAt(t);
+					data[15] = getFloatValueAt(t);
 					break;
 					
 				case TransformType.ROTATE_X:
