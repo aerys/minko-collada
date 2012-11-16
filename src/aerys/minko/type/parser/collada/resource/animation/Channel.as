@@ -51,18 +51,6 @@ package aerys.minko.type.parser.collada.resource.animation
 			}
 		}
         
-        public function getTimes() : Vector.<uint>
-        {
-            var inputSourceData			: Array				= Source(_sources['INPUT']).data;
-            var inputSourceDataLength	: uint				= inputSourceData.length;
-            var times       			: Vector.<uint>	    = new <uint>[];
-            
-            for (var timeId : uint = 0; timeId < inputSourceDataLength; ++timeId)
-                times[timeId] = uint(inputSourceData[timeId] * 1000);
-            
-            return times;
-        }
-        
         public function getTimeline() : ITimeline
         {
             switch (_transformType)
@@ -112,8 +100,6 @@ package aerys.minko.type.parser.collada.resource.animation
             for (var timeId : uint = 0; timeId < numTimes; ++timeId)
                 values[timeId] = getFloatValudByIndex(timeId);
             
-            trace(values);
-            
             return new ScalarTimeline(propertyPath, times, values, interpolate); 
         }
         
@@ -128,19 +114,6 @@ package aerys.minko.type.parser.collada.resource.animation
             
             return new MatrixTimeline(propertyPath, times, matrices);
         }
-		
-		public function retrieveTimes(out : Object) : void
-		{
-			var inputSourceData			: Array				= Source(_sources['INPUT']).data;
-			var inputSourceDataLength	: uint				= inputSourceData.length;
-			var dest					: Vector.<Number>	= out[_targetId];
-			
-			if (!dest)
-				dest = out[_targetId] = new Vector.<Number>();
-			
-			for (var timeId : uint = 0; timeId < inputSourceDataLength; ++timeId)
-				dest.push(inputSourceData[timeId]);
-		}
 		
 		/**
 		 * Dichotomy to find the time immediatly superior to a given value.
@@ -170,199 +143,23 @@ package aerys.minko.type.parser.collada.resource.animation
             return outputSource.data[index];
         }
 		
-		public function getFloatValueAt(t : Number) : Number
-		{
-			var out				: Number;
-			var timeIndex		: uint = getTimeIndexAt(t);
-			var times			: Array	= _sources['INPUT'].data;
-			var timesLength		: uint	= times.length;
-			
-			var outputSource	: Source = _sources['OUTPUT'];
-			
-			if (timeIndex == 0)
-			{
-				out = outputSource.data[0];
-			}
-			else if (timeIndex == timesLength)
-			{
-				out = outputSource.data[timesLength - 1];
-			}
-			else
-			{
-				var previousTime		: Number	= times[timeIndex - 1];
-				var nextTime			: Number	= times[timeIndex];
-				var interpolationRatio	: Number	= (t - previousTime) / (nextTime - previousTime);
-				
-				var previousValue		: Number	= outputSource.data[timeIndex - 1];
-				var nextValue			: Number	= outputSource.data[timeIndex];
-				
-				out = (1 - interpolationRatio) * previousValue + interpolationRatio * nextValue;
-			}
-			
-			return out;
-		}
-		
-		private function getCompoundValueAt(t : Number, out : Object = null) : Object
-		{
-			out ||= new Object();
-			
-			// interpolate the output source the get the wanted value.
-			// later here we should implement bezier stuff & co, but i'm way too lazy right now.
-			
-			var timeIndex		: uint		= getTimeIndexAt(t);
-			var times			: Array		= _sources['INPUT'].data;
-			var timesLength		: uint		= times.length;
-			var outputSource	: Source	= _sources['OUTPUT'];
-			
-			if (timeIndex == 0)
-			{
-				out = outputSource.getItem(0, out);
-			}
-			else if (timeIndex == timesLength)
-			{
-				out = outputSource.getItem(timesLength - 1, out);
-			}
-			else
-			{
-				var previousTime		: Number	= times[timeIndex - 1];
-				var nextTime			: Number	= times[timeIndex];
-				var interpolationRatio	: Number	= (t - previousTime) / (nextTime - previousTime);
-				
-				var previousValue		: Object	= outputSource.getItem(timeIndex - 1);
-				var nextValue			: Object	= outputSource.getItem(timeIndex);
-				
-				for (var key : String in previousValue)
-					out[key] = (1 - interpolationRatio) * previousValue[key] + interpolationRatio * nextValue[key];
-			}
-			
-			return out;
-		}
-		
+        private function getTimes() : Vector.<uint>
+        {
+            var inputSourceData			: Array				= Source(_sources['INPUT']).data;
+            var inputSourceDataLength	: uint				= inputSourceData.length;
+            var times       			: Vector.<uint>	    = new <uint>[];
+            
+            for (var timeId : uint = 0; timeId < inputSourceDataLength; ++timeId)
+                times[timeId] = uint(inputSourceData[timeId] * 1000);
+            
+            return times;
+        }
+        
         private function getMatrixValueByIndex(index : uint) : Matrix4x4
         {
             var outputSource	: Source	= _sources['OUTPUT'];
             
             return outputSource.getComponentByParamIndex(index, 0) as Matrix4x4;
         }
-        
-		private function getMatrixValueAt(t : Number, out : Matrix4x4 = null) : Matrix4x4
-		{
-			out ||= new Matrix4x4();
-			
-			// interpolate the output source the get the wanted value.
-			// later here we should implement bezier stuff & co, but i'm way too lazy right now.
-			
-			var timeIndex		: uint		= getTimeIndexAt(t);
-			var times			: Array		= _sources['INPUT'].data;
-			var timesLength		: uint		= times.length;
-			var outputSource	: Source	= _sources['OUTPUT'];
-			
-			if (timeIndex == 0)
-			{
-				out = outputSource.getComponentByParamIndex(0, 0) as Matrix4x4;
-			}
-			else if (timeIndex == timesLength)
-			{
-				out = outputSource.getComponentByParamIndex(timesLength - 1, 0) as Matrix4x4;
-			}
-			else
-			{
-				var previousTime		: Number	= times[timeIndex - 1];
-				var nextTime			: Number	= times[timeIndex];
-				var interpolationRatio	: Number	= (t - previousTime) / (nextTime - previousTime);
-				
-				var previousValue		: Matrix4x4	= outputSource.getComponentByParamIndex(timeIndex - 1, 0) as Matrix4x4;
-				var nextValue			: Matrix4x4	= outputSource.getComponentByParamIndex(timeIndex, 0) as Matrix4x4;
-				
-				out.copyFrom(previousValue);
-				out.interpolateTo(nextValue, 1 - interpolationRatio, true);
-			}
-			
-			return out;
-		}
-        
-		public function getMatrixData(t : Number, data : Vector.<Number>) : void
-		{
- 			switch (_transformType)
-			{
-				case TransformType.MATRIX:
-				case TransformType.TRANSFORM:
-					var matrix : Matrix4x4 = getMatrixValueAt(t);
-					matrix.getRawData(data, 0, false);
-					break;
-				
-				case TransformType.TRANSFORM_0_0:
-					data[0] = getFloatValueAt(t); 
-					break;
-				
-				case TransformType.TRANSFORM_0_1: 
-					data[1] = getFloatValueAt(t); 
-					break;
-				
-				case TransformType.TRANSFORM_0_2:
-					data[2] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_0_3:
-					data[3] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_1_0:
-					data[4] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_1_1:
-					data[5] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_1_2:
-					data[6] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_1_3:
-					data[7] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_2_0:
-					data[8] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_2_1:
-					data[9] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_2_2:
-					data[10] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_2_3:
-					data[11] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_3_0:
-					data[12] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_3_1:
-					data[13] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_3_2:
-					data[14] = getFloatValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_3_3:
-					data[15] = getFloatValueAt(t);
-					break;
-					
-				case TransformType.ROTATE_X:
-				case TransformType.ROTATE_Y:
-				case TransformType.ROTATE_Z:
-				case TransformType.TRANSLATE:
-				default: 
-					throw new Error("Unknown animation type: '" + _transformType + "'.");
-					break;
-			}
-		}
 	}
 }
