@@ -40,7 +40,12 @@ package aerys.minko.type.parser.collada.resource.animation
 				mergedSubAnimations.push(animation);
 			}
 			
-			store['mergedAnimations'] = new Animation(document, 'mergedAnimations', null, mergedSubAnimations);
+			store['mergedAnimations'] = new Animation(
+                document,
+                'mergedAnimations',
+                null,
+                mergedSubAnimations
+            );
 		}
 		
 		public static function createFromXML(xmlAnimation	: XML,
@@ -77,22 +82,36 @@ package aerys.minko.type.parser.collada.resource.animation
                 {
                     try
                     {
-                        timelines.push(channel.getTimeline());
-                        targetNames.push(channel.targetId);
+                        var timeline : ITimeline = channel.getTimeline();
                         
-                        Minko.log(
-                            DebugLevel.PLUGIN_NOTICE,
-                            'ColladaPlugin: Loaded \'' + channel.transformType
-                            + '\' animation for \'' + channel.targetId + '\'',
-                            this
-                        );
+                        if (timeline)
+                        {
+                            timelines.push(timeline);
+                            targetNames.push(channel.targetId);
+                            
+                            Minko.log(
+                                DebugLevel.PLUGIN_NOTICE,
+                                'ColladaPlugin: Loaded \'' + channel.transformType
+                                + '\' animation for \'' + channel.targetId + '\'',
+                                this
+                            );
+                        }
+                        else
+                        {
+                            Minko.log(
+                                DebugLevel.PLUGIN_WARNING,
+                                'ColladaPlugin: Dropped animation for \'' + channel.targetId
+                                + '\': no animation data.',
+                                this
+                            );  
+                        }
                     }
                     catch (e : Error)
                     {
                         Minko.log(
                             DebugLevel.PLUGIN_WARNING,
                             'ColladaPlugin: Dropped animation for \'' + channel.targetId
-                            + '\' (' + e.message + ')',
+                            + '\': ' + e.message,
                             this
                         );
                     }

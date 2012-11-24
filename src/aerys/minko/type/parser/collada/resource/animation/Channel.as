@@ -95,6 +95,10 @@ package aerys.minko.type.parser.collada.resource.animation
         {
             var times    : Vector.<uint>     = getTimes();
             var numTimes : uint              = times.length;
+            
+            if (numTimes == 0)
+                return null;
+            
             var values   : Vector.<Number>   = new Vector.<Number>(numTimes, true);
             
             for (var timeId : uint = 0; timeId < numTimes; ++timeId)
@@ -107,6 +111,10 @@ package aerys.minko.type.parser.collada.resource.animation
         {
             var times    : Vector.<uint>        = getTimes();
             var numTimes : uint                 = times.length;
+            
+            if (numTimes == 0)
+                return null;
+            
             var matrices : Vector.<Matrix4x4>   = new Vector.<Matrix4x4>(numTimes, true);
             
             for (var timeId : uint = 0; timeId < numTimes; ++timeId)
