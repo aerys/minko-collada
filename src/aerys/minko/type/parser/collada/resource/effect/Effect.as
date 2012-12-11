@@ -8,7 +8,7 @@ package aerys.minko.type.parser.collada.resource.effect
 	import aerys.minko.type.parser.collada.instance.InstanceEffect;
 	import aerys.minko.type.parser.collada.resource.IResource;
 	import aerys.minko.type.parser.collada.resource.effect.profile.IProfile;
-	import aerys.minko.type.parser.collada.resource.effect.profile.ProfileCommon;
+	import aerys.minko.type.parser.collada.resource.effect.profile.CommonProfile;
 	
 	public class Effect implements IResource
 	{
@@ -55,7 +55,7 @@ package aerys.minko.type.parser.collada.resource.effect
 				switch (child.localName())
 				{
 					case 'profile_COMMON':
-						profiles.push(ProfileCommon.createFromXML(child, document));
+						profiles.push(CommonProfile.createFromXML(child, document));
 						break;
 					
 					case 'profile_BRIDGE':
@@ -93,16 +93,16 @@ package aerys.minko.type.parser.collada.resource.effect
 		
 		public function createMaterial(setParams : Object) : Material
 		{
-			var profileCommon : ProfileCommon = null;
+			var profileCommon : CommonProfile = null;
 			
 			for each (var profile : IProfile in _profiles)
-				if (profile is ProfileCommon)
-					profileCommon = ProfileCommon(profile);
+				if (profile is CommonProfile)
+					profileCommon = CommonProfile(profile);
 			
 			if (!profileCommon)
 			{
 				Minko.log(DebugLevel.PLUGIN_WARNING, 'No valid profile was found for effect: ' + _name);
-				return ProfileCommon.DEFAULT_MATERIAL;
+				return CommonProfile.DEFAULT_MATERIAL;
 			}
 			else
 			{
