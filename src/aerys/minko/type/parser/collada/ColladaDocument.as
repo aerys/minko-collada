@@ -81,15 +81,6 @@ package aerys.minko.type.parser.collada
 		public function get nodes()			: Object { return _nodes;			}
 		public function get visualScenes()	: Object { return _visualScenes;	}
 		
-		public function getAnimationById	(id : String) : Animation	{ return _animations[id];	}
-		public function getControllerById	(id : String) : Controller	{ return _controllers[id];	}
-		public function getEffectById		(id : String) : Effect		{ return _effects[id];		}
-		public function getGeometryById		(id : String) : Geometry	{ return _geometries[id];	}
-		public function getImageById		(id : String) : Image		{ return _images[id];		}
-		public function getMaterialById		(id : String) : ColladaMaterial	{ return _materials[id];	}
-		public function getNodeById			(id	: String) : Node		{ return _nodes[id];		}
-		public function getVisualSceneById	(id	: String) : VisualScene	{ return _visualScenes[id];	}
-		
 		public function ColladaDocument()
 		{
 		}
@@ -337,5 +328,45 @@ package aerys.minko.type.parser.collada
 			
 			return null;
 		}
+        
+        public function getAnimationById(id : String) : Animation
+        {
+            return _animations[id];
+        }
+        
+        public function getControllerById(id : String) : Controller
+        {
+            return _controllers[id];
+        }
+        
+        public function getEffectById(id : String) : Effect
+        {
+            return _effects[id];
+        }
+        
+        public function getGeometryById(id : String) : Geometry
+        {
+            return _geometries[id];
+        }
+        
+        public function getImageById(id : String) : Image
+        {
+            return _images[id];
+        }
+        
+        public function getMaterialById(id : String) : ColladaMaterial
+        {
+            return _materials[id];
+        }
+        
+        public function getNodeById(id	: String) : Node
+        {
+            return _nodes[id];
+        }
+        
+        public function getVisualSceneById(id : String) : VisualScene
+        {
+            return _visualScenes[id];
+        }
 	}
 }
