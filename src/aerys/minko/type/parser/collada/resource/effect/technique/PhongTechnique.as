@@ -4,6 +4,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 	import aerys.minko.render.material.Material;
 	import aerys.minko.render.material.basic.BasicMaterial;
 	import aerys.minko.render.material.basic.BasicProperties;
+	import aerys.minko.render.material.phong.PhongProperties;
 	import aerys.minko.render.resource.texture.TextureResource;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Vector4;
@@ -181,9 +182,11 @@ package aerys.minko.type.parser.collada.resource.effect.technique
                 return _material;
             
 			_material = new BasicMaterial();
+            
+            _material.setProperty(PhongProperties.SHININESS_MULTIPLIER, _shininess);
             setDiffuse(params, setParams);
             setSpecular(params, setParams);
-			
+            			
 			return _material;
 		}
         
@@ -214,7 +217,28 @@ package aerys.minko.type.parser.collada.resource.effect.technique
         
         private function setSpecular(params : Object, setParams : Object) : void
         {
-            // FIXME
+            var specularValue : Object = _specular.getValue(params, setParams);
+            
+            if (specularValue is Vector4)
+            {
+                var specularValueVector : Vector4 = specularValue as Vector4;
+                
+                _material.setProperty(
+                    PhongProperties.SPECULAR_MULTIPLIER,
+                    (specularValueVector.x + specularValueVector.y + specularValueVector.z) / 3.
+                );
+            }
+            else if (specularValue is uint)
+            {
+                _material.setProperty(
+                    PhongProperties.SPECULAR_MULTIPLIER,
+                    ((specularValue as uint) >>> 24) / 255.
+                );
+            }
+            else if (specularValue is Number)
+            {
+                _material.setProperty(PhongProperties.SPECULAR_MULTIPLIER, specularValue);
+            }
         }
 	}
 }
