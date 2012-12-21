@@ -183,9 +183,12 @@ package aerys.minko.type.parser.collada.resource.effect.technique
             
 			_material = new BasicMaterial();
             
-            _material.setProperty(PhongProperties.SHININESS_MULTIPLIER, _shininess);
-            setDiffuse(params, setParams);
-            setSpecular(params, setParams);
+			if (!isNaN(_shininess))
+            	_material.setProperty(PhongProperties.SHININESS_MULTIPLIER, _shininess);
+			if (_diffuse != null)
+            	setDiffuse(params, setParams);
+			if (_specular != null)
+            	setSpecular(params, setParams);
             			
 			return _material;
 		}
