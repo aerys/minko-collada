@@ -111,7 +111,13 @@ package aerys.minko.type.parser.collada.resource.effect
 						if (surface)
 						{
 							image = _document.getImageById(surface.initFrom);
-							if (image.imageData.textureResource)
+							if (!image)
+								Minko.log(
+									DebugLevel.PLUGIN_ERROR,
+									'Collada: Broken reference to image with id \''
+									+ surface.initFrom + '\'.'
+								);
+							else if (image.imageData.textureResource)
 								return image.imageData.textureResource;
 						}
 					}

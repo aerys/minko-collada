@@ -207,7 +207,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
             {
                 Minko.log(
                     DebugLevel.PLUGIN_WARNING,
-                    'ColladaPlugin: Could not evaluate Phong in profile_COMMON. '
+                    'Collada: Could not evaluate diffuse in profile_COMMON. '
                     + 'It has been replaced by a random color.'
                 );
                 
