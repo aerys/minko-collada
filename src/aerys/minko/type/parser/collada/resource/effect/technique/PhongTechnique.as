@@ -184,7 +184,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			_material = new BasicMaterial();
             
 			if (!isNaN(_shininess))
-            	_material.setProperty(PhongProperties.SHININESS_MULTIPLIER, _shininess);
+            	_material.setProperty(PhongProperties.SHININESS, _shininess);
 			if (_diffuse != null)
             	setDiffuse(params, setParams);
 			if (_specular != null)
