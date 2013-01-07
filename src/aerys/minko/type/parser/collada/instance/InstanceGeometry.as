@@ -89,7 +89,7 @@ package aerys.minko.type.parser.collada.instance
 			}
 			
 			var group				: Group					= new Group();
-			var effect				: Effect				= options.effect;
+			var material			: Material				= options.material;
 			var subMeshTemplates	: Vector.<MeshTemplate>	= geometry.meshTemplates;
 			var numMeshes			: uint					= subMeshTemplates != null
 				? subMeshTemplates.length
@@ -102,7 +102,7 @@ package aerys.minko.type.parser.collada.instance
 				if (meshTemplate.indexData.length != 0)
 				{
 					var localMeshes : Vector.<Mesh> = meshTemplate.generateMeshes(
-						effect, options.vertexStreamUsage, options.indexStreamUsage
+						options.vertexStreamUsage, options.indexStreamUsage
 					);
 					
 					var i : uint = 0;
@@ -110,8 +110,8 @@ package aerys.minko.type.parser.collada.instance
 					{
 						localMesh.material = getMaterial(meshTemplate.materialName);
 						
-						if (options.effect)
-							localMesh.material.effect = options.effect;
+						if (options.material.effect)
+							localMesh.material.effect = options.material.effect;
 						
 						localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
 						
@@ -150,7 +150,7 @@ package aerys.minko.type.parser.collada.instance
 		private function getMaterial(materialName : String) : Material
 		{
 			if (materialName == null || materialName == '')
-				return ColladaMaterial.DEFAULT_MATERIAL;
+				return null;
 			else
 			{
 				var materialInstance : InstanceMaterial = _bindMaterial[materialName];
