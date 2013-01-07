@@ -115,8 +115,7 @@ package aerys.minko.type.parser.collada.helper
 			}
 		}
 		
-		public function generateMeshes(effect				: Effect, 
-									   vertexStreamUsage	: uint,
+		public function generateMeshes(vertexStreamUsage	: uint,
 									   indexStreamUsage		: uint) : Vector.<Mesh>
 		{
 			var vertexDatas	: Vector.<ByteArray>	= new <ByteArray>[];
