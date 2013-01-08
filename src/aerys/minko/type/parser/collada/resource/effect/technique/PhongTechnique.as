@@ -184,7 +184,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			_material = new BasicMaterial();
             
 			if (!isNaN(_shininess))
-            	_material.setProperty(PhongProperties.SHININESS_MULTIPLIER, _shininess);
+            	_material.setProperty(PhongProperties.SHININESS, _shininess);
 			if (_diffuse != null)
             	setDiffuse(params, setParams);
 			if (_specular != null)
@@ -227,20 +227,20 @@ package aerys.minko.type.parser.collada.resource.effect.technique
                 var specularValueVector : Vector4 = specularValue as Vector4;
                 
                 _material.setProperty(
-                    PhongProperties.SPECULAR_MULTIPLIER,
+                    PhongProperties.SPECULAR,
                     (specularValueVector.x + specularValueVector.y + specularValueVector.z) / 3.
                 );
             }
             else if (specularValue is uint)
             {
                 _material.setProperty(
-                    PhongProperties.SPECULAR_MULTIPLIER,
+                    PhongProperties.SPECULAR,
                     ((specularValue as uint) >>> 24) / 255.
                 );
             }
             else if (specularValue is Number)
             {
-                _material.setProperty(PhongProperties.SPECULAR_MULTIPLIER, specularValue);
+                _material.setProperty(PhongProperties.SPECULAR, specularValue);
             }
         }
 	}
