@@ -69,17 +69,52 @@ package aerys.minko.type.parser.collada
 		private var _materials		: Object;
 		private var _nodes			: Object;
 		private var _visualScenes	: Object;
+        private var _matrices       : Object;
 		
-		public function get mainSceneId()	: String { return _mainSceneId;		}
+		public function get mainSceneId() : String
+        {
+            return _mainSceneId;
+        }
 		
-		public function get animations()	: Object { return _animations;		}
-		public function get controllers()	: Object { return _controllers;		}
-		public function get effects()		: Object { return _effects;			}
-		public function get geometries()	: Object { return _geometries;		}
-		public function get images()		: Object { return _images;			}
-		public function get materials()		: Object { return _materials;		}
-		public function get nodes()			: Object { return _nodes;			}
-		public function get visualScenes()	: Object { return _visualScenes;	}
+		public function get animations() : Object
+        {
+            return _animations;
+        }
+        
+		public function get controllers() : Object
+        {
+            return _controllers;
+        }
+        
+		public function get effects() : Object
+        {
+            return _effects;
+        }
+        
+		public function get geometries() : Object
+        {
+            return _geometries;
+        }
+        
+		public function get images() : Object
+        {
+            return _images;
+        }
+        
+		public function get materials() : Object
+        {
+            return _materials;
+        }
+        
+		public function get nodes() : Object
+        {
+            return _nodes;
+        }
+        
+		public function get visualScenes() : Object
+        {
+            return _visualScenes;
+        }
 		
 		public function ColladaDocument()
 		{
@@ -91,31 +126,42 @@ package aerys.minko.type.parser.collada
 			
 			_metaData		= createMetaDataFromXML(xmlDocument.NS::asset[0]);
 			
-			_animations		= new Object();
-			_controllers	= new Object();
-			_effects		= new Object();
-			_geometries		= new Object();
-			_images			= new Object();
-			_materials		= new Object();
-			_nodes			= new Object();
-			_visualScenes	= new Object();
+			_animations		= {};
+			_controllers	= {};
+			_effects		= {};
+			_geometries		= {};
+			_images			= {};
+			_materials		= {};
+			_nodes			= {};
+			_visualScenes	= {};
+            _matrices       = {};
 			
-			Animation	.fillStoreFromXML(xmlDocument, this, _animations);
-			Controller	.fillStoreFromXML(xmlDocument, this, _controllers);
-			Effect		.fillStoreFromXML(xmlDocument, this, _effects);
-			Geometry	.fillStoreFromXML(xmlDocument, this, _geometries);
-			Image		.fillStoreFromXML(xmlDocument, this, _images);
-			ColladaMaterial 	.fillStoreFromXML(xmlDocument, this, _materials);
-			Node		.fillStoreFromXML(xmlDocument, this, _nodes);
-			VisualScene	.fillStoreFromXML(xmlDocument, this, _visualScenes);
+			Animation.fillStoreFromXML(xmlDocument, this, _animations);
+			Controller.fillStoreFromXML(xmlDocument, this, _controllers);
+			Effect.fillStoreFromXML(xmlDocument, this, _effects);
+			Geometry.fillStoreFromXML(xmlDocument, this, _geometries);
+			Image.fillStoreFromXML(xmlDocument, this, _images);
+			ColladaMaterial.fillStoreFromXML(xmlDocument, this, _materials);
+			Node.fillStoreFromXML(xmlDocument, this, _nodes);
+			VisualScene.fillStoreFromXML(xmlDocument, this, _visualScenes);
+            
+            var matrixNodes : XMLList = xmlDocument..NS::matrix.(hasOwnProperty('@sid'));
+            
+            for each (var matrixNode : XML in matrixNodes)
+                _matrices[matrixNode.@sid] = matrixNode;
 		}
+        
+        public function getMatrixXMLNodeBySid(sid : String) : XML
+        {
+            return  _matrices[sid];
+        }
 		
 		private function createMetaDataFromXML(xmlMetaData : XML) : Object
 		{
-			var metaData : Object = new Object();
+			var metaData : Object = {}
 			
-			metaData.contributor	= new Vector.<Object>();
-			metaData.unit			= new Object();
+			metaData.contributor	= new <Object>[];
+			metaData.unit			= {};
 			
 			//FIXME!
 			metaData.unit.meter		= 1;//parseFloat(String(xmlMetaData.NS::unit[0].@meter));
@@ -128,7 +174,7 @@ package aerys.minko.type.parser.collada
 			
 			for each (var xmlContributor : XML in xmlMetaData.NS::contributor)
 			{
-				var contributor : Object = new Object();
+				var contributor : Object = {};
 				
 				if (xmlContributor.NS::author.length() != 0)
 					contributor.author = String(xmlContributor.NS::author);
@@ -180,8 +226,8 @@ package aerys.minko.type.parser.collada
 		public function generateScene(options : ParserOptions) : ISceneNode
 		{
 			var instance		: IInstance		= getVisualSceneById(_mainSceneId).createInstance();
-			var sourceIdToScene	: Object		= new Object();
-			var scopedIdToScene	: Object		= new Object();
+			var sourceIdToScene	: Object		= {};
+			var scopedIdToScene	: Object		= {};
 			var mainScene		: Group			= Group(instance.createSceneNode(options, sourceIdToScene, scopedIdToScene));
 			var wrapper			: Group			= new Group(mainScene);
 			
