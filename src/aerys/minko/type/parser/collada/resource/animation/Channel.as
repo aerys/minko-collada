@@ -4,6 +4,7 @@ package aerys.minko.type.parser.collada.resource.animation
 	import aerys.minko.type.animation.timeline.MatrixTimeline;
 	import aerys.minko.type.animation.timeline.ScalarTimeline;
 	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.enum.TransformType;
 	import aerys.minko.type.parser.collada.helper.Source;
 
@@ -51,8 +52,11 @@ package aerys.minko.type.parser.collada.resource.animation
 			}
 		}
         
-        public function getTimeline() : ITimeline
+        public function getTimeline(document : ColladaDocument) : ITimeline
         {
+            if (document.getMatrixXMLNodeBySid(_transformType))
+                return getMatrixTimeline('transform');
+            
             switch (_transformType)
             {
                 case TransformType.MATRIX:
@@ -82,7 +86,7 @@ package aerys.minko.type.parser.collada.resource.animation
                 case TransformType.ROTATE_Y:
                 case TransformType.ROTATE_Z:
                 case TransformType.TRANSLATE:
-                default: 
+                default:
                     throw new Error('Unknown animation type: \'' + _transformType + '\'.');
                     break;
             }

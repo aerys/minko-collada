@@ -82,7 +82,7 @@ package aerys.minko.type.parser.collada.resource.animation
                 {
                     try
                     {
-                        var timeline : ITimeline = channel.getTimeline();
+                        var timeline : ITimeline = channel.getTimeline(_document);
                         
                         if (timeline)
                         {
