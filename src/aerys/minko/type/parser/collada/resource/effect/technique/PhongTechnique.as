@@ -7,6 +7,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 	import aerys.minko.render.material.environment.EnvironmentMappingProperties;
 	import aerys.minko.render.material.phong.PhongProperties;
 	import aerys.minko.render.resource.texture.TextureResource;
+	import aerys.minko.type.enum.EnvironmentMappingType;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Vector4;
@@ -256,8 +257,18 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			
 			if (reflectiveValue is TextureResource)
 			{
-				_material.setProperty(EnvironmentMappingProperties.ENVIRONMENT_MAP, reflectiveValue);
-				_material.setProperty(EnvironmentMappingProperties.REFLECTIVITY, _reflectivity);
+				_material.setProperty(
+					EnvironmentMappingProperties.ENVIRONMENT_MAP,
+					reflectiveValue
+				);
+				_material.setProperty(
+					EnvironmentMappingProperties.REFLECTIVITY,
+					_reflectivity
+				);
+				_material.setProperty(
+					EnvironmentMappingProperties.ENVIRONMENT_MAPPING_TYPE,
+					EnvironmentMappingType.BLINN_NEWELL
+				);
 			}
 		}
 	}
