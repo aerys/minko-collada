@@ -4,6 +4,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 	import aerys.minko.render.material.basic.BasicMaterial;
 	import aerys.minko.render.material.basic.BasicProperties;
 	import aerys.minko.render.resource.texture.TextureResource;
+	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTextureOrParam;
@@ -71,9 +72,11 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			return constant;
 		}
 		
-		public function createMaterial(params : Object, setParams : Object) : Material
+		public function createMaterial(parserOptions 	: ParserOptions,
+									   params 			: Object,
+									   setParams 		: Object) : Material
 		{
-			var material : Material	= new BasicMaterial();
+			var material : Material	= parserOptions.material.clone() as Material;
 			
 			material.setProperty(BasicProperties.DIFFUSE_COLOR, 0xFFFFFFFF);
 			

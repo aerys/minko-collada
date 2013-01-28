@@ -109,7 +109,9 @@ package aerys.minko.type.parser.collada.instance
 				
 				if (meshTemplate)
 				{
-					var materialProvider	: Material 		= getMaterial(meshTemplate.materialName) || Material(material.clone());
+					var materialProvider	: Material 		= getMaterial(
+						options, meshTemplate.materialName
+					);
 					var localMeshes 		: Vector.<Mesh> = meshTemplate.generateMeshes(
 						options.vertexStreamUsage, options.indexStreamUsage
 					);
@@ -154,14 +156,15 @@ package aerys.minko.type.parser.collada.instance
 			return result;
 		}
 		
-		private function getMaterial(materialName : String) : Material
+		private function getMaterial(parserOptions 	: ParserOptions,
+									 materialName 	: String) : Material
 		{
 			var materialInstance	: InstanceMaterial = materialName != null && materialName != ''
 				? _bindMaterial[materialName]
 				: null;
 			
 			var material	: Material = materialInstance != null
-				? ColladaMaterial(materialInstance.resource).material
+				? ColladaMaterial(materialInstance.resource).getMaterial(parserOptions)
 				: null;
 			
 			return material;

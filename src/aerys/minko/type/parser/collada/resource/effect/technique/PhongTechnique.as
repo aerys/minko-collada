@@ -6,6 +6,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 	import aerys.minko.render.material.basic.BasicProperties;
 	import aerys.minko.render.material.phong.PhongProperties;
 	import aerys.minko.render.resource.texture.TextureResource;
+	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
@@ -176,12 +177,14 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			_document			= document;
 		}
 		
-		public function createMaterial(params : Object, setParams : Object) : Material
+		public function createMaterial(parserOptions 	: ParserOptions,
+									   params 			: Object,
+									   setParams 		: Object) : Material
 		{
             if (_material)
                 return _material;
-            
-			_material = new BasicMaterial();
+			            
+			_material = parserOptions.material.clone() as Material;
             
 			if (!isNaN(_shininess))
             	_material.setProperty(PhongProperties.SHININESS, _shininess);
