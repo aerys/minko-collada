@@ -108,11 +108,7 @@ package aerys.minko.type.parser.collada.instance
 					var i : uint = 0;
 					for each (var localMesh : Mesh in localMeshes)
 					{
-						localMesh.material = getMaterial(meshTemplate.materialName);
-						
-						if (options.material.effect)
-							localMesh.material.effect = options.material.effect;
-						
+						localMesh.material = getMaterial(options, meshTemplate.materialName);
 						localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
 						
 						group.addChild(localMesh);
@@ -147,7 +143,8 @@ package aerys.minko.type.parser.collada.instance
 			return result;
 		}
 		
-		private function getMaterial(materialName : String) : Material
+		private function getMaterial(parserOptions 	: ParserOptions,
+									 materialName 	: String) : Material
 		{
 			if (materialName == null || materialName == '')
 				return null;
@@ -156,8 +153,8 @@ package aerys.minko.type.parser.collada.instance
 				var materialInstance : InstanceMaterial = _bindMaterial[materialName];
 				
 				return materialInstance != null ? 
-					ColladaMaterial(materialInstance.resource).material :
-					ColladaMaterial.DEFAULT_MATERIAL;
+					ColladaMaterial(materialInstance.resource).getMaterial(parserOptions) :
+					null;
 			}
 		}
 	}

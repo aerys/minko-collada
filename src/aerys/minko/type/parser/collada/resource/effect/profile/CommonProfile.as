@@ -4,6 +4,7 @@ package aerys.minko.type.parser.collada.resource.effect.profile
 	import aerys.minko.render.material.Material;
 	import aerys.minko.render.material.basic.BasicMaterial;
 	import aerys.minko.type.error.collada.ColladaError;
+	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.resource.effect.NewParam;
@@ -115,7 +116,9 @@ package aerys.minko.type.parser.collada.resource.effect.profile
 			_document	= document;
 		}
 		
-		public function createMaterial(params : Object, setParams : Object) : Material
+		public function createMaterial(parserOptions 	: ParserOptions,
+									   params 			: Object,
+									   setParams 		: Object) : Material
 		{
 			var key			: String;
 			var localParams : Object = new Object();
@@ -125,7 +128,9 @@ package aerys.minko.type.parser.collada.resource.effect.profile
 			for (key in _params)
 				localParams[key] = _params[key];
 			
-            var material : Material = _technique.createMaterial(localParams, setParams);
+            var material : Material = _technique.createMaterial(
+				parserOptions, localParams, setParams
+			);
             
             for each (var extraTechnique : IExtraTechnique in _extras)
                 extraTechnique.applyToMaterial(material, localParams, setParams);

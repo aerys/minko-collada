@@ -1,6 +1,7 @@
 package aerys.minko.type.parser.collada.resource.effect.technique
 {
     import aerys.minko.render.material.Material;
+    import aerys.minko.type.loader.parser.ParserOptions;
     import aerys.minko.type.parser.collada.resource.effect.CommonColorOrTextureOrParam;
     
     public interface ITechnique
@@ -12,6 +13,8 @@ package aerys.minko.type.parser.collada.resource.effect.technique
         function get transparency()			: Number;
         function get indexOfRefraction()	: Number;
         
-        function createMaterial(params : Object, setParams: Object) : Material;
+        function createMaterial(parserOptions	: ParserOptions,
+								params 			: Object,
+								setParams		: Object) : Material;
     }
 }

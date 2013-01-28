@@ -47,9 +47,9 @@ package aerys.minko.type.parser.collada.instance
 			_document	= document;
 		}
 		
-		public function createMaterial() : Material
+		public function createMaterial(parserOptions : ParserOptions) : Material
 		{
-			return Effect(resource).createMaterial(_setParams);
+			return Effect(resource).createMaterial(parserOptions, _setParams);
 		}
 		
 		public function createSceneNode(options				: ParserOptions,

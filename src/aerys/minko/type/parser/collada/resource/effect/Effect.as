@@ -2,13 +2,14 @@ package aerys.minko.type.parser.collada.resource.effect
 {
 	import aerys.minko.Minko;
 	import aerys.minko.render.material.Material;
+	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceEffect;
 	import aerys.minko.type.parser.collada.resource.IResource;
-	import aerys.minko.type.parser.collada.resource.effect.profile.IProfile;
 	import aerys.minko.type.parser.collada.resource.effect.profile.CommonProfile;
+	import aerys.minko.type.parser.collada.resource.effect.profile.IProfile;
 	
 	public class Effect implements IResource
 	{
@@ -91,7 +92,7 @@ package aerys.minko.type.parser.collada.resource.effect
 			_document	= document;
 		}
 		
-		public function createMaterial(setParams : Object) : Material
+		public function createMaterial(parserOptions : ParserOptions, setParams : Object) : Material
 		{
 			var profileCommon : CommonProfile = null;
 			
@@ -106,7 +107,7 @@ package aerys.minko.type.parser.collada.resource.effect
 			}
 			else
 			{
-				return profile.createMaterial(params, setParams);
+				return profile.createMaterial(parserOptions, params, setParams);
 			}
 		}
 		
