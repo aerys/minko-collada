@@ -4,6 +4,7 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 	import aerys.minko.render.material.Material;
 	import aerys.minko.render.material.basic.BasicMaterial;
 	import aerys.minko.render.material.basic.BasicProperties;
+	import aerys.minko.render.material.environment.EnvironmentMappingProperties;
 	import aerys.minko.render.material.phong.PhongProperties;
 	import aerys.minko.render.resource.texture.TextureResource;
 	import aerys.minko.type.loader.parser.ParserOptions;
@@ -188,10 +189,12 @@ package aerys.minko.type.parser.collada.resource.effect.technique
             
 			if (!isNaN(_shininess))
             	_material.setProperty(PhongProperties.SHININESS, _shininess);
-			if (_diffuse != null)
+			if (_diffuse)
             	setDiffuse(params, setParams);
-			if (_specular != null)
+			if (_specular)
             	setSpecular(params, setParams);
+			if (_reflective)
+				setReflective(params, setParams);
             			
 			return _material;
 		}
@@ -246,5 +249,16 @@ package aerys.minko.type.parser.collada.resource.effect.technique
                 _material.setProperty(PhongProperties.SPECULAR, specularValue);
             }
         }
+		
+		private function setReflective(params : Object, setParams : Object) : void
+		{
+			var reflectiveValue 	: Object	= _reflective.getValue(params, setParams);
+			
+			if (reflectiveValue is TextureResource)
+			{
+				_material.setProperty(EnvironmentMappingProperties.ENVIRONMENT_MAP, reflectiveValue);
+				_material.setProperty(EnvironmentMappingProperties.REFLECTIVITY, _reflectivity);
+			}
+		}
 	}
 }
