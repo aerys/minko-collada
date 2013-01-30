@@ -76,6 +76,7 @@ package aerys.minko.type.parser.collada.instance
 		{
 			var geometry			: Geometry				= Geometry(resource);
 			
+			
 			try
 			{
 				geometry.computeMeshTemplates(options);
@@ -86,6 +87,7 @@ package aerys.minko.type.parser.collada.instance
 					DebugLevel.PLUGIN_ERROR,
 					'ColladaPlugin: Error evaluating geometry node \'' + _name + '\'.'
 				);
+				return null;
 			}
 			
 			var group				: Group					= new Group();
