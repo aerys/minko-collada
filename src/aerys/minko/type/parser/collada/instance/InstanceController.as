@@ -3,6 +3,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.render.Effect;
+	import aerys.minko.render.geometry.Geometry;
 	import aerys.minko.render.material.Material;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
@@ -116,6 +117,8 @@ package aerys.minko.type.parser.collada.instance
 						options.vertexStreamUsage, options.indexStreamUsage
 					);
 					
+					if (options.assets)
+						options.assets.setMaterial(meshTemplate.materialName.slice(), materialProvider);
 					var i : uint = 0;
 					for each (var localMesh : Mesh in localMeshes)
 					{
@@ -128,6 +131,11 @@ package aerys.minko.type.parser.collada.instance
 						group.addChild(localMesh);
 						++i;
 					}
+				}
+				
+				for each (var geom : Geometry in meshTemplate.geometries)
+				{
+					options.assets.setGeometry(geom.name, geom);
 				}
 			}
 			

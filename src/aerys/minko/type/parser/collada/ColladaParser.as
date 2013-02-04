@@ -107,7 +107,7 @@ package aerys.minko.type.parser.collada
 			
 			return dependencies;
 		}
-		
+
 		public function parse() : void
 		{
 			for (var l : Object in _loaderToDependency)
@@ -116,7 +116,11 @@ package aerys.minko.type.parser.collada
 				var image	: Image			= _loaderToDependency[loader];
 				
 				if (loader.isComplete)
+				{
 					image.imageData.textureResource = loader.textureResource;
+					if (_options.assets)
+						_options.assets.setTexture(image.name.slice(), loader.textureResource);
+				}
 			}
 			
 			_complete.execute(this, _document.generateScene(_options));
