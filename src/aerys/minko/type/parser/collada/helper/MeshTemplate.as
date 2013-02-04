@@ -22,6 +22,11 @@ package aerys.minko.type.parser.collada.helper
 		
 		private var _geometries		: Vector.<Geometry>;
 		
+		public function get geometries():Vector.<Geometry>
+		{
+			return _geometries;
+		}
+
 		public function get meshName() : String
 		{
 			return _meshName;
@@ -105,8 +110,8 @@ package aerys.minko.type.parser.collada.helper
 				var geom : Geometry = new Geometry(new <IVertexStream>[vertexStream], indexStream);
 				_geometries[bufferId] = geom;
 				var subMesh : Mesh = new Mesh(geom);
-				
-				subMesh.name = _meshName + bufferId;
+				geom.name = _meshName + bufferId
+				subMesh.name = geom.name.slice();
 				
 				result[bufferId] = subMesh;
 				
