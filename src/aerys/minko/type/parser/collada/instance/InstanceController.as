@@ -118,7 +118,7 @@ package aerys.minko.type.parser.collada.instance
 					);
 					
 					if (options.assets)
-						options.assets.setMaterial(meshTemplate.materialName.slice(), materialProvider);
+						options.assets.setMaterial(meshTemplate.materialName, materialProvider);
 					var i : uint = 0;
 					for each (var localMesh : Mesh in localMeshes)
 					{
