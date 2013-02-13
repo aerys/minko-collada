@@ -112,10 +112,13 @@ package aerys.minko.type.parser.collada.instance
 					for each (var localMesh : Mesh in localMeshes)
 					{
 						material = getMaterial(options, meshTemplate.materialName);
-						if (options.assets)
-							options.assets.setMaterial(meshTemplate.materialName, material);
-						if (options.material.effect)
-							material.effect = options.material.effect;
+						if (material)
+						{
+							if (options.assets)
+								options.assets.setMaterial(meshTemplate.materialName, material);
+							if (options.material.effect)
+								material.effect = options.material.effect;
+						}
 
 						localMesh.material = material;
 						localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
