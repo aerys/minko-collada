@@ -23,8 +23,7 @@ package aerys.minko.type.parser.collada.instance
 		public function InstanceCamera(document		: ColladaDocument,
 									   sourceId		: String,
 									   name			: String,
-									   sid			: String
-		)
+									   sid			: String)
 		{
 			_document	= document;
 			_sourceId	= sourceId;
