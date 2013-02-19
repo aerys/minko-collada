@@ -1,14 +1,14 @@
 package aerys.minko.type.parser.collada
 {
+	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
+	
 	import aerys.minko.type.Signal;
 	import aerys.minko.type.loader.ILoader;
 	import aerys.minko.type.loader.TextureLoader;
 	import aerys.minko.type.loader.parser.IParser;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.resource.image.Image;
-	
-	import flash.utils.ByteArray;
-	import flash.utils.Dictionary;
 	
 	public class ColladaParser implements IParser
 	{
@@ -125,6 +125,5 @@ package aerys.minko.type.parser.collada
 			
 			_complete.execute(this, _document.generateScene(_options));
 		}
-		
 	}
 }
