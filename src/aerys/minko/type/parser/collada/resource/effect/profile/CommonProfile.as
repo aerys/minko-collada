@@ -93,7 +93,9 @@ package aerys.minko.type.parser.collada.resource.effect.profile
             switch (profileName)
             {
                 case 'OpenCOLLADA3dsMax':
-                    extras.push(OpenCollada3DSMaxExtraTechnique.fromXML(xmlTechnique, document));
+					var extra : OpenCollada3DSMaxExtraTechnique = OpenCollada3DSMaxExtraTechnique.fromXML(xmlTechnique, document);
+					if (extra)
+                    	extras.push(extra);
                     break;
                 default:
                     Minko.log(
