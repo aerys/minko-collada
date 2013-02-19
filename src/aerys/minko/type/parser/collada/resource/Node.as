@@ -8,6 +8,7 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.type.parser.collada.enum.NodeType;
 	import aerys.minko.type.parser.collada.helper.TransformParser;
 	import aerys.minko.type.parser.collada.instance.IInstance;
+	import aerys.minko.type.parser.collada.instance.InstanceCamera;
 	import aerys.minko.type.parser.collada.instance.InstanceController;
 	import aerys.minko.type.parser.collada.instance.InstanceGeometry;
 	import aerys.minko.type.parser.collada.instance.InstanceNode;
@@ -91,8 +92,10 @@ package aerys.minko.type.parser.collada.resource
 					
 					case 'instance_node':
 						childs.push(InstanceNode.createFromXML(document, child));
-					
+						break;
 					case 'instance_camera':
+						childs.push(InstanceCamera.createFromXml(document, child));
+						break;
 					case 'instance_light':
 						Minko.log(DebugLevel.PLUGIN_NOTICE, 'ColladaPlugin: Dropping ' + 
 							child.localName() + ' declaration in node ' + [id, sid, name].join());
