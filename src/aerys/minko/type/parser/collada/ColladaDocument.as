@@ -22,6 +22,7 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.parser.collada.resource.Node;
 	import aerys.minko.type.parser.collada.resource.VisualScene;
 	import aerys.minko.type.parser.collada.resource.animation.Animation;
+	import aerys.minko.type.parser.collada.resource.camera.Camera;
 	import aerys.minko.type.parser.collada.resource.controller.Controller;
 	import aerys.minko.type.parser.collada.resource.controller.Skin;
 	import aerys.minko.type.parser.collada.resource.effect.Effect;
@@ -43,7 +44,8 @@ package aerys.minko.type.parser.collada
 			'image'			: '_images',
 			'material'		: '_materials',
 			'node'			: '_nodes',
-			'visual_scene'	: '_visualScenes'
+			'visual_scene'	: '_visualScenes',
+			'camera'		: '_camera'
 		};
 		
 		private static const NODENAME_TO_CLASS : Object = {
@@ -54,7 +56,8 @@ package aerys.minko.type.parser.collada
 			'image'			: Image,
 			'material'		: ColladaMaterial,
 			'node'			: Node,
-			'visual_scene'	: VisualScene
+			'visual_scene'	: VisualScene,
+			'camera'		: Camera
 		};
 		
 		private var _mainSceneId	: String;
@@ -70,6 +73,7 @@ package aerys.minko.type.parser.collada
 		private var _nodes			: Object;
 		private var _visualScenes	: Object;
         private var _matrices       : Object;
+		private var _cameras		: Object;
 		
 		public function get mainSceneId() : String
         {
@@ -116,6 +120,11 @@ package aerys.minko.type.parser.collada
             return _visualScenes;
         }
 		
+		public function get cameras() : Object
+		{
+			return _cameras;
+		}
+		
 		public function ColladaDocument()
 		{
 		}
@@ -135,6 +144,7 @@ package aerys.minko.type.parser.collada
 			_nodes			= {};
 			_visualScenes	= {};
             _matrices       = {};
+			_cameras		= {};
 			
 			Animation.fillStoreFromXML(xmlDocument, this, _animations);
 			Controller.fillStoreFromXML(xmlDocument, this, _controllers);
@@ -142,6 +152,7 @@ package aerys.minko.type.parser.collada
 			Geometry.fillStoreFromXML(xmlDocument, this, _geometries);
 			Image.fillStoreFromXML(xmlDocument, this, _images);
 			ColladaMaterial.fillStoreFromXML(xmlDocument, this, _materials);
+			Camera.fillStoreFromXML(xmlDocument, this, _cameras);
 			Node.fillStoreFromXML(xmlDocument, this, _nodes);
 			VisualScene.fillStoreFromXML(xmlDocument, this, _visualScenes);
             
@@ -414,5 +425,10 @@ package aerys.minko.type.parser.collada
         {
             return _visualScenes[id];
         }
+		
+		public function getCameraById(id : String) : Camera
+		{
+			return _cameras[id];
+		}
 	}
 }
