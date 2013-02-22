@@ -1,6 +1,7 @@
 package aerys.minko.type.parser.collada
 {
 	import aerys.minko.Minko;
+	import aerys.minko.ns.minko_animation;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.controller.AbstractController;
 	import aerys.minko.scene.controller.AnimationController;
@@ -8,11 +9,15 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.Mesh;
+	import aerys.minko.scene.node.camera.AbstractCamera;
 	import aerys.minko.type.animation.SkinningMethod;
 	import aerys.minko.type.animation.timeline.ITimeline;
+	import aerys.minko.type.animation.timeline.MatrixTimeline;
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
+	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceController;
@@ -35,6 +40,8 @@ package aerys.minko.type.parser.collada
 	
 	public final class ColladaDocument extends EventDispatcher
 	{
+		use namespace minko_animation;
+		
 		private static const NS	: Namespace	= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
 		private static const NODENAME_TO_LIBRARY : Object = {
@@ -297,7 +304,23 @@ package aerys.minko.type.parser.collada
 					timelines 	= timeLinesByNodeName[targetName_];
 					
 					if (sceneNode && timelines)
-						sceneNode.addController(new AnimationController(timelines));
+					{
+//						for each (var matrixTimeline : MatrixTimeline in timelines)
+//						{
+//							var matrices	: Vector.<Matrix4x4>	= matrixTimeline.minko_animation::matrices;
+//							for each (var mat : Matrix4x4 in matrices)
+//							{
+//								mat.appendRotation(-Math.PI / 2, Vector4.X_AXIS);
+//								mat.appendRotation(Math.PI / 2, Vector4.Y_AXIS);
+//								mat.appendScale(-1, 1, -1);
+//							}
+//						}
+						var group	: Group	= sceneNode as Group;
+						if (group && group.getChildAt(0) is AbstractCamera)
+							group.getChildAt(0).addController(new AnimationController(timelines));
+						else
+							sceneNode.addController(new AnimationController(timelines));
+					}
 				}
 			}
 			
