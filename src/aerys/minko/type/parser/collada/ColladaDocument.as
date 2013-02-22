@@ -305,16 +305,6 @@ package aerys.minko.type.parser.collada
 					
 					if (sceneNode && timelines)
 					{
-//						for each (var matrixTimeline : MatrixTimeline in timelines)
-//						{
-//							var matrices	: Vector.<Matrix4x4>	= matrixTimeline.minko_animation::matrices;
-//							for each (var mat : Matrix4x4 in matrices)
-//							{
-//								mat.appendRotation(-Math.PI / 2, Vector4.X_AXIS);
-//								mat.appendRotation(Math.PI / 2, Vector4.Y_AXIS);
-//								mat.appendScale(-1, 1, -1);
-//							}
-//						}
 						var group	: Group	= sceneNode as Group;
 						if (group && group.getChildAt(0) is AbstractCamera)
 							group.getChildAt(0).addController(new AnimationController(timelines));
