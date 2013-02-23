@@ -60,7 +60,7 @@ package aerys.minko.type.parser.collada.resource.camera
 			var aspectXml		: XML		= xmlPerspective.NS::aspect_ratio[0];
 			
 			var xFov			: Number	= xFovXml ? parseFloat(String(xFovXml)) : .0;
-			var yFov			: Number	= yFovXml ? parseFloat(String(xFovXml)) : .0;
+			var yFov			: Number	= yFovXml ? parseFloat(String(yFovXml)) : .0;
 			var aspect			: Number	= aspectXml ? parseFloat(String(aspectXml)) : .0;
 			if (xFov != .0 && yFov != .0 && aspect == .0)
 				aspect = xFov / yFov;	
