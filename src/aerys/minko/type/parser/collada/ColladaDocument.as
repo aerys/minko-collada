@@ -1,6 +1,7 @@
 package aerys.minko.type.parser.collada
 {
 	import aerys.minko.Minko;
+	import aerys.minko.ns.minko_animation;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.controller.AbstractController;
 	import aerys.minko.scene.controller.AnimationController;
@@ -8,10 +9,14 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.Mesh;
+	import aerys.minko.scene.node.camera.AbstractCamera;
 	import aerys.minko.type.animation.timeline.ITimeline;
+	import aerys.minko.type.animation.timeline.MatrixTimeline;
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
+	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceController;
@@ -34,6 +39,8 @@ package aerys.minko.type.parser.collada
 	
 	public final class ColladaDocument extends EventDispatcher
 	{
+		use namespace minko_animation;
+		
 		private static const NS	: Namespace	= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
 		private static const NODENAME_TO_LIBRARY : Object = {
@@ -293,6 +300,33 @@ package aerys.minko.type.parser.collada
 				{
 					var sceneNode : ISceneNode	= sourceIdToScene[targetName_] as ISceneNode;
 					timelines 	= timeLinesByNodeName[targetName_];
+					
+					if (sceneNode is AbstractCamera)
+					{
+						var nbTimelines	: uint	= timelines.length;
+						var tlId		: uint	= 0;
+						var tl			: MatrixTimeline = null;
+						for (tlId = 0; tlId < nbTimelines; ++tlId)
+						{
+							tl = timelines[tlId] as MatrixTimeline;
+							if (!tl)
+								continue;
+							var matrices	: Vector.<Matrix4x4>	= tl.minko_animation::matrices
+							var nbMatrices	: uint					= matrices.length;
+							var matrixId	: uint					= 0;
+							var matrix		: Matrix4x4				= null;
+							
+							for (matrixId = 0; matrixId < nbMatrices; ++matrixId)
+							{
+								matrix = matrices[matrixId];
+								var xaxis	: Vector4	= matrix.getColumn(0);
+								var zaxis	: Vector4	= matrix.getColumn(2);
+								xaxis.scaleBy(-1);
+								zaxis.scaleBy(-1);
+								matrix.setColumn(0, xaxis).setColumn(2, zaxis);
+							}
+						}
+					}
 					sceneNode.addController(new AnimationController(timelines));
 				}
 			}
@@ -433,7 +467,7 @@ package aerys.minko.type.parser.collada
             return _visualScenes[id];
         }
 		
-		public function getCameraById(id : String) : Camera
+		public function getCameraById(id : String) : aerys.minko.type.parser.collada.resource.camera.Camera
 		{
 			return _cameras[id];
 		}
