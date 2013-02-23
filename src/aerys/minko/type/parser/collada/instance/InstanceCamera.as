@@ -55,14 +55,9 @@ package aerys.minko.type.parser.collada.instance
 			var perspective			: Perspective	= cameraResource.perspective;
 			if (perspective)
 			{
+				var fov				: Number		= (Math.PI * perspective.fov) / 180.;
 				camera = new aerys.minko.scene.node.camera.Camera(
-					perspective.fov,
-					perspective.zNear,
-					perspective.zFar
-				);
-				camera.transform.perspectiveFoV(
-					perspective.fov,
-					perspective.aspect,
+					fov,
 					perspective.zNear,
 					perspective.zFar
 				);
