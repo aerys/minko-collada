@@ -318,7 +318,7 @@ package aerys.minko.type.parser.collada
 							
 							for (matrixId = 0; matrixId < nbMatrices; ++matrixId)
 							{
-								matrix = matrices[matrixId];m
+								matrix = matrices[matrixId];
 								var xaxis	: Vector4	= matrix.getColumn(0);
 								var zaxis	: Vector4	= matrix.getColumn(2);
 								xaxis.scaleBy(-1);
