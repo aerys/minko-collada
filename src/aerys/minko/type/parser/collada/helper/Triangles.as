@@ -22,8 +22,8 @@ package aerys.minko.type.parser.collada.helper
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		private const NOT_YET_IMPLEMENTED_FAIL : Function = function(xmlPrimitive : XML) : void { 
-			throw new ColladaError(xmlPrimitive.localName() + ' primitives are not supported yet'); 
+		private const NOT_YET_IMPLEMENTED_FAIL : Function = function(xmlPrimitive : XML) : void {
+            Minko.log(DebugLevel.LOAD_ERROR, xmlPrimitive.localName() + ' primitives are not supported yet');
 		};
 		
 		private const NAME_TO_PARSER : Object = {
