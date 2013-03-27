@@ -15,7 +15,7 @@ package aerys.minko.type.parser.collada.enum
 		use namespace minko_collada;
 		
 		public static const BINORMAL		: String = 'BINORMAL';
-		public static const COLOR			: String = 'COLOR';
+//		public static const COLOR			: String = 'COLOR';
 		public static const CONTINUITY		: String = 'CONTINUITY';
 		public static const IMAGE			: String = 'IMAGE';
 		public static const INPUT			: String = 'INPUT';
@@ -41,7 +41,7 @@ package aerys.minko.type.parser.collada.enum
 		minko_collada static const TO_COMPONENT : Object = new Object();
 		{
 			TO_COMPONENT[POSITION] = VertexComponent.XYZ;
-			TO_COMPONENT[COLOR] = VertexComponent.RGBA;
+//			TO_COMPONENT[COLOR] = VertexComponent.RGBA;
 			TO_COMPONENT[TEXCOORD] = VertexComponent.UV;
 			TO_COMPONENT[NORMAL] = VertexComponent.NORMAL;
 			TO_COMPONENT[TANGENT] = VertexComponent.TANGENT;
