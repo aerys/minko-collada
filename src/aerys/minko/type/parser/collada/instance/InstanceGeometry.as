@@ -2,7 +2,7 @@ package aerys.minko.type.parser.collada.instance
 {
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.render.Effect;
+	import aerys.minko.render.geometry.Geometry;
 	import aerys.minko.render.material.Material;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
@@ -74,7 +74,8 @@ package aerys.minko.type.parser.collada.instance
 										sourceIdToSceneNode	: Object,
 										scopedIdToSceneNode	: Object) : ISceneNode
 		{
-			var geometry			: Geometry				= Geometry(resource);
+			var geometry			: aerys.minko.type.parser.collada.resource.Geometry
+									= aerys.minko.type.parser.collada.resource.Geometry(resource);
 			
 			
 			try
@@ -91,11 +92,11 @@ package aerys.minko.type.parser.collada.instance
 			}
 			
 			var group				: Group					= new Group();
-			var material			: Material				= options.material;
+			var material			: Material				= null;
 			var subMeshTemplates	: Vector.<MeshTemplate>	= geometry.meshTemplates;
 			var numMeshes			: uint					= subMeshTemplates != null
-				? subMeshTemplates.length
-				: 0;
+															? subMeshTemplates.length
+															: 0;
 			
 			for (var meshTemplateId : uint = 0; meshTemplateId < numMeshes; ++meshTemplateId)
 			{
@@ -110,12 +111,29 @@ package aerys.minko.type.parser.collada.instance
 					var i : uint = 0;
 					for each (var localMesh : Mesh in localMeshes)
 					{
-						localMesh.material = getMaterial(options, meshTemplate.materialName);
+						material = getMaterial(options, meshTemplate.materialName);
+						if (material)
+						{
+							if (options.assets)
+								options.assets.setMaterial(meshTemplate.materialName, material);
+							if (options.material.effect)
+								material.effect = options.material.effect;
+						}
+
+						localMesh.material = material;
 						localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
 						
 						group.addChild(localMesh);
 						
 						++i;
+					}
+				}
+				
+				if (options.assets)
+				{
+					for each (var geom : aerys.minko.render.geometry.Geometry in meshTemplate.geometries)
+					{
+						options.assets.setGeometry(geom.name, geom);
 					}
 				}
 			}
@@ -154,7 +172,7 @@ package aerys.minko.type.parser.collada.instance
 			{
 				var materialInstance : InstanceMaterial = _bindMaterial[materialName];
 				
-				return materialInstance != null ? 
+				return materialInstance != null && materialInstance.resource != null ? 
 					ColladaMaterial(materialInstance.resource).getMaterial(parserOptions) :
 					null;
 			}

@@ -3,7 +3,9 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.render.Effect;
+	import aerys.minko.render.geometry.Geometry;
 	import aerys.minko.render.material.Material;
+	import aerys.minko.render.material.basic.BasicMaterial;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.Mesh;
@@ -116,10 +118,12 @@ package aerys.minko.type.parser.collada.instance
 						options.vertexStreamUsage, options.indexStreamUsage
 					);
 					
+					if (options.assets)
+						options.assets.setMaterial(meshTemplate.materialName, materialProvider);
 					var i : uint = 0;
 					for each (var localMesh : Mesh in localMeshes)
 					{
-						localMesh.material = materialProvider;
+						localMesh.material = materialProvider || new BasicMaterial();
 						
 						if (options.material.effect)
 							localMesh.material.effect = options.material.effect;
@@ -128,6 +132,11 @@ package aerys.minko.type.parser.collada.instance
 						group.addChild(localMesh);
 						++i;
 					}
+				}
+				
+				for each (var geom : Geometry in meshTemplate.geometries)
+				{
+					options.assets.setGeometry(geom.name, geom);
 				}
 			}
 			

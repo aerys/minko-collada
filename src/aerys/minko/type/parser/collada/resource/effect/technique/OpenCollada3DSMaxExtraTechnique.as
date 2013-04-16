@@ -19,9 +19,14 @@ package aerys.minko.type.parser.collada.resource.effect.technique
         public static function fromXML(xml      : XML,
                                        document : ColladaDocument) : OpenCollada3DSMaxExtraTechnique
         {
+			if (xml.NS::specularLevel[0] == null || xml.NS::bump[0] == null)
+			{
+				return null;
+			}
+			
             var technique : OpenCollada3DSMaxExtraTechnique = new OpenCollada3DSMaxExtraTechnique();
-            
-            technique._specularMap = CommonColorOrTextureOrParam.createFromXML(
+			
+			technique._specularMap = CommonColorOrTextureOrParam.createFromXML(
                 xml.NS::specularLevel[0], document
             );
             technique._normalMap = CommonColorOrTextureOrParam.createFromXML(

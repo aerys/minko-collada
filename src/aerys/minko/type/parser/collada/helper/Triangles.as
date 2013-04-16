@@ -1,5 +1,8 @@
 package aerys.minko.type.parser.collada.helper
 {
+	import flash.utils.ByteArray;
+	import flash.utils.Endian;
+	
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.render.geometry.stream.IndexStream;
@@ -14,9 +17,6 @@ package aerys.minko.type.parser.collada.helper
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.enum.InputType;
-	
-	import flash.utils.ByteArray;
-	import flash.utils.Endian;
 
 	public final class Triangles
 	{
@@ -456,6 +456,9 @@ package aerys.minko.type.parser.collada.helper
 													   source			: Source, 
 													   isVertexSource	: Boolean) : VertexStream
 		{
+			if (semantic == InputType.COLOR && source.stride == 3)
+					semantic = InputType.COLOR_RGB;
+			
 			return createVertexStream(semantic, createVertexBuffer(semantic, source, isVertexSource));
 		}
 		
@@ -527,6 +530,11 @@ package aerys.minko.type.parser.collada.helper
 				}
 				
 				buffer.position = 0;
+			}
+			else if (semantic == InputType.COLOR)
+			{
+				numDwords = buffer.bytesAvailable >>> 2;
+				numVertices = _triangleVertices.length / _indicesPerVertex;
 			}
 			
 			return new VertexStream(StreamUsage.DYNAMIC, format, buffer);
