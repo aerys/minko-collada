@@ -381,8 +381,13 @@ package aerys.minko.type.parser.collada
 							continue;
 						}
 
+						var jointAnimations : Vector.<AbstractController> = joint.getControllersByType(
+							AnimationController
+						);
+
 						joints.push(joint);
-                        animations.push(joint.getControllersByType(AnimationController)[0] as AnimationController);
+						if (jointAnimations.length)
+						    animations.push(jointAnimations[0]);
 					}
 					
 					if (joints.length)
