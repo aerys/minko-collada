@@ -381,15 +381,21 @@ package aerys.minko.type.parser.collada
 							continue;
 						}
 
-						var jointAnimations : Vector.<AbstractController> = joint.getControllersByType(
-							AnimationController
-						);
+						for (var jointOrAncestor : ISceneNode = joint;
+						     jointOrAncestor != null;
+							 jointOrAncestor = jointOrAncestor.parent)
+						{
+							var jointAnimations : Vector.<AbstractController> = jointOrAncestor.getControllersByType(
+								AnimationController
+							);
+
+							for each (var jointAnimation : AnimationController in jointAnimations)
+								animations.push(jointAnimation);
+						}
 
 						joints.push(joint);
-						if (jointAnimations.length)
-						    animations.push(jointAnimations[0]);
 					}
-					
+
 					if (joints.length)
 					{
                         var masterAnimation : MasterAnimationController = new MasterAnimationController(animations);
