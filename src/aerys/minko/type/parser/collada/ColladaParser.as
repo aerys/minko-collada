@@ -59,6 +59,8 @@ package aerys.minko.type.parser.collada
 				_lastData.position	= 0;
 				_lastXML			= new XML(_lastData);
 				
+				_lastData.clear();
+				
 				isCollada = _lastXML != null && _lastXML.localName().toLowerCase() == 'collada';
 			}
 			catch (e : Error)
@@ -84,10 +86,15 @@ package aerys.minko.type.parser.collada
 				_lastData			= data;
 				_lastData.position	= 0;
 				_lastXML			= new XML(_lastData);
+				
+				_lastData.clear();
 			}
 			
 			_document = new ColladaDocument();
 			_document.loadFromXML(_lastXML);
+			
+			_lastXML	= null;
+			_lastData	= null;
 			
 			if (_options.dependencyLoaderFunction == null)
 				return null;

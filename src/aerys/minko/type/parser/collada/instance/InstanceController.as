@@ -5,6 +5,7 @@ package aerys.minko.type.parser.collada.instance
 	import aerys.minko.render.Effect;
 	import aerys.minko.render.geometry.Geometry;
 	import aerys.minko.render.material.Material;
+	import aerys.minko.render.material.basic.BasicMaterial;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.Mesh;
@@ -122,7 +123,7 @@ package aerys.minko.type.parser.collada.instance
 					var i : uint = 0;
 					for each (var localMesh : Mesh in localMeshes)
 					{
-						localMesh.material = materialProvider;
+						localMesh.material = materialProvider || new BasicMaterial();
 						
 						if (options.material.effect)
 							localMesh.material.effect = options.material.effect;

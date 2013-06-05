@@ -4,7 +4,9 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.ns.minko_animation;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.controller.AbstractController;
-	import aerys.minko.scene.controller.AnimationController;
+	import aerys.minko.scene.controller.animation.AnimationController;
+	import aerys.minko.scene.controller.animation.IAnimationController;
+	import aerys.minko.scene.controller.animation.MasterAnimationController;
 	import aerys.minko.scene.controller.mesh.skinning.SkinningController;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
@@ -277,8 +279,8 @@ package aerys.minko.type.parser.collada
 			var animationStore : Animation = _animations['mergedAnimations'];
 			if (animationStore)
 			{
-				var timelines			: Vector.<ITimeline>	= new <ITimeline>[];
-				var targetNames			: Vector.<String>		= new <String>[];
+				var timelines   : Vector.<ITimeline>	= new <ITimeline>[];
+				var targetNames	: Vector.<String>		= new <String>[];
 				
 				animationStore.getTimelines(timelines, targetNames);
 				
@@ -290,9 +292,7 @@ package aerys.minko.type.parser.collada
 					var timeline	: ITimeline	= timelines[timelineId];
 					var targetName	: String	= targetNames[timelineId];
 					
-					if (timeLinesByNodeName[targetName] == undefined)
-						timeLinesByNodeName[targetName] = new <ITimeline>[];
-					
+					timeLinesByNodeName[targetName] ||= new <ITimeline>[];
 					timeLinesByNodeName[targetName].push(timeline);
 				}
 				
@@ -341,13 +341,16 @@ package aerys.minko.type.parser.collada
 				// This is a kludge and will break if multiple instances of the same controller are present in the scene.
 				for each (var controller : Controller in _controllers)
 				{
-					var controllerInstance	: InstanceController = findInstanceById(controller.id) as InstanceController;
+					var controllerInstance	: InstanceController = findInstanceById(controller.id)
+                            as InstanceController;
+
 					if (!controllerInstance)
 						continue;
 
 					var skin	: Skin			= controller.skin;
 					var scene	: ISceneNode	= sourceIdToScene[controllerInstance.sourceId];
-					if (scene == null)
+
+                    if (scene == null)
 					{
 						Minko.log(
 							DebugLevel.PLUGIN_WARNING,
@@ -362,6 +365,7 @@ package aerys.minko.type.parser.collada
 						: new <ISceneNode>[scene];
 
 					var joints : Vector.<Group>	= new <Group>[];
+                    var animations : Vector.<IAnimationController> = new <IAnimationController>[];
 					for each (var jointName : String in skin.jointNames)
 					{
 						// handle collada 1.4 "ID_REF"
@@ -377,21 +381,38 @@ package aerys.minko.type.parser.collada
 							continue;
 						}
 
+						for (var jointOrAncestor : ISceneNode = joint;
+						     jointOrAncestor != null;
+							 jointOrAncestor = jointOrAncestor.parent)
+						{
+							var jointAnimations : Vector.<AbstractController> = jointOrAncestor.getControllersByType(
+								AnimationController
+							);
+
+							for each (var jointAnimation : AnimationController in jointAnimations)
+								animations.push(jointAnimation);
+						}
+
 						joints.push(joint);
 					}
-					
+
 					if (joints.length)
 					{
+                        var masterAnimation : MasterAnimationController = new MasterAnimationController(animations);
 						var skinController : AbstractController = new SkinningController(
 							options.skinningMethod,
 							mainScene,
 							joints,
 							skin.bindShapeMatrix,
-							skin.invBindMatrices
+							skin.invBindMatrices,
+							options.flattenSkinning,
+							options.skinningNumFps
 						);
 						
 						for each (var mesh : ISceneNode in meshes)
-							Mesh(mesh).addController(skinController);
+                        {
+							mesh.addController(skinController).addController(masterAnimation);
+                        }
 					}
 				}
 			}
