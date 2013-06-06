@@ -1,15 +1,13 @@
 package aerys.minko.type.parser.collada
 {
-	import flash.events.EventDispatcher;
-	
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_animation;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.controller.AbstractController;
-    import aerys.minko.scene.controller.animation.AnimationController;
-    import aerys.minko.scene.controller.animation.IAnimationController;
-    import aerys.minko.scene.controller.animation.MasterAnimationController;
-    import aerys.minko.scene.controller.mesh.skinning.SkinningController;
+	import aerys.minko.scene.controller.animation.AnimationController;
+	import aerys.minko.scene.controller.animation.IAnimationController;
+	import aerys.minko.scene.controller.animation.MasterAnimationController;
+	import aerys.minko.scene.controller.mesh.skinning.SkinningController;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.Mesh;
@@ -36,6 +34,8 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.parser.collada.resource.effect.Effect;
 	import aerys.minko.type.parser.collada.resource.image.Image;
 	import aerys.minko.type.parser.collada.resource.light.Light;
+	
+	import flash.events.EventDispatcher;
 
 	use namespace minko_collada;
 	
@@ -404,7 +404,9 @@ package aerys.minko.type.parser.collada
 							mainScene,
 							joints,
 							skin.bindShapeMatrix,
-							skin.invBindMatrices
+							skin.invBindMatrices,
+							options.flattenSkinning,
+							options.skinningNumFps
 						);
 						
 						for each (var mesh : ISceneNode in meshes)
