@@ -24,6 +24,7 @@ package aerys.minko.type.parser.collada.enum
 		
 		public static const MATRIX			: String = 'matrix';
 		public static const TRANSFORM		: String = 'transform';
+        public static const VISIBILITY		: String = 'visibility';
 		
 		public static const ROTATE_X		: String = 'rotateX.ANGLE';
 		public static const ROTATE_Y		: String = 'rotateY.ANGLE';

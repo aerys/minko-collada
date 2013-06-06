@@ -1,14 +1,14 @@
 package aerys.minko.type.parser.collada
 {
+	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
+	
 	import aerys.minko.type.Signal;
 	import aerys.minko.type.loader.ILoader;
 	import aerys.minko.type.loader.TextureLoader;
 	import aerys.minko.type.loader.parser.IParser;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.resource.image.Image;
-	
-	import flash.utils.ByteArray;
-	import flash.utils.Dictionary;
 	
 	public class ColladaParser implements IParser
 	{
@@ -59,6 +59,8 @@ package aerys.minko.type.parser.collada
 				_lastData.position	= 0;
 				_lastXML			= new XML(_lastData);
 				
+				_lastData.clear();
+				
 				isCollada = _lastXML != null && _lastXML.localName().toLowerCase() == 'collada';
 			}
 			catch (e : Error)
@@ -84,10 +86,15 @@ package aerys.minko.type.parser.collada
 				_lastData			= data;
 				_lastData.position	= 0;
 				_lastXML			= new XML(_lastData);
+				
+				_lastData.clear();
 			}
 			
 			_document = new ColladaDocument();
 			_document.loadFromXML(_lastXML);
+			
+			_lastXML	= null;
+			_lastData	= null;
 			
 			if (_options.dependencyLoaderFunction == null)
 				return null;
@@ -107,7 +114,7 @@ package aerys.minko.type.parser.collada
 			
 			return dependencies;
 		}
-		
+
 		public function parse() : void
 		{
 			for (var l : Object in _loaderToDependency)
@@ -116,11 +123,14 @@ package aerys.minko.type.parser.collada
 				var image	: Image			= _loaderToDependency[loader];
 				
 				if (loader.isComplete)
+				{
 					image.imageData.textureResource = loader.textureResource;
+					if (_options.assets)
+						_options.assets.setTexture(image.name.slice(), loader.textureResource);
+				}
 			}
 			
 			_complete.execute(this, _document.generateScene(_options));
 		}
-		
 	}
 }

@@ -1,6 +1,10 @@
 package aerys.minko.type.parser.collada.resource.animation
 {
+	import aerys.minko.type.animation.timeline.ITimeline;
+	import aerys.minko.type.animation.timeline.MatrixTimeline;
+	import aerys.minko.type.animation.timeline.ScalarTimeline;
 	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.enum.TransformType;
 	import aerys.minko.type.parser.collada.helper.Source;
 
@@ -47,19 +51,81 @@ package aerys.minko.type.parser.collada.resource.animation
 				_sources[semantic] = source;
 			}
 		}
-		
-		public function retrieveTimes(out : Object) : void
-		{
-			var inputSourceData			: Array				= Source(_sources['INPUT']).data;
-			var inputSourceDataLength	: uint				= inputSourceData.length;
-			var dest					: Vector.<Number>	= out[_targetId];
-			
-			if (!dest)
-				dest = out[_targetId] = new Vector.<Number>();
-			
-			for (var timeId : uint = 0; timeId < inputSourceDataLength; ++timeId)
-				dest.push(inputSourceData[timeId]);
-		}
+        
+        public function getTimeline(document : ColladaDocument) : ITimeline
+        {
+            if (document.getMatrixXMLNodeBySid(_transformType))
+                return getMatrixTimeline('transform');
+            
+            switch (_transformType)
+            {
+                case TransformType.MATRIX:
+                case TransformType.TRANSFORM:
+                    return getMatrixTimeline('transform');
+                    break ;
+                case TransformType.VISIBILITY:
+                    return getScalarTimeline('visible', false);
+                    break ;
+                case TransformType.TRANSFORM_0_0:
+                case TransformType.TRANSFORM_0_1:
+                case TransformType.TRANSFORM_0_2:
+                case TransformType.TRANSFORM_0_3:
+                case TransformType.TRANSFORM_1_0:
+                case TransformType.TRANSFORM_1_1:
+                case TransformType.TRANSFORM_1_2:
+                case TransformType.TRANSFORM_1_3:
+                case TransformType.TRANSFORM_2_0:
+                case TransformType.TRANSFORM_2_1:
+                case TransformType.TRANSFORM_2_2:
+                case TransformType.TRANSFORM_2_3:
+                case TransformType.TRANSFORM_3_0:
+                case TransformType.TRANSFORM_3_1:
+                case TransformType.TRANSFORM_3_2:
+                case TransformType.TRANSFORM_3_3:
+                case TransformType.ROTATE_X:
+                case TransformType.ROTATE_Y:
+                case TransformType.ROTATE_Z:
+                case TransformType.TRANSLATE:
+                default:
+                    throw new Error('Unknown animation type: \'' + _transformType + '\'.');
+                    break;
+            }
+
+            return null;
+        }
+        
+        private function getScalarTimeline(propertyPath : String,
+                                           interpolate  : Boolean) : ScalarTimeline
+        {
+            var times    : Vector.<uint>     = getTimes();
+            var numTimes : uint              = times.length;
+            
+            if (numTimes == 0)
+                return null;
+            
+            var values   : Vector.<Number>   = new Vector.<Number>(numTimes, true);
+            
+            for (var timeId : uint = 0; timeId < numTimes; ++timeId)
+                values[timeId] = getFloatValudByIndex(timeId);
+            
+            return new ScalarTimeline(propertyPath, times, values, interpolate); 
+        }
+        
+        private function getMatrixTimeline(propertyPath  : String) : MatrixTimeline
+        {
+            var times    : Vector.<uint>        = getTimes();
+            var numTimes : uint                 = times.length;
+            
+            if (numTimes == 0)
+                return null;
+            
+            var matrices : Vector.<Matrix4x4>   = new Vector.<Matrix4x4>(numTimes, true);
+            
+            for (var timeId : uint = 0; timeId < numTimes; ++timeId)
+                matrices[timeId] = getMatrixValueByIndex(timeId);
+            
+            return new MatrixTimeline(propertyPath, times, matrices);
+        }
 		
 		/**
 		 * Dichotomy to find the time immediatly superior to a given value.
@@ -81,193 +147,31 @@ package aerys.minko.type.parser.collada.resource.animation
 			
 			return i;
 		}
+        
+        public function getFloatValudByIndex(index : uint) : Number
+        {
+            var outputSource : Source = _sources['OUTPUT'];
+            
+            return outputSource.data[index];
+        }
 		
-		private function getSimpleValueAt(t : Number) : Number
-		{
-			var out				: Number;
-			var timeIndex		: uint = getTimeIndexAt(t);
-			var times			: Array	= _sources['INPUT'].data;
-			var timesLength		: uint	= times.length;
-			
-			var outputSource	: Source = _sources['OUTPUT'];
-			
-			if (timeIndex == 0)
-			{
-				out = outputSource.data[0];
-			}
-			else if (timeIndex == timesLength)
-			{
-				out = outputSource.data[timesLength - 1];
-			}
-			else
-			{
-				var previousTime		: Number	= times[timeIndex - 1];
-				var nextTime			: Number	= times[timeIndex];
-				var interpolationRatio	: Number	= (t - previousTime) / (nextTime - previousTime);
-				
-				var previousValue		: Number	= outputSource.data[timeIndex - 1];
-				var nextValue			: Number	= outputSource.data[timeIndex];
-				
-				out = (1 - interpolationRatio) * previousValue + interpolationRatio * nextValue;
-			}
-			
-			return out;
-		}
-		
-		private function getCompoundValueAt(t : Number, out : Object = null) : Object
-		{
-			out ||= new Object();
-			
-			// interpolate the output source the get the wanted value.
-			// later here we should implement bezier stuff & co, but i'm way too lazy right now.
-			
-			var timeIndex		: uint		= getTimeIndexAt(t);
-			var times			: Array		= _sources['INPUT'].data;
-			var timesLength		: uint		= times.length;
-			var outputSource	: Source	= _sources['OUTPUT'];
-			
-			if (timeIndex == 0)
-			{
-				out = outputSource.getItem(0, out);
-			}
-			else if (timeIndex == timesLength)
-			{
-				out = outputSource.getItem(timesLength - 1, out);
-			}
-			else
-			{
-				var previousTime		: Number	= times[timeIndex - 1];
-				var nextTime			: Number	= times[timeIndex];
-				var interpolationRatio	: Number	= (t - previousTime) / (nextTime - previousTime);
-				
-				var previousValue		: Object	= outputSource.getItem(timeIndex - 1);
-				var nextValue			: Object	= outputSource.getItem(timeIndex);
-				
-				for (var key : String in previousValue)
-					out[key] = (1 - interpolationRatio) * previousValue[key] + interpolationRatio * nextValue[key];
-			}
-			
-			return out;
-		}
-		
-		private function getMatrixValueAt(t : Number, out : Matrix4x4 = null) : Matrix4x4
-		{
-			out ||= new Matrix4x4();
-			
-			// interpolate the output source the get the wanted value.
-			// later here we should implement bezier stuff & co, but i'm way too lazy right now.
-			
-			var timeIndex		: uint		= getTimeIndexAt(t);
-			var times			: Array		= _sources['INPUT'].data;
-			var timesLength		: uint		= times.length;
-			var outputSource	: Source	= _sources['OUTPUT'];
-			
-			if (timeIndex == 0)
-			{
-				out = outputSource.getComponentByParamIndex(0, 0) as Matrix4x4;
-			}
-			else if (timeIndex == timesLength)
-			{
-				out = outputSource.getComponentByParamIndex(timesLength - 1, 0) as Matrix4x4;
-			}
-			else
-			{
-				var previousTime		: Number	= times[timeIndex - 1];
-				var nextTime			: Number	= times[timeIndex];
-				var interpolationRatio	: Number	= (t - previousTime) / (nextTime - previousTime);
-				
-				var previousValue		: Matrix4x4	= outputSource.getComponentByParamIndex(timeIndex - 1, 0) as Matrix4x4;
-				var nextValue			: Matrix4x4	= outputSource.getComponentByParamIndex(timeIndex, 0) as Matrix4x4;
-				
-				out.copyFrom(previousValue);
-				out.interpolateTo(nextValue, 1 - interpolationRatio, true);
-			}
-			
-			return out;
-		}
-		
-		public function setMatrixData(t : Number, data : Vector.<Number>) : void
-		{
-			switch (_transformType)
-			{
-				case TransformType.MATRIX:
-				case TransformType.TRANSFORM:
-					var matrix : Matrix4x4 = getMatrixValueAt(t);
-					matrix.getRawData(data, 0, false);
-					break;
-				
-				case TransformType.TRANSFORM_0_0:
-					data[0] = getSimpleValueAt(t); 
-					break;
-				
-				case TransformType.TRANSFORM_0_1: 
-					data[1] = getSimpleValueAt(t); 
-					break;
-				
-				case TransformType.TRANSFORM_0_2:
-					data[2] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_0_3:
-					data[3] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_1_0:
-					data[4] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_1_1:
-					data[5] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_1_2:
-					data[6] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_1_3:
-					data[7] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_2_0:
-					data[8] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_2_1:
-					data[9] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_2_2:
-					data[10] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_2_3:
-					data[11] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_3_0:
-					data[12] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_3_1:
-					data[13] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_3_2:
-					data[14] = getSimpleValueAt(t);
-					break;
-				
-				case TransformType.TRANSFORM_3_3:
-					data[15] = getSimpleValueAt(t);
-					break;
-					
-				case TransformType.ROTATE_X:
-				case TransformType.ROTATE_Y:
-				case TransformType.ROTATE_Z:
-				case TransformType.TRANSLATE:
-				default: 
-					throw new Error("Unknown animation type: '" + _transformType + "'.");
-					break;
-			}
-		}
+        private function getTimes() : Vector.<uint>
+        {
+            var inputSourceData			: Array				= Source(_sources['INPUT']).data;
+            var inputSourceDataLength	: uint				= inputSourceData.length;
+            var times       			: Vector.<uint>	    = new <uint>[];
+            
+            for (var timeId : uint = 0; timeId < inputSourceDataLength; ++timeId)
+                times[timeId] = uint(inputSourceData[timeId] * 1000);
+            
+            return times;
+        }
+        
+        private function getMatrixValueByIndex(index : uint) : Matrix4x4
+        {
+            var outputSource	: Source	= _sources['OUTPUT'];
+            
+            return outputSource.getComponentByParamIndex(index, 0) as Matrix4x4;
+        }
 	}
 }
