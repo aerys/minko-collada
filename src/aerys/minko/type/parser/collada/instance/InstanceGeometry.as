@@ -1,12 +1,14 @@
 package aerys.minko.type.parser.collada.instance
 {
+	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
-	import aerys.minko.render.Effect;
+	import aerys.minko.render.geometry.Geometry;
 	import aerys.minko.render.material.Material;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.Mesh;
 	import aerys.minko.type.loader.parser.ParserOptions;
+	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.helper.MeshTemplate;
 	import aerys.minko.type.parser.collada.resource.ColladaMaterial;
@@ -72,14 +74,29 @@ package aerys.minko.type.parser.collada.instance
 										sourceIdToSceneNode	: Object,
 										scopedIdToSceneNode	: Object) : ISceneNode
 		{
-			var geometry			: Geometry				= Geometry(resource);
+			var geometry			: aerys.minko.type.parser.collada.resource.Geometry
+									= aerys.minko.type.parser.collada.resource.Geometry(resource);
 			
-			geometry.computeMeshTemplates(options);
 			
-			var effect				: Effect				= options.effect;
-			var subMeshTemplates	: Vector.<MeshTemplate>	= geometry.meshTemplates;
-			var numMeshes			: uint					= subMeshTemplates != null ? subMeshTemplates.length : 0;
+			try
+			{
+				geometry.computeMeshTemplates(options);
+			}
+			catch (e : Error)
+			{
+				Minko.log(
+					DebugLevel.PLUGIN_ERROR,
+					'ColladaPlugin: Error evaluating geometry node \'' + _name + '\'.'
+				);
+				return null;
+			}
+			
 			var group				: Group					= new Group();
+			var material			: Material				= null;
+			var subMeshTemplates	: Vector.<MeshTemplate>	= geometry.meshTemplates;
+			var numMeshes			: uint					= subMeshTemplates != null
+															? subMeshTemplates.length
+															: 0;
 			
 			for (var meshTemplateId : uint = 0; meshTemplateId < numMeshes; ++meshTemplateId)
 			{
@@ -88,22 +105,35 @@ package aerys.minko.type.parser.collada.instance
 				if (meshTemplate.indexData.length != 0)
 				{
 					var localMeshes : Vector.<Mesh> = meshTemplate.generateMeshes(
-						effect, options.vertexStreamUsage, options.indexStreamUsage
+						options.vertexStreamUsage, options.indexStreamUsage
 					);
 					
 					var i : uint = 0;
 					for each (var localMesh : Mesh in localMeshes)
 					{
-						localMesh.material = getMaterial(meshTemplate.materialName);
-						
-						if (options.effect)
-							localMesh.material.effect = options.effect;
-						
+						material = getMaterial(options, meshTemplate.materialName);
+						if (material)
+						{
+							if (options.assets)
+								options.assets.setMaterial(meshTemplate.materialName, material);
+							if (options.material.effect)
+								material.effect = options.material.effect;
+						}
+
+						localMesh.material = material;
 						localMesh.name = _sourceId + '_' + meshTemplateId + '_' + i;
 						
 						group.addChild(localMesh);
 						
 						++i;
+					}
+				}
+				
+				if (options.assets)
+				{
+					for each (var geom : aerys.minko.render.geometry.Geometry in meshTemplate.geometries)
+					{
+						options.assets.setGeometry(geom.name, geom);
 					}
 				}
 			}
@@ -133,17 +163,18 @@ package aerys.minko.type.parser.collada.instance
 			return result;
 		}
 		
-		private function getMaterial(materialName : String) : Material
+		private function getMaterial(parserOptions 	: ParserOptions,
+									 materialName 	: String) : Material
 		{
 			if (materialName == null || materialName == '')
-				return ColladaMaterial.DEFAULT_MATERIAL;
+				return null;
 			else
 			{
 				var materialInstance : InstanceMaterial = _bindMaterial[materialName];
 				
-				return materialInstance != null ? 
-					ColladaMaterial(materialInstance.resource).material :
-					ColladaMaterial.DEFAULT_MATERIAL;
+				return materialInstance != null && materialInstance.resource != null ? 
+					ColladaMaterial(materialInstance.resource).getMaterial(parserOptions) :
+					null;
 			}
 		}
 	}

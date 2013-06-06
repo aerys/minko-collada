@@ -61,28 +61,38 @@ package aerys.minko.type.parser.collada.instance
 			var transform		: Matrix4x4				= nodeResource.transform;
 			var childs			: Vector.<IInstance>	= nodeResource.childs;
 			var numChilds		: uint					= childs.length;
+			var name			: String				= null;
+			var sceneNode		: ISceneNode			= null;
 			
-			var group : Group = new Group();
-			group.transform.copyFrom(transform);
-			
-			if (_sourceId != null && _sourceId.length != 0)
-				group.name = _sourceId;
-			
-			for (var childId : uint = 0; childId < numChilds; ++childId)
+			if (childs.length == 1 && childs[0] is InstanceCamera)
 			{
-				var child : ISceneNode = 
-					childs[childId].createSceneNode(options, sourceIdToSceneNode, scopedIdToSceneNode);
-				
-				if (child)
-					group.addChild(child);
-				else
-					Minko.log(DebugLevel.PLUGIN_WARNING, 'Dropping unknown node in group: "' + group.name + '"', this);
+				sceneNode = childs[0].createSceneNode(options, sourceIdToSceneNode, scopedIdToSceneNode);
+				sceneNode.transform.copyFrom(transform);
+			}
+			else
+			{
+				var group : Group = new Group();
+				group.transform.copyFrom(transform);
+				for (var childId : uint = 0; childId < numChilds; ++childId)
+				{
+					var child : ISceneNode = 
+						childs[childId].createSceneNode(options, sourceIdToSceneNode, scopedIdToSceneNode);
+					
+					if (child)
+						group.addChild(child);
+					else
+						Minko.log(DebugLevel.PLUGIN_WARNING, 'Dropping unknown node in group: "' + group.name + '"', this);
+				}
+				sceneNode = group;
 			}
 			
-			if (_sourceId != null) sourceIdToSceneNode[_sourceId] = group;
-			if (_scopedId != null) scopedIdToSceneNode[_scopedId] = group;
+			if (_sourceId != null && _sourceId.length != 0)
+				sceneNode.name = _sourceId;
 			
-			return group;
+			if (_sourceId != null) sourceIdToSceneNode[_sourceId] = sceneNode;
+			if (_scopedId != null) scopedIdToSceneNode[_scopedId] = sceneNode;
+			
+			return sceneNode;
 		}
 	}
 }

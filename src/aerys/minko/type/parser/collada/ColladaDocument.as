@@ -1,18 +1,24 @@
 package aerys.minko.type.parser.collada
 {
 	import aerys.minko.Minko;
+	import aerys.minko.ns.minko_animation;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.scene.controller.AbstractController;
-	import aerys.minko.scene.controller.AnimationController;
+	import aerys.minko.scene.controller.animation.AnimationController;
+	import aerys.minko.scene.controller.animation.IAnimationController;
+	import aerys.minko.scene.controller.animation.MasterAnimationController;
 	import aerys.minko.scene.controller.mesh.skinning.SkinningController;
 	import aerys.minko.scene.node.Group;
 	import aerys.minko.scene.node.ISceneNode;
 	import aerys.minko.scene.node.Mesh;
-	import aerys.minko.type.animation.SkinningMethod;
+	import aerys.minko.scene.node.camera.AbstractCamera;
 	import aerys.minko.type.animation.timeline.ITimeline;
+	import aerys.minko.type.animation.timeline.MatrixTimeline;
 	import aerys.minko.type.error.collada.ColladaError;
 	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
+	import aerys.minko.type.math.Matrix4x4;
+	import aerys.minko.type.math.Vector4;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceController;
@@ -22,10 +28,12 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.parser.collada.resource.Node;
 	import aerys.minko.type.parser.collada.resource.VisualScene;
 	import aerys.minko.type.parser.collada.resource.animation.Animation;
+	import aerys.minko.type.parser.collada.resource.camera.Camera;
 	import aerys.minko.type.parser.collada.resource.controller.Controller;
 	import aerys.minko.type.parser.collada.resource.controller.Skin;
 	import aerys.minko.type.parser.collada.resource.effect.Effect;
 	import aerys.minko.type.parser.collada.resource.image.Image;
+	import aerys.minko.type.parser.collada.resource.light.Light;
 	
 	import flash.events.EventDispatcher;
 
@@ -33,6 +41,8 @@ package aerys.minko.type.parser.collada
 	
 	public final class ColladaDocument extends EventDispatcher
 	{
+		use namespace minko_animation;
+		
 		private static const NS	: Namespace	= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
 		private static const NODENAME_TO_LIBRARY : Object = {
@@ -43,7 +53,9 @@ package aerys.minko.type.parser.collada
 			'image'			: '_images',
 			'material'		: '_materials',
 			'node'			: '_nodes',
-			'visual_scene'	: '_visualScenes'
+			'visual_scene'	: '_visualScenes',
+			'camera'		: '_cameras',
+			'light'			: '_lights'
 		};
 		
 		private static const NODENAME_TO_CLASS : Object = {
@@ -54,7 +66,9 @@ package aerys.minko.type.parser.collada
 			'image'			: Image,
 			'material'		: ColladaMaterial,
 			'node'			: Node,
-			'visual_scene'	: VisualScene
+			'visual_scene'	: VisualScene,
+			'camera'		: Camera,
+			'light'			: Light
 		};
 		
 		private var _mainSceneId	: String;
@@ -69,26 +83,64 @@ package aerys.minko.type.parser.collada
 		private var _materials		: Object;
 		private var _nodes			: Object;
 		private var _visualScenes	: Object;
+        private var _matrices       : Object;
+		private var _cameras		: Object;
+		private var _lights			: Object;
 		
-		public function get mainSceneId()	: String { return _mainSceneId;		}
+		public function get mainSceneId() : String
+        {
+            return _mainSceneId;
+        }
 		
-		public function get animations()	: Object { return _animations;		}
-		public function get controllers()	: Object { return _controllers;		}
-		public function get effects()		: Object { return _effects;			}
-		public function get geometries()	: Object { return _geometries;		}
-		public function get images()		: Object { return _images;			}
-		public function get materials()		: Object { return _materials;		}
-		public function get nodes()			: Object { return _nodes;			}
-		public function get visualScenes()	: Object { return _visualScenes;	}
+		public function get animations() : Object
+        {
+            return _animations;
+        }
+        
+		public function get controllers() : Object
+        {
+            return _controllers;
+        }
+        
+		public function get effects() : Object
+        {
+            return _effects;
+        }
+        
+		public function get geometries() : Object
+        {
+            return _geometries;
+        }
+        
+		public function get images() : Object
+        {
+            return _images;
+        }
+        
+		public function get materials() : Object
+        {
+            return _materials;
+        }
+        
+		public function get nodes() : Object
+        {
+            return _nodes;
+        }
+        
+		public function get visualScenes() : Object
+        {
+            return _visualScenes;
+        }
 		
-		public function getAnimationById	(id : String) : Animation	{ return _animations[id];	}
-		public function getControllerById	(id : String) : Controller	{ return _controllers[id];	}
-		public function getEffectById		(id : String) : Effect		{ return _effects[id];		}
-		public function getGeometryById		(id : String) : Geometry	{ return _geometries[id];	}
-		public function getImageById		(id : String) : Image		{ return _images[id];		}
-		public function getMaterialById		(id : String) : ColladaMaterial	{ return _materials[id];	}
-		public function getNodeById			(id	: String) : Node		{ return _nodes[id];		}
-		public function getVisualSceneById	(id	: String) : VisualScene	{ return _visualScenes[id];	}
+		public function get cameras() : Object
+		{
+			return _cameras;
+		}
+		
+		public function get lights() : Object
+		{
+			return _lights;
+		}
 		
 		public function ColladaDocument()
 		{
@@ -100,31 +152,46 @@ package aerys.minko.type.parser.collada
 			
 			_metaData		= createMetaDataFromXML(xmlDocument.NS::asset[0]);
 			
-			_animations		= new Object();
-			_controllers	= new Object();
-			_effects		= new Object();
-			_geometries		= new Object();
-			_images			= new Object();
-			_materials		= new Object();
-			_nodes			= new Object();
-			_visualScenes	= new Object();
+			_animations		= {};
+			_controllers	= {};
+			_effects		= {};
+			_geometries		= {};
+			_images			= {};
+			_materials		= {};
+			_nodes			= {};
+			_visualScenes	= {};
+            _matrices       = {};
+			_cameras		= {};
+			_lights			= {};
 			
-			Animation	.fillStoreFromXML(xmlDocument, this, _animations);
-			Controller	.fillStoreFromXML(xmlDocument, this, _controllers);
-			Effect		.fillStoreFromXML(xmlDocument, this, _effects);
-			Geometry	.fillStoreFromXML(xmlDocument, this, _geometries);
-			Image		.fillStoreFromXML(xmlDocument, this, _images);
-			ColladaMaterial 	.fillStoreFromXML(xmlDocument, this, _materials);
-			Node		.fillStoreFromXML(xmlDocument, this, _nodes);
-			VisualScene	.fillStoreFromXML(xmlDocument, this, _visualScenes);
+			Animation.fillStoreFromXML(xmlDocument, this, _animations);
+			Controller.fillStoreFromXML(xmlDocument, this, _controllers);
+			Effect.fillStoreFromXML(xmlDocument, this, _effects);
+			Geometry.fillStoreFromXML(xmlDocument, this, _geometries);
+			Image.fillStoreFromXML(xmlDocument, this, _images);
+			ColladaMaterial.fillStoreFromXML(xmlDocument, this, _materials);
+			Camera.fillStoreFromXML(xmlDocument, this, _cameras);
+			Light.fillStoreFromXML(xmlDocument, this, _lights);
+			Node.fillStoreFromXML(xmlDocument, this, _nodes);
+			VisualScene.fillStoreFromXML(xmlDocument, this, _visualScenes);
+            
+            var matrixNodes : XMLList = xmlDocument..NS::matrix.(hasOwnProperty('@sid'));
+            
+            for each (var matrixNode : XML in matrixNodes)
+                _matrices[matrixNode.@sid] = matrixNode;
 		}
+        
+        public function getMatrixXMLNodeBySid(sid : String) : XML
+        {
+            return  _matrices[sid];
+        }
 		
 		private function createMetaDataFromXML(xmlMetaData : XML) : Object
 		{
-			var metaData : Object = new Object();
+			var metaData : Object = {}
 			
-			metaData.contributor	= new Vector.<Object>();
-			metaData.unit			= new Object();
+			metaData.contributor	= new <Object>[];
+			metaData.unit			= {};
 			
 			//FIXME!
 			metaData.unit.meter		= 1;//parseFloat(String(xmlMetaData.NS::unit[0].@meter));
@@ -137,7 +204,7 @@ package aerys.minko.type.parser.collada
 			
 			for each (var xmlContributor : XML in xmlMetaData.NS::contributor)
 			{
-				var contributor : Object = new Object();
+				var contributor : Object = {};
 				
 				if (xmlContributor.NS::author.length() != 0)
 					contributor.author = String(xmlContributor.NS::author);
@@ -189,21 +256,22 @@ package aerys.minko.type.parser.collada
 		public function generateScene(options : ParserOptions) : ISceneNode
 		{
 			var instance		: IInstance		= getVisualSceneById(_mainSceneId).createInstance();
-			var sourceIdToScene	: Object		= new Object();
-			var scopedIdToScene	: Object		= new Object();
+			var sourceIdToScene	: Object		= {};
+			var scopedIdToScene	: Object		= {};
 			var mainScene		: Group			= Group(instance.createSceneNode(options, sourceIdToScene, scopedIdToScene));
 			var wrapper			: Group			= new Group(mainScene);
+			
 			wrapper.name = 'colladaWrapper' + uint(Math.random() * 1000);
 			
 			// scale depending on collada unit, and switch from right to left handed
 			var unit : Number = _metaData.unit.meter;
-//			if (!isNaN(unit) && unit != 0)
-//				wrapper.transform.setScale(unit, unit, -unit);
+			if (!isNaN(unit) && unit != 0)
+				wrapper.transform.setScale(unit, unit, unit);
 			
 			// change up axis
 			var upAxis : String = _metaData.upAxis;
 			if (upAxis == 'Z_UP')
-				wrapper.transform.setRotation(Math.PI / 2, 0, 0);
+				wrapper.transform.setRotation(-Math.PI / 2, 0, 0);
 			else if (upAxis == 'X_UP')
 				wrapper.transform.setRotation(0, 0, Math.PI / 2);
 			
@@ -211,8 +279,8 @@ package aerys.minko.type.parser.collada
 			var animationStore : Animation = _animations['mergedAnimations'];
 			if (animationStore)
 			{
-				var timelines			: Vector.<ITimeline>	= new <ITimeline>[];
-				var targetNames			: Vector.<String>		= new <String>[];
+				var timelines   : Vector.<ITimeline>	= new <ITimeline>[];
+				var targetNames	: Vector.<String>		= new <String>[];
 				
 				animationStore.getTimelines(timelines, targetNames);
 				
@@ -224,23 +292,45 @@ package aerys.minko.type.parser.collada
 					var timeline	: ITimeline	= timelines[timelineId];
 					var targetName	: String	= targetNames[timelineId];
 					
-					if (timeLinesByNodeName[targetName] == undefined)
-						timeLinesByNodeName[targetName] = new <ITimeline>[];
-					
+					timeLinesByNodeName[targetName] ||= new <ITimeline>[];
 					timeLinesByNodeName[targetName].push(timeline);
 				}
 				
 				for (var targetName_ : String in timeLinesByNodeName)
 				{
 					var sceneNode : ISceneNode	= sourceIdToScene[targetName_] as ISceneNode;
-					
 					timelines 	= timeLinesByNodeName[targetName_];
 					
-					if (sceneNode && timelines)
-						sceneNode.addController(new AnimationController(timelines));
+					if (sceneNode is AbstractCamera)
+					{
+						var nbTimelines	: uint	= timelines.length;
+						var tlId		: uint	= 0;
+						var tl			: MatrixTimeline = null;
+						for (tlId = 0; tlId < nbTimelines; ++tlId)
+						{
+							tl = timelines[tlId] as MatrixTimeline;
+							if (!tl)
+								continue;
+							var matrices	: Vector.<Matrix4x4>	= tl.minko_animation::matrices
+							var nbMatrices	: uint					= matrices.length;
+							var matrixId	: uint					= 0;
+							var matrix		: Matrix4x4				= null;
+							
+							for (matrixId = 0; matrixId < nbMatrices; ++matrixId)
+							{
+								matrix = matrices[matrixId];
+								var xaxis	: Vector4	= matrix.getColumn(0);
+								var zaxis	: Vector4	= matrix.getColumn(2);
+								xaxis.scaleBy(-1);
+								zaxis.scaleBy(-1);
+								matrix.setColumn(0, xaxis).setColumn(2, zaxis);
+							}
+						}
+					}
+					sceneNode.addController(new AnimationController(timelines));
 				}
 			}
-
+			
 			// check if loadSkin is available
 			if (options.loadSkin)
 			{
@@ -251,47 +341,79 @@ package aerys.minko.type.parser.collada
 				// This is a kludge and will break if multiple instances of the same controller are present in the scene.
 				for each (var controller : Controller in _controllers)
 				{
-					var controllerInstance	: InstanceController = findInstanceById(controller.id) as InstanceController;
+					var controllerInstance	: InstanceController = findInstanceById(controller.id)
+                            as InstanceController;
+
 					if (!controllerInstance)
 						continue;
 
 					var skin	: Skin			= controller.skin;
 					var scene	: ISceneNode	= sourceIdToScene[controllerInstance.sourceId];
-					if (scene == null)
+
+                    if (scene == null)
 					{
-						Minko.log(DebugLevel.PLUGIN_WARNING, 'Unable to find instance linked to controller ' +
-							'named "' + controllerInstance.sourceId + '". Dropping skin.');
+						Minko.log(
+							DebugLevel.PLUGIN_WARNING,
+							'Unable to find instance linked to controller ' +
+							'named \'' + controllerInstance.sourceId + '\': dropping skin.'
+						);
 						continue;
 					}
 
-					var meshes : Vector.<ISceneNode> =
-						scene is Group ? Group(scene).getDescendantsByType(Mesh) : new <ISceneNode>[scene];
+					var meshes : Vector.<ISceneNode> = scene is Group
+						? Group(scene).getDescendantsByType(Mesh)
+						: new <ISceneNode>[scene];
 
 					var joints : Vector.<Group>	= new <Group>[];
+                    var animations : Vector.<IAnimationController> = new <IAnimationController>[];
 					for each (var jointName : String in skin.jointNames)
 					{
-						var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName]; // handle collada 1.4 "ID_REF"
+						// handle collada 1.4 "ID_REF"
+						var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName];
 
 						if (joint == null)
 						{
-							Minko.log(DebugLevel.PLUGIN_WARNING, 'Unable to find bone named "'
-								+ jointName + '". Dropping skin for mesh named "' + scene.name + '".');
+							Minko.log(
+								DebugLevel.PLUGIN_WARNING, 'Unable to find bone named \''
+								+ jointName + '\'. Dropping skin for mesh named \'' + scene.name
+								+ '\'.'
+							);
 							continue;
+						}
+
+						for (var jointOrAncestor : ISceneNode = joint;
+						     jointOrAncestor != null;
+							 jointOrAncestor = jointOrAncestor.parent)
+						{
+							var jointAnimations : Vector.<AbstractController> = jointOrAncestor.getControllersByType(
+								AnimationController
+							);
+
+							for each (var jointAnimation : AnimationController in jointAnimations)
+								animations.push(jointAnimation);
 						}
 
 						joints.push(joint);
 					}
-					
-					var skinController : AbstractController = new SkinningController(
-						options.skinningMethod,
-						mainScene,
-						joints,
-						skin.bindShapeMatrix,
-						skin.invBindMatrices
-					);
-					
-					for each (var mesh : ISceneNode in meshes)
-						Mesh(mesh).addController(skinController);
+
+					if (joints.length)
+					{
+                        var masterAnimation : MasterAnimationController = new MasterAnimationController(animations);
+						var skinController : AbstractController = new SkinningController(
+							options.skinningMethod,
+							mainScene,
+							joints,
+							skin.bindShapeMatrix,
+							skin.invBindMatrices,
+							options.flattenSkinning,
+							options.skinningNumFps
+						);
+						
+						for each (var mesh : ISceneNode in meshes)
+                        {
+							mesh.addController(skinController).addController(masterAnimation);
+                        }
+					}
 				}
 			}
 			
@@ -324,6 +446,56 @@ package aerys.minko.type.parser.collada
 			}
 			
 			return null;
+		}
+        
+        public function getAnimationById(id : String) : Animation
+        {
+            return _animations[id];
+        }
+        
+        public function getControllerById(id : String) : Controller
+        {
+            return _controllers[id];
+        }
+        
+        public function getEffectById(id : String) : Effect
+        {
+            return _effects[id];
+        }
+        
+        public function getGeometryById(id : String) : Geometry
+        {
+            return _geometries[id];
+        }
+        
+        public function getImageById(id : String) : Image
+        {
+            return _images[id];
+        }
+        
+        public function getMaterialById(id : String) : ColladaMaterial
+        {
+            return _materials[id];
+        }
+        
+        public function getNodeById(id	: String) : Node
+        {
+            return _nodes[id];
+        }
+        
+        public function getVisualSceneById(id : String) : VisualScene
+        {
+            return _visualScenes[id];
+        }
+		
+		public function getCameraById(id : String) : aerys.minko.type.parser.collada.resource.camera.Camera
+		{
+			return _cameras[id];
+		}
+		
+		public function getLightbyId(id : String) : Light
+		{
+			return _lights[id];
 		}
 	}
 }

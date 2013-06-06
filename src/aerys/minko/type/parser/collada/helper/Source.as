@@ -15,15 +15,15 @@ package aerys.minko.type.parser.collada.helper
 	 */	
 	public final class Source
 	{
-		private static const NS	: Namespace	= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		private static const NS	: Namespace	= new Namespace('http://www.collada.org/2005/11/COLLADASchema');
 		
 		private static const TYPES	: Object	= {
-			"float"		: Number,
-			"double"	: Number,
-			"Name"		: String,
-			"float4x4"	: Matrix4x4,
-			"name"		: String,
-			"IDREF"		: String
+			'float'		: Number,
+			'double'	: Number,
+			'Name'		: String,
+			'float4x4'	: Matrix4x4,
+			'name'		: String,
+			'IDREF'		: String
 		};
 		
 		protected var _id			: String;
@@ -33,15 +33,35 @@ package aerys.minko.type.parser.collada.helper
 		protected var _paramTypes	: Vector.<Class>;
 		protected var _data			: Array;
 		
-		public function get id()			: String			{ return _id;			}
-		public function get stride()		: uint				{ return _stride;		}
-		public function get count()			: uint				{ return _count;		}
-		public function get paramNames()	: Vector.<String>	{ return _paramNames;	}
-		public function get paramTypes()	: Vector.<Class>	{ return _paramTypes;	}
-		public function get data()			: Array				{ return _data;			}
-		
-		public static var totalTime : uint = 0;
-		public static var partialTime : uint = 0;
+		public function get id() : String
+        {
+            return _id;
+        }
+        
+		public function get stride() : uint
+        {
+            return _stride;
+        }
+        
+		public function get count() : uint
+        {
+            return _count;
+        }
+        
+		public function get paramNames() : Vector.<String>
+        {
+            return _paramNames;
+        }
+        
+		public function get paramTypes() : Vector.<Class>
+        {
+            return _paramTypes;
+        }
+        
+		public function get data() : Array
+        {
+            return _data;
+        }
 		
 		/*
 		 * For an obscure reason, there is no way to get the raw data using the
@@ -90,15 +110,13 @@ package aerys.minko.type.parser.collada.helper
 			/*
 			 * End of kludge.
 			 */
-			var timer2 : uint = getTimer();
 			var rawData : Array = String(xmlRawData).replace(/[ \t\n\r]+/g, ' ').split(' ');
-			partialTime += getTimer() - timer2;
 			
 			/* the kludge is back */
-			var size : uint = 0;
-			for each (var paramType2 : Class in source._paramTypes)
-				size += paramType2 == Matrix4x4 ? 16 : 1;
-			source._count = rawData.length / size;
+//			var size : uint = 0;
+//			for each (var paramType2 : Class in source._paramTypes)
+//				size += paramType2 == Matrix4x4 ? 16 : 1;
+//			source._count = rawData.length / size;
 			/* end of second kludge */
 			
 			var currentOffset		: uint		= 0;
@@ -125,14 +143,14 @@ package aerys.minko.type.parser.collada.helper
 					else if (paramType == Matrix4x4)
 					{
 						currentDatum = new Matrix4x4(
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)]),
-							parseFloat(rawData[int(currentOffset++)]), parseFloat(rawData[int(currentOffset++)])
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)]),
+							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)])
 						).transpose();
 						
 						MatrixSanitizer.sanitize(currentDatum);
@@ -146,7 +164,6 @@ package aerys.minko.type.parser.collada.helper
 				}
 			}
 			
-			totalTime += getTimer() - timer;
 			return source;
 		}
 		
@@ -163,13 +180,13 @@ package aerys.minko.type.parser.collada.helper
 		public function getComponentByParamIndex(index		: uint, 
 												 paramIndex	: uint) : Object
 		{
-			return _data[index * _paramNames.length + paramIndex];
+			return _data[uint(index * _paramNames.length + paramIndex)];
 		}
 		
 		public function getComponentByParamName(index		: uint, 
 												paramName	: String) : Object
 		{
-			return _data[index * _paramNames.length + _paramNames.indexOf(paramName)];
+			return _data[uint(index * _paramNames.length + _paramNames.indexOf(paramName))];
 		}
 	}
 }

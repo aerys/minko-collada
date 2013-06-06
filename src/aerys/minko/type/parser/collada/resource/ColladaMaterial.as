@@ -2,6 +2,7 @@ package aerys.minko.type.parser.collada.resource
 {
 	import aerys.minko.render.material.Material;
 	import aerys.minko.render.material.basic.BasicMaterial;
+	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceEffect;
@@ -11,7 +12,7 @@ package aerys.minko.type.parser.collada.resource
 	{
 		private static const NS 				: Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
 		
-		public static const DEFAULT_MATERIAL 	: Material 	= new BasicMaterial({diffuseColor: 0x00ff00ff});
+//		public static const DEFAULT_MATERIAL 	: Material 	= new BasicMaterial({diffuseColor: 0x00ff00ff});
 		
 		private var _document		: ColladaDocument;
 		private var _id				: String;
@@ -33,17 +34,6 @@ package aerys.minko.type.parser.collada.resource
 		public function get instanceEffect() : InstanceEffect
 		{
 			return _instanceEffect;
-		}
-		
-		public function get material() : Material
-		{
-			if (!_material)
-			{
-				_material = _instanceEffect.createMaterial();
-				_material.name = _id;
-			}
-			
-			return _material;
 		}
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
@@ -76,9 +66,9 @@ package aerys.minko.type.parser.collada.resource
 		}
 		
 		public function ColladaMaterial(id				: String,
-								 name			: String, 
-								 instanceEffect	: InstanceEffect,
-								 document		: ColladaDocument)
+										name			: String, 
+										instanceEffect	: InstanceEffect,
+										document		: ColladaDocument)
 		{
 			_id				= id;
 			_name			= name;
@@ -89,6 +79,17 @@ package aerys.minko.type.parser.collada.resource
 		public function createInstance() : IInstance
 		{
 			return new InstanceMaterial(_id, null, _document); 
+		}
+		
+		public function getMaterial(parserOptions : ParserOptions) : Material
+		{
+			if (!_material)
+			{
+				_material = _instanceEffect.createMaterial(parserOptions);
+				_material.name = _id;
+			}
+			
+			return _material;
 		}
 	}
 }

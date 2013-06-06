@@ -2,13 +2,14 @@ package aerys.minko.type.parser.collada.resource.effect
 {
 	import aerys.minko.Minko;
 	import aerys.minko.render.material.Material;
+	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceEffect;
 	import aerys.minko.type.parser.collada.resource.IResource;
+	import aerys.minko.type.parser.collada.resource.effect.profile.CommonProfile;
 	import aerys.minko.type.parser.collada.resource.effect.profile.IProfile;
-	import aerys.minko.type.parser.collada.resource.effect.profile.ProfileCommon;
 	
 	public class Effect implements IResource
 	{
@@ -55,7 +56,7 @@ package aerys.minko.type.parser.collada.resource.effect
 				switch (child.localName())
 				{
 					case 'profile_COMMON':
-						profiles.push(ProfileCommon.createFromXML(child, document));
+						profiles.push(CommonProfile.createFromXML(child, document));
 						break;
 					
 					case 'profile_BRIDGE':
@@ -91,22 +92,22 @@ package aerys.minko.type.parser.collada.resource.effect
 			_document	= document;
 		}
 		
-		public function createMaterial(setParams : Object) : Material
+		public function createMaterial(parserOptions : ParserOptions, setParams : Object) : Material
 		{
-			var profileCommon : ProfileCommon = null;
+			var profileCommon : CommonProfile = null;
 			
 			for each (var profile : IProfile in _profiles)
-				if (profile is ProfileCommon)
-					profileCommon = ProfileCommon(profile);
+				if (profile is CommonProfile)
+					profileCommon = CommonProfile(profile);
 			
 			if (!profileCommon)
 			{
 				Minko.log(DebugLevel.PLUGIN_WARNING, 'No valid profile was found for effect: ' + _name);
-				return ProfileCommon.DEFAULT_MATERIAL;
+				return CommonProfile.DEFAULT_MATERIAL;
 			}
 			else
 			{
-				return profile.createMaterial(params, setParams);
+				return profile.createMaterial(parserOptions, params, setParams);
 			}
 		}
 		
