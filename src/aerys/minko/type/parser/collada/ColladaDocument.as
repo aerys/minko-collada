@@ -411,7 +411,10 @@ package aerys.minko.type.parser.collada
 							);
 							
 							for each (var jointAnimation : AnimationController in jointAnimations)
-							animations.push(jointAnimation);
+							{
+								if (animations.indexOf(jointAnimation) == -1)
+									animations.push(jointAnimation);
+							}
 						}
 						
 						joints.push(joint);

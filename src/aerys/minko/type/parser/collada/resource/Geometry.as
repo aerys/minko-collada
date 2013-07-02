@@ -1,5 +1,7 @@
 package aerys.minko.type.parser.collada.resource
 {
+	import flash.utils.ByteArray;
+	
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.ns.minko_stream;
@@ -11,8 +13,6 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.type.parser.collada.helper.Triangles;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceGeometry;
-	
-	import flash.utils.ByteArray;
 	
 	public class Geometry implements IResource
 	{
@@ -66,13 +66,18 @@ package aerys.minko.type.parser.collada.resource
 			
 			var xmlGeometries		: XMLList	= xmlGeometryLibrary.NS::geometry;
 			
-			for each (var xmlGeometry : XML in xmlGeometries)
+			while(xmlGeometries.length() > 0)
 			{
+				var xmlGeometry : XML = xmlGeometries[0];
+				
 				var geometry : Geometry = Geometry.createFromXML(xmlGeometry, document);
+				
+				delete xmlGeometries[0];
 				
 				if (geometry)
 					store[geometry.id] = geometry;
 			}
+			delete xmlDocument..NS::library_geometries[0];
 		}
 		
 		public static function createFromXML(xmlGeometry : XML, document : ColladaDocument) : Geometry
@@ -109,7 +114,9 @@ package aerys.minko.type.parser.collada.resource
 				newGeometry._verticesDataSources[semantic] = source;
 			}
 			
-			for each (var child : XML in xmlMesh.children())
+			var children : XMLList = xmlMesh.children();
+			
+			for each (var child : XML in children)
 				switch (child.localName())
 				{
 					case 'lines':
