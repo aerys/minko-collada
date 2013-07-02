@@ -125,9 +125,9 @@ package aerys.minko.type.parser.collada.helper
 			
 			var paramCount : uint = source._paramNames.length;
 			source._data = new Array();
-			for (var index : uint = 0; index < source._count; ++index)
+			for (var index : uint = 0; index < source._count || currentOffset < rawData.length; ++index)
 			{
-				for (var paramId : uint = 0; paramId < paramCount; ++paramId)
+				for (var paramId : uint = 0; currentOffset < rawData.length && paramId < paramCount; ++paramId)
 				{
 					var paramType : Class	= source._paramTypes[paramId];
 					var paramName : String	= source._paramNames[paramId];

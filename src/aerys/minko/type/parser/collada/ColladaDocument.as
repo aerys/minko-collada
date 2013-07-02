@@ -366,11 +366,32 @@ package aerys.minko.type.parser.collada
 
 					var joints : Vector.<Group>	= new <Group>[];
                     var animations : Vector.<IAnimationController> = new <IAnimationController>[];
-					for each (var jointName : String in skin.jointNames)
+										
+					for(var i : int = 0; i < skin.jointNames.length; ++i)
 					{
 						// handle collada 1.4 "ID_REF"
-						var joint : Group = scopedIdToScene[jointName] || sourceIdToScene[jointName];
-
+						var jointName		: String	= skin.jointNames[i];
+						var realJointName	: String	= "";
+						var joint			: Group		= null;
+						
+						if (scopedIdToScene[jointName] || sourceIdToScene[jointName])
+						{
+							joint = scopedIdToScene[jointName] || sourceIdToScene[jointName];
+							realJointName = jointName;
+						}
+						
+						for(var j : int = i + 1; j < skin.jointNames.length; j++)
+						{
+							jointName = jointName + " " + skin.jointNames[j];
+							
+							if (scopedIdToScene[jointName] || sourceIdToScene[jointName])
+							{
+								joint = scopedIdToScene[jointName] || sourceIdToScene[jointName];
+								realJointName = jointName;
+								i = j;
+							}
+						}
+						
 						if (joint == null)
 						{
 							Minko.log(
@@ -380,22 +401,25 @@ package aerys.minko.type.parser.collada
 							);
 							continue;
 						}
-
+						
 						for (var jointOrAncestor : ISceneNode = joint;
-						     jointOrAncestor != null;
-							 jointOrAncestor = jointOrAncestor.parent)
+							jointOrAncestor != null;
+							jointOrAncestor = jointOrAncestor.parent)
 						{
 							var jointAnimations : Vector.<AbstractController> = jointOrAncestor.getControllersByType(
 								AnimationController
 							);
-
+							
 							for each (var jointAnimation : AnimationController in jointAnimations)
-								animations.push(jointAnimation);
+							{
+								if (animations.indexOf(jointAnimation) == -1)
+									animations.push(jointAnimation);
+							}
 						}
-
+						
 						joints.push(joint);
 					}
-
+					
 					if (joints.length)
 					{
                         var masterAnimation : MasterAnimationController = new MasterAnimationController(animations);
