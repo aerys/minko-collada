@@ -279,8 +279,9 @@ package aerys.minko.type.parser.collada
 			var animationStore : Animation = _animations['mergedAnimations'];
 			if (animationStore)
 			{
-				var timelines   : Vector.<ITimeline>	= new <ITimeline>[];
-				var targetNames	: Vector.<String>		= new <String>[];
+				var timelines   : Vector.<ITimeline>				= new <ITimeline>[];
+				var targetNames	: Vector.<String>					= new <String>[];
+				var animations	: Vector.<IAnimationController>		= new <IAnimationController>[];
 				
 				animationStore.getTimelines(timelines, targetNames);
 				
@@ -327,7 +328,28 @@ package aerys.minko.type.parser.collada
 							}
 						}
 					}
-					sceneNode.addController(new AnimationController(timelines));
+					var animationController : AnimationController = new AnimationController(timelines);
+					sceneNode.addController(animationController);
+					animations.push(animationController);
+				}
+				
+				if (animations.length)
+				{
+					var masterAnimation : MasterAnimationController = new MasterAnimationController(animations);
+					
+					var targets : Vector.<ISceneNode> = new Vector.<ISceneNode>();
+					for each(var animation : AnimationController in animations)
+					{
+						for(var i : int = 0; i < animation.numTargets; ++i )
+						{
+							var target : ISceneNode = animation.getTarget(i);
+							if (targets.indexOf(target) == -1)
+							{
+								target.addController(masterAnimation);
+								targets.push(target);
+							}
+						}
+					}
 				}
 			}
 			
@@ -365,9 +387,8 @@ package aerys.minko.type.parser.collada
 						: new <ISceneNode>[scene];
 
 					var joints : Vector.<Group>	= new <Group>[];
-                    var animations : Vector.<IAnimationController> = new <IAnimationController>[];
 										
-					for(var i : int = 0; i < skin.jointNames.length; ++i)
+					for(i = 0; i < skin.jointNames.length; ++i)
 					{
 						// handle collada 1.4 "ID_REF"
 						var jointName		: String	= skin.jointNames[i];
@@ -402,27 +423,11 @@ package aerys.minko.type.parser.collada
 							continue;
 						}
 						
-						for (var jointOrAncestor : ISceneNode = joint;
-							jointOrAncestor != null;
-							jointOrAncestor = jointOrAncestor.parent)
-						{
-							var jointAnimations : Vector.<AbstractController> = jointOrAncestor.getControllersByType(
-								AnimationController
-							);
-							
-							for each (var jointAnimation : AnimationController in jointAnimations)
-							{
-								if (animations.indexOf(jointAnimation) == -1)
-									animations.push(jointAnimation);
-							}
-						}
-						
 						joints.push(joint);
 					}
 					
 					if (joints.length)
 					{
-                        var masterAnimation : MasterAnimationController = new MasterAnimationController(animations);
 						var skinController : AbstractController = new SkinningController(
 							options.skinningMethod,
 							mainScene,
@@ -435,7 +440,7 @@ package aerys.minko.type.parser.collada
 						
 						for each (var mesh : ISceneNode in meshes)
                         {
-							mesh.addController(skinController).addController(masterAnimation);
+							mesh.addController(skinController);
                         }
 					}
 				}
