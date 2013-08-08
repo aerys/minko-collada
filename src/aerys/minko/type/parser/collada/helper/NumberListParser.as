@@ -4,10 +4,6 @@ package aerys.minko.type.parser.collada.helper
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.math.Vector4;
 	
-	import flash.utils.ByteArray;
-	import flash.utils.Endian;
-	import flash.utils.getTimer;
-	
 	public class NumberListParser
 	{
 		public static function parseIntList(xml : XML) : Vector.<int>

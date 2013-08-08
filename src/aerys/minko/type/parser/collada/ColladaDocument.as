@@ -328,34 +328,17 @@ package aerys.minko.type.parser.collada
 							}
 						}
 					}
-					var animationController : AnimationController = new AnimationController(timelines);
-					sceneNode.addController(animationController);
+					var animationController : IAnimationController = new AnimationController(timelines);
+					sceneNode.addController(animationController as AnimationController);
 					animations.push(animationController);
-				}
-				
-				if (animations.length)
-				{
-					var masterAnimation : MasterAnimationController = new MasterAnimationController(animations);
-					
-					var targets : Vector.<ISceneNode> = new Vector.<ISceneNode>();
-					for each(var animation : AnimationController in animations)
-					{
-						for(var i : int = 0; i < animation.numTargets; ++i )
-						{
-							var target : ISceneNode = animation.getTarget(i);
-							if (targets.indexOf(target) == -1)
-							{
-								target.addController(masterAnimation);
-								targets.push(target);
-							}
-						}
-					}
 				}
 			}
 			
 			// check if loadSkin is available
 			if (options.loadSkin)
 			{
+				var skinningAnimationControllers : Vector.<IAnimationController> = new Vector.<IAnimationController>();
+				
 				// add skinning controllers.
 
 				// @fixme
@@ -388,7 +371,7 @@ package aerys.minko.type.parser.collada
 
 					var joints : Vector.<Group>	= new <Group>[];
 										
-					for(i = 0; i < skin.jointNames.length; ++i)
+					for(var i : int = 0; i < skin.jointNames.length; ++i)
 					{
 						// handle collada 1.4 "ID_REF"
 						var jointName		: String	= skin.jointNames[i];
@@ -422,7 +405,22 @@ package aerys.minko.type.parser.collada
 							);
 							continue;
 						}
-											
+												
+						for (var jointOrAncestor : ISceneNode = joint; jointOrAncestor != null; jointOrAncestor = jointOrAncestor.parent)
+						{
+							var jointAnimations : Vector.<AbstractController> = jointOrAncestor.getControllersByType(
+								AnimationController
+							);
+							
+							for each (var jointAnimation : AnimationController in jointAnimations)
+							{
+								if (skinningAnimationControllers.indexOf(jointAnimation) == -1)
+									skinningAnimationControllers.push(jointAnimation);
+								if (animations.indexOf(jointAnimation) != -1)
+									animations.splice(animations.indexOf(jointAnimation), 1);
+							}
+						}
+						
 						joints.push(joint);
 					}
 					
@@ -443,6 +441,11 @@ package aerys.minko.type.parser.collada
 							mesh.addController(skinController);
                         }
 					}
+				}
+				if (skinningAnimationControllers.length)
+				{
+					var masterAnimationController : MasterAnimationController = new MasterAnimationController(skinningAnimationControllers);
+					mainScene.addController(masterAnimationController);
 				}
 			}
 			
