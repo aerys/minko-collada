@@ -337,7 +337,7 @@ package aerys.minko.type.parser.collada
 			// check if loadSkin is available
 			if (options.loadSkin)
 			{
-				var skinningAnimationControllers : Vector.<IAnimationController> = new Vector.<IAnimationController>();
+				var skinningAnimationControllers : Vector.<AnimationController> = new Vector.<AnimationController>();
 				
 				// add skinning controllers.
 
