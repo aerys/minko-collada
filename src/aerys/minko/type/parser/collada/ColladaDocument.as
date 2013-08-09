@@ -328,9 +328,13 @@ package aerys.minko.type.parser.collada
 							}
 						}
 					}
-					var animationController : IAnimationController = new AnimationController(timelines);
-					sceneNode.addController(animationController as AnimationController);
-					animations.push(animationController);
+
+					if (sceneNode)
+					{
+						var animationController : IAnimationController = new AnimationController(timelines);
+						sceneNode.addController(animationController as AnimationController);
+						animations.push(animationController);
+					}
 				}
 			}
 			
