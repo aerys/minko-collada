@@ -409,7 +409,7 @@ package aerys.minko.type.parser.collada
 							);
 							continue;
 						}
-												
+						
 						for (var jointOrAncestor : ISceneNode = joint; jointOrAncestor != null; jointOrAncestor = jointOrAncestor.parent)
 						{
 							var jointAnimations : Vector.<AbstractController> = jointOrAncestor.getControllersByType(
