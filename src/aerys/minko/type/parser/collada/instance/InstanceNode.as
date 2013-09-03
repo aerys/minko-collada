@@ -59,6 +59,7 @@ package aerys.minko.type.parser.collada.instance
 		{
 			var nodeResource	: Node					= Node(resource);
 			var transform		: Matrix4x4				= nodeResource.transform;
+			var extra			: Object				= nodeResource.extra;
 			var childs			: Vector.<IInstance>	= nodeResource.childs;
 			var numChilds		: uint					= childs.length;
 			var name			: String				= null;
@@ -73,6 +74,10 @@ package aerys.minko.type.parser.collada.instance
 			{
 				var group : Group = new Group();
 				group.transform.copyFrom(transform);
+				
+				if (extra)
+					group.userData.setProperties({'extra': JSON.stringify(extra)});
+				
 				for (var childId : uint = 0; childId < numChilds; ++childId)
 				{
 					var child : ISceneNode = 
