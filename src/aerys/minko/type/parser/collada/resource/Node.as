@@ -6,6 +6,7 @@ package aerys.minko.type.parser.collada.resource
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.enum.NodeType;
+	import aerys.minko.type.parser.collada.helper.ExtraParser;
 	import aerys.minko.type.parser.collada.helper.TransformParser;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceCamera;
@@ -27,6 +28,7 @@ package aerys.minko.type.parser.collada.resource
 		private var _sid		: String;
 		private var _name		: String;
 		private var _transform	: Matrix4x4;
+		private var _extra		: Object;
 		private var _type		: String;
 		
 		private var _childs		: Vector.<IInstance>;
@@ -35,6 +37,7 @@ package aerys.minko.type.parser.collada.resource
 		public function get sid()		: String				{ return _sid; }
 		public function get name()		: String				{ return _name; }
 		public function get transform()	: Matrix4x4				{ return _transform; }
+		public function get extra()		: Object				{ return _extra; }
 		public function get type()		: String				{ return _type; }
 		public function get childs()	: Vector.<IInstance>	{ return _childs; }
 		
@@ -74,6 +77,8 @@ package aerys.minko.type.parser.collada.resource
 			if (type.length == 0)
 				type = NodeType.NODE;
 			
+			var extra : Object = null;
+			
 			var childs : Vector.<IInstance> = new Vector.<IInstance>();
 			for each (var child : XML in xmlNode.children())
 			{
@@ -94,11 +99,17 @@ package aerys.minko.type.parser.collada.resource
 					case 'instance_node':
 						childs.push(InstanceNode.createFromXML(document, child));
 						break;
+					
 					case 'instance_camera':
 						childs.push(InstanceCamera.createFromXml(document, child));
 						break;
+					
 					case 'instance_light':
 						childs.push(InstanceLight.createFromXml(document, child));
+						break;
+					
+					case 'extra':
+						extra = ExtraParser.parseExtra(child);
 						break;
 					
 					// ignore transformation, it's parsed in a helper function
@@ -108,7 +119,6 @@ package aerys.minko.type.parser.collada.resource
 					case 'scale':
 					case 'skew':
 					case 'translate':
-					case 'extra':
 						break;
 					
 					default:
@@ -119,14 +129,15 @@ package aerys.minko.type.parser.collada.resource
 				}
 			}
 			
-			return new Node(id, sid, name, transform, type, childs, document);
+			return new Node(id, sid, name, transform, type, extra, childs, document);
 		}
 		
 		public function Node(id			: String, 
 							 sid		: String, 
 							 name		: String, 
 							 transform	: Matrix4x4, 
-							 type		: String, 
+							 type		: String,
+							 extra		: Object,
 							 childs		: Vector.<IInstance>,
 							 document	: ColladaDocument)
 		{
@@ -135,6 +146,7 @@ package aerys.minko.type.parser.collada.resource
 			_name		= name;
 			_transform	= transform;
 			_type		= type;
+			_extra		= extra;
 			_childs		= childs;
 			_document	= document;
 		}
