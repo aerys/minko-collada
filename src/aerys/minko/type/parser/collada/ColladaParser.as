@@ -103,7 +103,7 @@ package aerys.minko.type.parser.collada
 			for each (var image : Image in _document.images)
 			{
 				var imageURL	: String	= image.imageData.path;
-				var loader		: ILoader	= _options.dependencyLoaderFunction(imageURL, true, _options);
+				var loader		: ILoader	= _options.dependencyLoaderFunction(image.id, imageURL, true, _options);
 				
 				if (loader)
 				{
@@ -121,6 +121,9 @@ package aerys.minko.type.parser.collada
 			{
 				var loader	: TextureLoader	= TextureLoader(l);
 				var image	: Image			= _loaderToDependency[loader];
+				
+				if (loader.textureResource)
+					loader.textureResource.name = image.id;
 				
 				if (loader.isComplete)
 				{
