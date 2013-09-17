@@ -89,7 +89,9 @@ package aerys.minko.type.parser.collada.resource
 				_material.name = _id;
 			}
 			
-			return _material;
+			return parserOptions.materialFunction 
+				? parserOptions.materialFunction(_material.name, _material)
+				: _material;
 		}
 	}
 }
