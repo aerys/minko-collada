@@ -170,11 +170,12 @@ package aerys.minko.type.parser.collada.instance
 				return null;
 			else
 			{
-				var materialInstance : InstanceMaterial = _bindMaterial[materialName];
-				
-				return materialInstance != null && materialInstance.resource != null ? 
+				var materialInstance	: InstanceMaterial	= _bindMaterial[materialName];
+				var material			: Material			= materialInstance != null && materialInstance.resource != null ? 
 					ColladaMaterial(materialInstance.resource).getMaterial(parserOptions) :
 					null;
+				
+				return parserOptions.materialFunction(materialName, material);
 			}
 		}
 	}
