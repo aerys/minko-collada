@@ -80,7 +80,7 @@ package aerys.minko.type.parser.collada.helper
 				
 				var vector	: Vector4 = new Vector4(float1, float2, float3);
 				
-				result[i] = vector;
+				result[i / 3] = vector;
 			}
 			
 			return result;
