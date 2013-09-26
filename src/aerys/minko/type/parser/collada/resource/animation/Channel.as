@@ -11,9 +11,7 @@ package aerys.minko.type.parser.collada.resource.animation
 	public final class Channel
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
-		
-		private static const TMP_MATRIX		: Matrix4x4 = new Matrix4x4();
-		
+				
 		private var _targetId				: String;
 		private var _transformType			: String;
 		

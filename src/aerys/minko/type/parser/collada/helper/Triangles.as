@@ -1,8 +1,5 @@
 package aerys.minko.type.parser.collada.helper
 {
-	import flash.utils.ByteArray;
-	import flash.utils.Endian;
-	
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.render.geometry.stream.IndexStream;
@@ -17,6 +14,9 @@ package aerys.minko.type.parser.collada.helper
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.enum.InputType;
+	
+	import flash.utils.ByteArray;
+	import flash.utils.Endian;
 
 	public final class Triangles
 	{
@@ -535,6 +535,31 @@ package aerys.minko.type.parser.collada.helper
 			{
 				numDwords = buffer.bytesAvailable >>> 2;
 				numVertices = _triangleVertices.length / _indicesPerVertex;
+			}
+			else if (semantic == InputType.POSITION)
+			{
+				numDwords = buffer.bytesAvailable >>> 2;
+				numVertices = _triangleVertices.length / _indicesPerVertex;
+				
+				if (numDwords != 3 * numVertices)
+					throw new Error('Failed converting positions from right- to left-handed frame.');
+				
+				buffer.position = 0;
+				
+				// convert from right-handedness to left-handedness
+				for (var j : uint = 1; j < numDwords; j += 3)
+				{
+					var x : Number = buffer.readFloat();
+					var y : Number = buffer.readFloat();
+					var z : Number = buffer.readFloat();
+					
+					buffer.position -= 12;
+					buffer.writeFloat(-x);
+					buffer.writeFloat(y);
+					buffer.writeFloat(z);
+				}
+				
+				buffer.position = 0;
 			}
 			
 			return new VertexStream(StreamUsage.DYNAMIC, format, buffer);

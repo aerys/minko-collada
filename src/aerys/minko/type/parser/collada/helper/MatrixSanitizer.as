@@ -14,5 +14,23 @@ package aerys.minko.type.parser.collada.helper
             TMP_NUMBERS[15] = 1.;
             matrix.setRawData(TMP_NUMBERS);
 		}
+		
+		public static function changeHandedness(matrix : Matrix4x4) : Matrix4x4
+		{
+			matrix.getRawData(TMP_NUMBERS);
+			
+			// affine part
+			TMP_NUMBERS[1]	*= -1.0;
+			TMP_NUMBERS[2]	*= -1.0;
+			TMP_NUMBERS[4]	*= -1.0;
+			TMP_NUMBERS[8]	*= -1.0;
+			
+			// translational part
+			TMP_NUMBERS[12]	*= -1.0;
+			
+			matrix.setRawData(TMP_NUMBERS);
+			
+			return matrix;
+		}
 	}
 }

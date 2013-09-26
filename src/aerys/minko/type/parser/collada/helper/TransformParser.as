@@ -6,7 +6,8 @@ package aerys.minko.type.parser.collada.helper
 
 	public class TransformParser
 	{
-		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		private static const 	NS 				: Namespace 		= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		private static var		MATRIX4X4_DATA	: Vector.<Number>	= new Vector.<Number>(16, true);
 		
 		public static function parseTransform(node : XML) : Matrix4x4
 		{
@@ -28,7 +29,8 @@ package aerys.minko.type.parser.collada.helper
 					
 					case 'matrix':
 						// is this multiply or multiplyInverse?
-						transform.prepend(NumberListParser.parseMatrix3D(child));
+						transform.prepend(NumberListParser.parseMatrix3D(child));	
+						// handedness already changed
 						break;
 					
 					case 'rotate':
@@ -36,11 +38,13 @@ package aerys.minko.type.parser.collada.helper
 						var angle		: Number	= axis.w / 180 * Math.PI;
 						axis.w = 0;
 						transform.prependRotation(angle, axis);
+						MatrixSanitizer.changeHandedness(transform);
 						break;
 					
 					case 'scale':
 						var scale : Vector4 = NumberListParser.parseVector3(child);
 						transform.prependScale(scale.x, scale.y, scale.z);
+						MatrixSanitizer.changeHandedness(transform);
 						break;
 					
 					case 'skew':
@@ -50,12 +54,12 @@ package aerys.minko.type.parser.collada.helper
 					case 'translate':
 						var translation : Vector4 = NumberListParser.parseVector3(child);
 						transform.prependTranslation(translation.x, translation.y, translation.z);
+						MatrixSanitizer.changeHandedness(transform);
 						break;
 				}
 			}
-			
+						
 			return transform;
 		}
-		
 	}
 }

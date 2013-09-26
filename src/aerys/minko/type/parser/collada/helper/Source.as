@@ -154,6 +154,7 @@ package aerys.minko.type.parser.collada.helper
 						).transpose();
 						
 						MatrixSanitizer.sanitize(currentDatum);
+						MatrixSanitizer.changeHandedness(currentDatum);
 					}
 					else
 					{
