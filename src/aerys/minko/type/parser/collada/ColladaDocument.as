@@ -193,9 +193,9 @@ package aerys.minko.type.parser.collada
 			metaData.contributor	= new <Object>[];
 			metaData.unit			= {};
 			
-			//FIXME!
-			metaData.unit.meter		= 1;//parseFloat(String(xmlMetaData.NS::unit[0].@meter));
-			metaData.unit.name		= "meter";//String(xmlMetaData.NS::unit[0].@name);
+			
+			metaData.unit.meter		= xmlMetaData.NS::unit.length() != 0 ? parseFloat(String(xmlMetaData.NS::unit[0].@meter))	: 1.0;
+			metaData.unit.name		= xmlMetaData.NS::unit.length() != 0 ? String(xmlMetaData.NS::unit[0].@name)				: "meter";
 			metaData.created		= new Date();
 			metaData.modified		= new Date();
 			metaData.upAxis			= String(xmlMetaData.NS::up_axis[0]);
