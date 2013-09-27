@@ -153,8 +153,7 @@ package aerys.minko.type.parser.collada.helper
 							parseFloat(rawData[uint(currentOffset++)]), parseFloat(rawData[uint(currentOffset++)])
 						).transpose();
 						
-						MatrixSanitizer.sanitize(currentDatum);
-						MatrixSanitizer.changeHandedness(currentDatum);
+						currentDatum = MatrixSanitizer.apply(currentDatum);
 					}
 					else
 					{

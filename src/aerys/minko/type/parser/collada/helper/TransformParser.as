@@ -25,12 +25,13 @@ package aerys.minko.type.parser.collada.helper
 					case 'lookat':
 						var lookAt : Vector.<Vector4> = NumberListParser.parseVector3List(child);
 						transform.lookAt(lookAt[0], lookAt[1], lookAt[2]);
+						transform = MatrixSanitizer.apply(transform);
 						break;
 					
 					case 'matrix':
 						// is this multiply or multiplyInverse?
 						transform.prepend(NumberListParser.parseMatrix3D(child));	
-						// handedness already changed
+						// handedness already changed (must not call MatrixSanitizer again)
 						break;
 					
 					case 'rotate':
@@ -38,13 +39,13 @@ package aerys.minko.type.parser.collada.helper
 						var angle		: Number	= axis.w / 180 * Math.PI;
 						axis.w = 0;
 						transform.prependRotation(angle, axis);
-						MatrixSanitizer.changeHandedness(transform);
+						transform = MatrixSanitizer.apply(transform);
 						break;
 					
 					case 'scale':
 						var scale : Vector4 = NumberListParser.parseVector3(child);
 						transform.prependScale(scale.x, scale.y, scale.z);
-						MatrixSanitizer.changeHandedness(transform);
+						transform = MatrixSanitizer.apply(transform);
 						break;
 					
 					case 'skew':
@@ -54,7 +55,7 @@ package aerys.minko.type.parser.collada.helper
 					case 'translate':
 						var translation : Vector4 = NumberListParser.parseVector3(child);
 						transform.prependTranslation(translation.x, translation.y, translation.z);
-						MatrixSanitizer.changeHandedness(transform);
+						transform = MatrixSanitizer.apply(transform);
 						break;
 				}
 			}
