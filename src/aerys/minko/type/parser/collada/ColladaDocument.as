@@ -1,7 +1,5 @@
 package aerys.minko.type.parser.collada
 {
-	import flash.events.EventDispatcher;
-	
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_animation;
 	import aerys.minko.ns.minko_collada;
@@ -21,6 +19,7 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.math.Vector4;
+	import aerys.minko.type.parser.collada.helper.MatrixSanitizer;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceController;
@@ -36,6 +35,8 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.parser.collada.resource.effect.Effect;
 	import aerys.minko.type.parser.collada.resource.image.Image;
 	import aerys.minko.type.parser.collada.resource.light.Light;
+	
+	import flash.events.EventDispatcher;
 
 	use namespace minko_collada;
 	
@@ -269,11 +270,16 @@ package aerys.minko.type.parser.collada
 				wrapper.transform.setScale(unit, unit, unit);
 			
 			// change up axis
-			var upAxis : String = _metaData.upAxis;
+			var upAxis 		: String	= _metaData.upAxis;
+			var upTransform	: Matrix4x4	= new Matrix4x4();
+			
 			if (upAxis == 'Z_UP')
-				wrapper.transform.setRotation(-Math.PI / 2, 0, 0);
+				upTransform.appendRotation(Math.PI * 0.5, Vector4.X_AXIS);
 			else if (upAxis == 'X_UP')
-				wrapper.transform.setRotation(0, 0, Math.PI / 2);
+				upTransform.appendRotation(-Math.PI * 0.5, Vector4.Z_AXIS);
+			upTransform = MatrixSanitizer.apply(upTransform);
+			
+			wrapper.transform.copyFrom(upTransform);
 			
 			// add animation controllers
 			var animationStore : Animation = _animations['mergedAnimations'];
