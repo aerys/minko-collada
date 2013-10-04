@@ -279,7 +279,7 @@ package aerys.minko.type.parser.collada
 				upTransform.appendRotation(-Math.PI * 0.5, Vector4.Z_AXIS);
 			upTransform = MatrixSanitizer.apply(upTransform);
 			
-			wrapper.transform.copyFrom(upTransform);
+			wrapper.transform.append(upTransform);
 			
 			// add animation controllers
 			var animationStore : Animation = _animations['mergedAnimations'];
