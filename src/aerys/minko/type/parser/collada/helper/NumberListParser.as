@@ -128,7 +128,7 @@ package aerys.minko.type.parser.collada.helper
 					0,							0,							0,							1
 				).transpose();
 				
-				result.push(matrix);
+				result.push(MatrixSanitizer.apply(matrix));
 			}
 			
 			return result;
@@ -152,9 +152,7 @@ package aerys.minko.type.parser.collada.helper
 					parseFloat(data[uint(i + 12)]),	parseFloat(data[uint(i + 13)]),	parseFloat(data[uint(i + 14)]), parseFloat(data[uint(i + 15)])
 				).transpose();
 				
-				MatrixSanitizer.sanitize(matrix);
-				
-				result.push(matrix);
+				result.push(MatrixSanitizer.apply(matrix));
 			}
 			
 			return result;
@@ -199,12 +197,14 @@ package aerys.minko.type.parser.collada.helper
 			if (dataLength != 9)
 				throw new ColladaError('Invalid data length');
 			
-			return new Matrix4x4(
-				parseFloat(data[0]),	parseFloat(data[1]),	parseFloat(data[2]),	0,
-				parseFloat(data[3]),	parseFloat(data[4]),	parseFloat(data[5]),	0,
-				parseFloat(data[6]),	parseFloat(data[7]),	parseFloat(data[8]),	0,
-				0,						0,						0,						1
-			).transpose();
+			return MatrixSanitizer.apply(
+				new Matrix4x4(
+					parseFloat(data[0]),	parseFloat(data[1]),	parseFloat(data[2]),	0,
+					parseFloat(data[3]),	parseFloat(data[4]),	parseFloat(data[5]),	0,
+					parseFloat(data[6]),	parseFloat(data[7]),	parseFloat(data[8]),	0,
+					0,						0,						0,						1
+				).transpose()
+			);
 		}
 		
 		public static function parseMatrix3D(xml : XML) : Matrix4x4
@@ -222,9 +222,7 @@ package aerys.minko.type.parser.collada.helper
 				parseFloat(data[12]),	parseFloat(data[13]),	parseFloat(data[14]),	parseFloat(data[15])
 			).transpose();
 			
-			MatrixSanitizer.sanitize(matrix);
-			
-			return matrix;
+			return MatrixSanitizer.apply(matrix);
 		}
 		
 	}
