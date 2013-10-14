@@ -277,6 +277,23 @@ package aerys.minko.type.parser.collada
 				upTransform.appendRotation(Math.PI * 0.5, Vector4.X_AXIS);
 			else if (upAxis == 'X_UP')
 				upTransform.appendRotation(-Math.PI * 0.5, Vector4.Z_AXIS);
+			
+			// In the projects' properties, add the following compiler argument:
+			// -define+=CONFIG::FROM_3DSMAX,true 
+			CONFIG::FROM_3DSMAX
+			{
+				// World space correspondences between 3DSMax and Minko (3DSMax -> Minko axis)
+				//     x -> -x
+				//     y -> -z
+				//     z -> y
+				if (upAxis == 'X_UP')
+					upTransform.appendRotation(Math.PI, Vector4.Z_AXIS);
+				else if (upAxis == 'Z_UP')
+					upTransform
+						.appendRotation(Math.PI, Vector4.Z_AXIS)
+						.appendRotation(Math.PI, Vector4.Y_AXIS);
+			}
+			
 			upTransform = MatrixSanitizer.apply(upTransform);
 			
 			wrapper.transform.append(upTransform);
