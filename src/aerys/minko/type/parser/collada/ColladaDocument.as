@@ -283,15 +283,17 @@ package aerys.minko.type.parser.collada
 			CONFIG::FROM_3DSMAX
 			{
 				// World space correspondences between 3DSMax and Minko (3DSMax -> Minko axis)
-				//     x -> -x
-				//     y -> -z
+				//     x -> x
+				//     y -> z
 				//     z -> y
 				if (upAxis == 'X_UP')
-					upTransform.appendRotation(Math.PI, Vector4.Z_AXIS);
-				else if (upAxis == 'Z_UP')
 					upTransform
 						.appendRotation(Math.PI, Vector4.Z_AXIS)
 						.appendRotation(Math.PI, Vector4.Y_AXIS);
+				else if (upAxis == 'Y_UP')
+					upTransform.appendRotation(Math.PI, Vector4.Y_AXIS);
+				else if (upAxis == 'Z_UP')
+					upTransform.appendRotation(Math.PI, Vector4.Z_AXIS);
 			}
 			
 			upTransform = MatrixSanitizer.apply(upTransform);
