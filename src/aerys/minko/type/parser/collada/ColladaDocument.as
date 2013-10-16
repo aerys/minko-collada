@@ -280,8 +280,8 @@ package aerys.minko.type.parser.collada
 			
 			// In the projects' properties, add the following compiler argument:
 			// -define+=CONFIG::FROM_3DSMAX,true 
-			CONFIG::FROM_3DSMAX
-			{
+			//CONFIG::FROM_3DSMAX
+			//{
 				// World space correspondences between 3DSMax and Minko (3DSMax -> Minko axis)
 				//     x -> x
 				//     y -> z
@@ -294,7 +294,7 @@ package aerys.minko.type.parser.collada
 					upTransform.appendRotation(Math.PI, Vector4.Y_AXIS);
 				else if (upAxis == 'Z_UP')
 					upTransform.appendRotation(Math.PI, Vector4.Z_AXIS);
-			}
+			//}
 			
 			upTransform = MatrixSanitizer.apply(upTransform);
 			
