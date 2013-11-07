@@ -116,7 +116,7 @@ package aerys.minko.type.parser.collada.instance
 					);
 					
 					materialProvider = options.materialFunction(meshTemplate.materialName, materialProvider);
-							
+
 					var localMeshes 		: Vector.<Mesh> = meshTemplate.generateMeshes(
 						options.vertexStreamUsage, options.indexStreamUsage
 					);
