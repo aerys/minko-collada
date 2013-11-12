@@ -3,6 +3,7 @@ package aerys.minko.type.parser.collada.resource.animation
 	import aerys.minko.type.animation.timeline.ITimeline;
 	import aerys.minko.type.animation.timeline.MatrixTimeline;
 	import aerys.minko.type.animation.timeline.ScalarTimeline;
+	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.enum.TransformType;
@@ -50,16 +51,17 @@ package aerys.minko.type.parser.collada.resource.animation
 			}
 		}
         
-        public function getTimeline(document : ColladaDocument) : ITimeline
+        public function getTimeline(document	: ColladaDocument, 
+									options		: ParserOptions) : ITimeline
         {
             if (document.getMatrixXMLNodeBySid(_transformType))
-                return getMatrixTimeline('transform');
+                return getMatrixTimeline('transform', options.interpolateAnimations);
             
             switch (_transformType)
             {
                 case TransformType.MATRIX:
                 case TransformType.TRANSFORM:
-                    return getMatrixTimeline('transform');
+                    return getMatrixTimeline('transform', options.interpolateAnimations);
                     break ;
                 case TransformType.VISIBILITY:
                     return getScalarTimeline('visible', false);
@@ -109,7 +111,8 @@ package aerys.minko.type.parser.collada.resource.animation
             return new ScalarTimeline(propertyPath, times, values, interpolate); 
         }
         
-        private function getMatrixTimeline(propertyPath  : String) : MatrixTimeline
+        private function getMatrixTimeline(propertyPath	: String,
+										   interpolate	: Boolean) : MatrixTimeline
         {
             var times    : Vector.<uint>        = getTimes();
             var numTimes : uint                 = times.length;
@@ -122,7 +125,7 @@ package aerys.minko.type.parser.collada.resource.animation
             for (var timeId : uint = 0; timeId < numTimes; ++timeId)
                 matrices[timeId] = getMatrixValueByIndex(timeId);
             
-            return new MatrixTimeline(propertyPath, times, matrices);
+            return new MatrixTimeline(propertyPath, times, matrices, interpolate);
         }
 		
 		/**

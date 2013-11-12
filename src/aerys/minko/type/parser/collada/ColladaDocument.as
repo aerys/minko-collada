@@ -1,5 +1,7 @@
 package aerys.minko.type.parser.collada
 {
+	import flash.events.EventDispatcher;
+	
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_animation;
 	import aerys.minko.ns.minko_collada;
@@ -35,8 +37,6 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.parser.collada.resource.effect.Effect;
 	import aerys.minko.type.parser.collada.resource.image.Image;
 	import aerys.minko.type.parser.collada.resource.light.Light;
-	
-	import flash.events.EventDispatcher;
 
 	use namespace minko_collada;
 	
@@ -147,7 +147,7 @@ package aerys.minko.type.parser.collada
 		{
 		}
 		
-		public function loadFromXML(xmlDocument : XML) : void
+		public function loadFromXML(xmlDocument : XML, options : ParserOptions) : void
 		{
 			_mainSceneId	= String(xmlDocument.NS::scene[0].NS::instance_visual_scene[0].@url).substr(1);
 			
@@ -165,7 +165,7 @@ package aerys.minko.type.parser.collada
 			_cameras		= {};
 			_lights			= {};
 			
-			Animation.fillStoreFromXML(xmlDocument, this, _animations);
+			Animation.fillStoreFromXML(xmlDocument, this, _animations, options);
 			Controller.fillStoreFromXML(xmlDocument, this, _controllers);
 			Effect.fillStoreFromXML(xmlDocument, this, _effects);
 			Geometry.fillStoreFromXML(xmlDocument, this, _geometries);

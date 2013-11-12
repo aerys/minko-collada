@@ -91,7 +91,7 @@ package aerys.minko.type.parser.collada
 			}
 			
 			_document = new ColladaDocument();
-			_document.loadFromXML(_lastXML);
+			_document.loadFromXML(_lastXML, _options);
 			
 			_lastXML	= null;
 			_lastData	= null;
