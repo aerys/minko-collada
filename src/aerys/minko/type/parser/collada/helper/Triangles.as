@@ -443,6 +443,7 @@ package aerys.minko.type.parser.collada.helper
 			for (componentId = 0; componentId < numSemantics; ++componentId)
 			{
 				semantic = verticesSemantics[componentId];
+				
 				vertexStreamList.pushVertexStream(
 					computeVertexStreamFromSource(semantic, verticesDataSources[semantic], true)
 				);
@@ -470,7 +471,11 @@ package aerys.minko.type.parser.collada.helper
 													   isVertexSource	: Boolean) : VertexStream
 		{
 			if (semantic == InputType.COLOR && source.stride == 3)
-					semantic = InputType.COLOR_RGB;
+			{
+				semantic 			= InputType.COLOR_RGB;
+				_offsets[semantic]	= _offsets[InputType.COLOR];
+				_sources[semantic]	= _sources[InputType.COLOR];
+			}
 			
 			return createVertexStream(semantic, createVertexBuffer(semantic, source, isVertexSource));
 		}
