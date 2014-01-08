@@ -82,12 +82,12 @@ package aerys.minko.type.parser.collada.resource.effect.technique
 			var ambient				: CommonColorOrTextureOrParam;
 			var diffuse				: CommonColorOrTextureOrParam;
 			var specular			: CommonColorOrTextureOrParam;
-			var shininess			: Number;
+			var shininess			: Number = 0;
 			var reflective			: CommonColorOrTextureOrParam;
-			var reflectivity		: Number;
+			var reflectivity		: Number = 0;
 			var transparent			: CommonColorOrTextureOrParam;
-			var transparency		: Number;
-			var indexOfRefraction	: Number;
+			var transparency		: Number = 0;
+			var indexOfRefraction	: Number = 0;
 			
 			for each (var child : XML in xml.children())
 			{
