@@ -1,5 +1,8 @@
 package aerys.minko.type.parser.collada.resource.camera
 {
+	import aerys.minko.scene.node.camera.AbstractCamera;
+	import aerys.minko.scene.node.camera.Camera;
+
 	public final class Perspective
 	{
 		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
@@ -53,6 +56,9 @@ package aerys.minko.type.parser.collada.resource.camera
 
 		public static function createFromXml(xmlPerspective : XML) : Perspective
 		{
+			if (xmlPerspective == null)
+			return new Perspective(aerys.minko.scene.node.camera.Camera.DEFAULT_FOV, 1, AbstractCamera.DEFAULT_ZNEAR, AbstractCamera.DEFAULT_ZFAR)
+			
 			var xFovXml			: XML		= xmlPerspective.NS::xfov[0];
 			var yFovXml			: XML		= xmlPerspective.NS::yfov[0];
 			var zNearXml		: XML		= xmlPerspective.NS::znear[0];

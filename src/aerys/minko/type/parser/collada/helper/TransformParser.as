@@ -6,7 +6,8 @@ package aerys.minko.type.parser.collada.helper
 
 	public class TransformParser
 	{
-		private static const NS : Namespace = new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		private static const 	NS 				: Namespace 		= new Namespace("http://www.collada.org/2005/11/COLLADASchema");
+		private static var		MATRIX4X4_DATA	: Vector.<Number>	= new Vector.<Number>(16, true);
 		
 		public static function parseTransform(node : XML) : Matrix4x4
 		{
@@ -24,11 +25,13 @@ package aerys.minko.type.parser.collada.helper
 					case 'lookat':
 						var lookAt : Vector.<Vector4> = NumberListParser.parseVector3List(child);
 						transform.lookAt(lookAt[0], lookAt[1], lookAt[2]);
+						transform = MatrixSanitizer.apply(transform);
 						break;
 					
 					case 'matrix':
 						// is this multiply or multiplyInverse?
-						transform.prepend(NumberListParser.parseMatrix3D(child));
+						transform.prepend(NumberListParser.parseMatrix3D(child));	
+						// handedness already changed (must not call MatrixSanitizer again)
 						break;
 					
 					case 'rotate':
@@ -36,11 +39,13 @@ package aerys.minko.type.parser.collada.helper
 						var angle		: Number	= axis.w / 180 * Math.PI;
 						axis.w = 0;
 						transform.prependRotation(angle, axis);
+						transform = MatrixSanitizer.apply(transform);
 						break;
 					
 					case 'scale':
 						var scale : Vector4 = NumberListParser.parseVector3(child);
 						transform.prependScale(scale.x, scale.y, scale.z);
+						transform = MatrixSanitizer.apply(transform);
 						break;
 					
 					case 'skew':
@@ -50,12 +55,12 @@ package aerys.minko.type.parser.collada.helper
 					case 'translate':
 						var translation : Vector4 = NumberListParser.parseVector3(child);
 						transform.prependTranslation(translation.x, translation.y, translation.z);
+						transform = MatrixSanitizer.apply(transform);
 						break;
 				}
 			}
-			
+						
 			return transform;
 		}
-		
 	}
 }

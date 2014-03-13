@@ -1,8 +1,5 @@
 package aerys.minko.type.parser.collada.helper
 {
-	import flash.utils.ByteArray;
-	import flash.utils.Endian;
-	
 	import aerys.minko.Minko;
 	import aerys.minko.ns.minko_collada;
 	import aerys.minko.render.geometry.stream.IndexStream;
@@ -17,6 +14,10 @@ package aerys.minko.type.parser.collada.helper
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.parser.collada.enum.InputType;
+	
+	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
+	import flash.utils.Endian;
 
 	public final class Triangles
 	{
@@ -390,6 +391,18 @@ package aerys.minko.type.parser.collada.helper
 			for (var i : uint = 0; i < numIndices; ++i)
 				data[i] = numIndices - i - 1;
 			
+			if (data.length % 3 != 0)
+				throw new Error("The created geometry does not correspond to a triangle mesh.");
+			
+			var numFaces	: uint = data.length / 3;
+			for (var faceId:uint = 0; faceId < numFaces; ++faceId)
+			{
+				var i1 : uint = data[3*faceId + 1];
+				var i2 : uint = data[3*faceId + 2];
+				data[3*faceId + 1] = i2;
+				data[3*faceId + 2] = i1;
+			}
+			
 			return data;
 		}
 		
@@ -430,6 +443,7 @@ package aerys.minko.type.parser.collada.helper
 			for (componentId = 0; componentId < numSemantics; ++componentId)
 			{
 				semantic = verticesSemantics[componentId];
+				
 				vertexStreamList.pushVertexStream(
 					computeVertexStreamFromSource(semantic, verticesDataSources[semantic], true)
 				);
@@ -457,7 +471,11 @@ package aerys.minko.type.parser.collada.helper
 													   isVertexSource	: Boolean) : VertexStream
 		{
 			if (semantic == InputType.COLOR && source.stride == 3)
-					semantic = InputType.COLOR_RGB;
+			{
+				semantic 			= InputType.COLOR_RGB;
+				_offsets[semantic]	= _offsets[InputType.COLOR];
+				_sources[semantic]	= _sources[InputType.COLOR];
+			}
 			
 			return createVertexStream(semantic, createVertexBuffer(semantic, source, isVertexSource));
 		}
@@ -499,6 +517,12 @@ package aerys.minko.type.parser.collada.helper
 			var component	: VertexComponent	= InputType.minko_collada::TO_COMPONENT[semantic];
 			var format		: VertexFormat		= new VertexFormat(component);
 			
+			var handednessConverter : Dictionary	= new Dictionary();
+			
+			handednessConverter[InputType.POSITION]	= new <Number>[ -1.0, 1.0, 1.0 ];
+			handednessConverter[InputType.NORMAL]	= new <Number>[ -1.0, 1.0, 1.0 ];
+			handednessConverter[InputType.TANGENT]	= new <Number>[ -1.0, 1.0, 1.0 ];
+			
 			if (semantic == InputType.TEXCOORD)
 			{
 				var numDwords	: uint = buffer.bytesAvailable >>> 2;
@@ -535,6 +559,35 @@ package aerys.minko.type.parser.collada.helper
 			{
 				numDwords = buffer.bytesAvailable >>> 2;
 				numVertices = _triangleVertices.length / _indicesPerVertex;
+			}
+			else
+			{
+				// convert from right-handedness to left-handedness (if necessary)
+				var handednessCoeffs 	: Vector.<Number> 	= handednessConverter[semantic];
+				
+				if (handednessCoeffs != null)
+				{
+					var numVertexComps		: uint			= handednessCoeffs.length;
+					
+					numDwords	= buffer.bytesAvailable >>> 2;
+					numVertices	= _triangleVertices.length / _indicesPerVertex;
+					
+					if (numDwords != numVertexComps * numVertices)
+						throw new Error('Failed converting positions from right- to left-handed frame.');
+					
+					
+					buffer.position = 0;
+					for (vertexId = 0; vertexId < numVertices; ++vertexId)
+					{
+						for (var compId:uint = 0; compId < numVertexComps; ++compId)
+						{
+							var vertexComp	: Number = buffer.readFloat();
+							buffer.position -= 4;
+							buffer.writeFloat(handednessCoeffs[compId] * vertexComp);
+						}
+					}
+					buffer.position = 0;
+				}
 			}
 			
 			return new VertexStream(StreamUsage.DYNAMIC, format, buffer);

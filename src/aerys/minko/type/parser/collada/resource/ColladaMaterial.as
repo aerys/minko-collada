@@ -88,7 +88,7 @@ package aerys.minko.type.parser.collada.resource
 				_material = _instanceEffect.createMaterial(parserOptions);
 				_material.name = _id;
 			}
-			
+
 			return _material;
 		}
 	}

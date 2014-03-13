@@ -21,6 +21,7 @@ package aerys.minko.type.parser.collada
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.math.Matrix4x4;
 	import aerys.minko.type.math.Vector4;
+	import aerys.minko.type.parser.collada.helper.MatrixSanitizer;
 	import aerys.minko.type.parser.collada.helper.RandomStringGenerator;
 	import aerys.minko.type.parser.collada.instance.IInstance;
 	import aerys.minko.type.parser.collada.instance.InstanceController;
@@ -146,7 +147,7 @@ package aerys.minko.type.parser.collada
 		{
 		}
 		
-		public function loadFromXML(xmlDocument : XML) : void
+		public function loadFromXML(xmlDocument : XML, options : ParserOptions) : void
 		{
 			_mainSceneId	= String(xmlDocument.NS::scene[0].NS::instance_visual_scene[0].@url).substr(1);
 			
@@ -164,7 +165,7 @@ package aerys.minko.type.parser.collada
 			_cameras		= {};
 			_lights			= {};
 			
-			Animation.fillStoreFromXML(xmlDocument, this, _animations);
+			Animation.fillStoreFromXML(xmlDocument, this, _animations, options);
 			Controller.fillStoreFromXML(xmlDocument, this, _controllers);
 			Effect.fillStoreFromXML(xmlDocument, this, _effects);
 			Geometry.fillStoreFromXML(xmlDocument, this, _geometries);
@@ -193,9 +194,9 @@ package aerys.minko.type.parser.collada
 			metaData.contributor	= new <Object>[];
 			metaData.unit			= {};
 			
-			//FIXME!
-			metaData.unit.meter		= 1;//parseFloat(String(xmlMetaData.NS::unit[0].@meter));
-			metaData.unit.name		= "meter";//String(xmlMetaData.NS::unit[0].@name);
+			
+			metaData.unit.meter		= xmlMetaData.NS::unit.length() != 0 ? parseFloat(String(xmlMetaData.NS::unit[0].@meter))	: 1.0;
+			metaData.unit.name		= xmlMetaData.NS::unit.length() != 0 ? String(xmlMetaData.NS::unit[0].@name)				: "meter";
 			metaData.created		= new Date();
 			metaData.modified		= new Date();
 			metaData.upAxis			= String(xmlMetaData.NS::up_axis[0]);
@@ -269,11 +270,35 @@ package aerys.minko.type.parser.collada
 				wrapper.transform.setScale(unit, unit, unit);
 			
 			// change up axis
-			var upAxis : String = _metaData.upAxis;
+			var upAxis 		: String	= _metaData.upAxis;
+			var upTransform	: Matrix4x4	= new Matrix4x4();
+			
 			if (upAxis == 'Z_UP')
-				wrapper.transform.setRotation(-Math.PI / 2, 0, 0);
+				upTransform.appendRotation(Math.PI * 0.5, Vector4.X_AXIS);
 			else if (upAxis == 'X_UP')
-				wrapper.transform.setRotation(0, 0, Math.PI / 2);
+				upTransform.appendRotation(-Math.PI * 0.5, Vector4.Z_AXIS);
+			
+			// In the projects' properties, add the following compiler argument:
+			// -define+=CONFIG::FROM_3DSMAX,true 
+			//CONFIG::FROM_3DSMAX
+			//{
+				// World space correspondences between 3DSMax and Minko (3DSMax -> Minko axis)
+				//     x -> x
+				//     y -> z
+				//     z -> y
+				if (upAxis == 'X_UP')
+					upTransform
+						.appendRotation(Math.PI, Vector4.Z_AXIS)
+						.appendRotation(Math.PI, Vector4.Y_AXIS);
+				else if (upAxis == 'Y_UP')
+					upTransform.appendRotation(Math.PI, Vector4.Y_AXIS);
+				else if (upAxis == 'Z_UP')
+					upTransform.appendRotation(Math.PI, Vector4.Z_AXIS);
+			//}
+			
+			upTransform = MatrixSanitizer.apply(upTransform);
+			
+			wrapper.transform.append(upTransform);
 			
 			// add animation controllers
 			var animationStore : Animation = _animations['mergedAnimations'];

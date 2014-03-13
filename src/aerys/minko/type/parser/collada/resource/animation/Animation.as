@@ -2,6 +2,7 @@ package aerys.minko.type.parser.collada.resource.animation
 {
 	import aerys.minko.Minko;
 	import aerys.minko.type.animation.timeline.ITimeline;
+	import aerys.minko.type.loader.parser.ParserOptions;
 	import aerys.minko.type.log.DebugLevel;
 	import aerys.minko.type.parser.collada.ColladaDocument;
 	import aerys.minko.type.parser.collada.instance.IInstance;
@@ -16,6 +17,7 @@ package aerys.minko.type.parser.collada.resource.animation
 		private var _id			: String;
 		private var _animations	: Vector.<Animation>;
 		private var _channels	: Vector.<Channel>;
+		private var _options	: ParserOptions;
 		
 		public function get id() : String
         {
@@ -24,7 +26,8 @@ package aerys.minko.type.parser.collada.resource.animation
 		
 		public static function fillStoreFromXML(xmlDocument	: XML,
 												document	: ColladaDocument, 
-												store		: Object) : void
+												store		: Object,
+												options		: ParserOptions) : void
 		{
 			var xmlAnimationLibrary	: XML					= xmlDocument..NS::library_animations[0];
 			if (!xmlAnimationLibrary || xmlAnimationLibrary.children().length() == 0)
@@ -35,21 +38,23 @@ package aerys.minko.type.parser.collada.resource.animation
 			
 			for each (var xmlAnimation : XML in xmlAnimations)
 			{
-				var animation : Animation = Animation.createFromXML(xmlAnimation, document);
+				var animation : Animation = Animation.createFromXML(xmlAnimation, document, options);
 				store[animation.id] = animation;
 				mergedSubAnimations.push(animation);
 			}
 			
 			store['mergedAnimations'] = new Animation(
                 document,
-                'mergedAnimations',
+                'mergedAnimations', 
+				options,
                 null,
                 mergedSubAnimations
             );
 		}
 		
 		public static function createFromXML(xmlAnimation	: XML,
-											 document		: ColladaDocument) : Animation
+											 document		: ColladaDocument,
+											 options		: ParserOptions) : Animation
 		{
 			var id			: String				= xmlAnimation.@id;
 			var channels	: Vector.<Channel>		= new Vector.<Channel>();
@@ -59,13 +64,14 @@ package aerys.minko.type.parser.collada.resource.animation
 				channels.push(new Channel(xmlChannel, xmlAnimation));
 				
 			for each (var xmlSubAnimation : XML in xmlAnimation.NS::animation)
-				animations.push(Animation.createFromXML(xmlSubAnimation, document));
+				animations.push(Animation.createFromXML(xmlSubAnimation, document, options));
 			
-			return new Animation(document, id, channels, animations);
+			return new Animation(document, id, options, channels, animations);
 		}
 		
 		public function Animation(document		: ColladaDocument,
 								  id			: String,
+								  options		: ParserOptions,
 								  channels		: Vector.<Channel>		= null,
 								  animations	: Vector.<Animation>	= null)
 		{
@@ -73,6 +79,7 @@ package aerys.minko.type.parser.collada.resource.animation
 			_id			= id;
 			_channels	= channels || new Vector.<Channel>();
 			_animations = animations || new Vector.<Animation>();
+			_options	= options;
 		}
 		
         public function getTimelines(timelines      : Vector.<ITimeline>,
@@ -82,7 +89,7 @@ package aerys.minko.type.parser.collada.resource.animation
                 {
                     try
                     {
-                        var timeline : ITimeline = channel.getTimeline(_document);
+                        var timeline : ITimeline = channel.getTimeline(_document, _options);
                         
                         if (timeline)
                         {
